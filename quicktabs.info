@@ -1,0 +1,4 @@
+; $Id$
+name = Quick Tabs
+description = Create blocks of tabbed views and blocks.
+dependencies = views

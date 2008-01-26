@@ -1,0 +1,12 @@
+
+
+div.quicktabs_wrapper {
+  position: relative;
+}
+
+ul.quicktabs_tabs li {
+  display: inline;
+  background: none;
+  list-style-type: none;
+}
+

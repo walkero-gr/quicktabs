@@ -1,0 +1,250 @@
+<?php
+
+// $Id$ 
+/** 
+ * Implementation of hook_menu(). 
+ */ 
+function quicktabs_menu($may_cache) { 
+  $items = array(); 
+  if ($may_cache) { 
+    $items[] = array( 
+      'path' => 'admin/build/quicktabs', 
+      'title' => t('Quick Tabs'), 
+      'callback' => 'quicktabs_page', 
+      'access' => user_access('create quicktabs block'), 
+    ); 
+  } 
+  return $items; 
+}
+
+/** 
+ * Implementation of hook_perm(). 
+ */ 
+function quicktabs_perm() {
+  return array('create quicktabs block');
+}
+
+/** 
+ * Called when user goes to example.com/?q=quicktabs 
+ */ 
+function quicktabs_page() {
+  drupal_add_js(drupal_get_path('module', 'quicktabs').'/js/quicktabs_form.js');
+  $output = ''; 
+  views_load_cache();
+  $result = db_query("SELECT v.name, v.description, f.field FROM {view_view} v LEFT JOIN {view_exposed_filter} f ON v.vid=f.vid");
+  $views = array();
+  while ($view = db_fetch_object($result)) {
+		if (!($view->field)) {
+			$views[$view->name] = $view->name . ': ' . $view->description;
+		}
+  }
+
+  $default_views = _views_get_default_views();
+  $views_status = variable_get('views_defaults', array());
+  foreach ($default_views as $view) {
+    if (!$views[$view->name] && 
+      ($views_status[$view->name] == 'enabled' || (!$views_status[$view->name] && !$view->disabled)) && empty($view->exposed_filter)) {
+      $views[$view->name] = check_plain($view->name . ': ' . $view->description);
+    }
+  }
+	$blocks = _block_rehash();
+	$blocksarray = array();
+	foreach($blocks as $i => $block) {
+		$key = $block['module'] .'_delta_'. $block['delta'];
+		$blocksarray[$key] = $block['info'];
+	}
+  $output .= drupal_get_form('quicktabs_viewsform', $views, $blocksarray);
+	return $output;
+} 
+
+
+
+function quicktabs_viewsform($views, $blocks, $form_values=NULL) {
+	$form = array();
+  $form['#multistep'] = TRUE;
+	$step = isset($form_values) ? (int) $form_values['step'] : 1; 
+	$form['step'] = array( 
+   '#type' => 'hidden', 
+   '#value' => $step + 1 
+  );
+  $form['indicator'] = array( 
+    '#type' => 'fieldset', 
+    '#title' => t('Quick Tabs - Step @number', array('@number' => $step)) 
+  );
+	switch($step) {
+		case 1: 
+			$form['indicator']['num_tabs_options'] = array(
+				'#type' => 'value',
+				'#value' => array(
+					'2' => 2,
+					'3' => 3,
+					'4' => 4,
+					'5' => 5,
+					'6' => 6
+					)
+			);
+			$form['indicator']['num_tabs'] = array(
+				'#title' => t('Number of tabs'),
+				'#type' => 'select',
+				'#options' => $form['indicator']['num_tabs_options']['#value'],
+				'#weight' => 1
+			);
+			break;
+		case 2:
+			$i=1;
+			$tabs = $form_values['num_tabs'];
+			while ($i <= $tabs) {
+				$form['indicator']['tab_'.$i] = array(
+					'#type' => 'fieldset',
+					'#title' => t('Tab '.$i),
+					'#weight' => $i
+				);
+				$form['indicator']['tab_'.$i]['title_'.$i] = array(
+					'#type' => 'textfield',
+					'#title' => t('Tab title'),
+					'#description' => t('The title to appear on the tab itself')
+				);
+				$form['indicator']['tab_'.$i]['type_options'] = array(
+					'#type' => 'value',
+					'#value' => array(
+						'view' => 'view',
+						'block' => 'block'
+						)
+				);
+				$form['indicator']['tab_'.$i]['type_'.$i] = array(
+					'#type' => 'select',
+					'#options' => $form['indicator']['tab_'.$i]['type_options']['#value'],
+					'#title' => t('Tab Content'),
+					'#description' => t('Will this tab contain a view or a block?')
+				);
+				$form['indicator']['tab_'.$i]['vid_'.$i] = array(
+					'#type' => 'select',
+					'#options' => $views,
+					'#title' => t('Select a view')
+				);
+        $form['indicator']['tab_'.$i]['args_'.$i] = array(
+          '#type' => 'textfield',
+          '#title' => 'arguments',
+          '#required' => false,
+          '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
+        );        
+				$form['indicator']['tab_'.$i]['bid_'.$i] = array(
+					'#type' => 'select',
+					'#options' => $blocks,
+					'#title' => t('Select a block')
+				);
+				$form['indicator']['tab_'.$i]['limit_'.$i] = array(
+					'#type' => 'textfield',
+					'#title' => t('Limit'),
+					'#description' => t('Limit the number of results')
+				);
+				$i++;
+			}
+			break;
+
+		case 3:
+			$formvalues_tabs = array();
+			$done = FALSE;
+			$j=1;
+			while (!$done) {
+				if (!isset($form_values['title_'.$j])) {
+					$done = TRUE;
+				} else {
+					$formvalues_tabs[] = array(
+            'title' => $form_values['title_'.$j],
+            'type' => $form_values['type_'.$j],
+            'bvid' => ($form_values['type_'.$j]=='block' ? $form_values['bid_'.$j] : $form_values['vid_'.$j]),
+            'args' => $form_values['args_'.$j],
+            'limit' => $form_values['limit_'.$j]
+					);					
+				}
+				$j++;
+			}
+			$form['indicator']['code'] = array(
+			'#type' => 'textarea',
+			'#value' => quicktabs_generate_code($formvalues_tabs),
+			'#title' => t('Paste this code into a new php-enabled block'),
+			'#rows' => 20
+			);
+			break;
+	}
+  if ($step < 3) { 
+		$form['submit'] = array( 
+			'#type' => 'submit', 
+			'#value' => t('Next') 
+		); 
+  } 
+
+  $form['#redirect'] = FALSE;
+  
+	return $form;
+}
+
+// generate the code for the block
+function quicktabs_generate_code($tabs) {
+  $code = <<<EOT
+<?php
+drupal_add_css(drupal_get_path('module', 'quicktabs') .'/quicktabs.css');
+drupal_add_js(drupal_get_path('module', 'quicktabs') .'/js/quicktabs.js');
+?>
+<div class="quicktabs_wrapper">
+<ul class="quicktabs_tabs">
+\n	
+EOT;
+  $i=0;
+	foreach($tabs as $tab) {
+
+  	$code .= <<<EOT
+<li><a href="#">{$tab['title']}</a></li>
+\n
+EOT;
+  	$i++;
+  } 
+  $code .= <<<EOT
+</ul>
+<div class="quicktabs_main">
+\n
+EOT;
+
+		$j=0;
+		foreach($tabs as $tab) {     
+      $argstring = 'array(';
+      if($tab['args']!='') {
+        $args = explode(',', $tab['args']);
+        foreach($args as $arg) {
+          $argstring .= '\''. $arg .'\',';
+        }
+      }
+      $argstring .= ')';
+      $code .= <<<EOT
+<div class="quicktabs">
+EOT;
+
+     if ($tab['type'] == 'view') { 
+      $code .= <<<EOT
+<?php print views_build_view('embed', views_get_view('{$tab['bvid']}'), {$argstring}, false, {$tab['limit']}) ?>
+</div>
+\n
+EOT;
+     } else {
+      $pos = strpos($tab['bvid'], '_delta_');
+      $blockmodule = substr($tab['bvid'],0,$pos);
+      $blockdelta = substr($tab['bvid'],$pos+7);
+      $code .= <<<EOT
+<?php
+\$block = (object) module_invoke('{$blockmodule}', 'block', 'view', {$blockdelta});
+\$block->module = {$blockmodule};
+\$block->delta = {$blockdelta};
+print theme('block', \$block);
+?>
+</div>
+\n
+EOT;
+
+     }
+		$j++;
+	}
+	$code .= '</div></div>'; 
+
+  return $code;
+}
