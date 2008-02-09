@@ -1,7 +1,7 @@
 $(document).ready(function(){
   $('div.quicktabs').hide();
   $('div.quicktabs:first-child').show();
-    $('ul.quicktabs_tabs li:first-child').addClass('active');
+  $('ul.quicktabs_tabs li:first-child').addClass('active');
   
   var clickFunction = function() {      
     var tabIndex = this.myTabIndex;

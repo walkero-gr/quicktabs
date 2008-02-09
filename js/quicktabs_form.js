@@ -1,5 +1,19 @@
 $(document).ready(function(){
-  $('#quicktabs-form div.form-item :input[@name^="bid"]').parent().hide();
+  
+  $('#quicktabs-form div.form-item :input[@name^="type"]').each(function(){
+    if(this.value == 'block') {
+      $(this).parent().parent()
+      .find('div.form-item :input[@name^="vid"]').parent().hide();
+      $(this).parent().parent()
+      .find('div.form-item :input[@name^="args"]').parent().hide();
+      $(this).parent().parent()
+      .find('div.form-item :input[@name^="limit"]').parent().hide();      
+    } else {
+      $(this).parent().parent()
+      .find('div.form-item :input[@name^="bid"]').parent().hide();       
+    }
+  });
+
   var showhide = function() {
     if (this.value == 'block') {
       $(this).parent().parent()
@@ -21,5 +35,7 @@ $(document).ready(function(){
       .find('div.form-item :input[@name^="limit"]').parent().show();  
    }
   };
+  
   $('#quicktabs-form div.form-item :input[@name^="type"]').bind('change', showhide);
+  
 });

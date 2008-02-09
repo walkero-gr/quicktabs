@@ -38,5 +38,4 @@ http://drupal.org/user/172987
 TODO
 -------------------------------------------------------------------------------
 
-+ add the ability to edit existing Quick Tabs blocks
-+ fix problem with the blocks/views dropdowns on validation error
++ add default tab styles
