@@ -1,5 +1,12 @@
-div.quicktabs_wrapper {
-  position: relative;
+iframe.quicktabs-preview {
+  border: none;
+  width: 200px;
+  height: 40px;
+}
+
+iframe body {
+  background: none;
+  background-color: #FFFFFF;
 }
 
 ul.quicktabs_tabs li {
