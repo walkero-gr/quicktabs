@@ -77,7 +77,7 @@ function quicktabs_list() {
   $rows = array();
   while ($row = db_fetch_object($result)) {
     $tablerow = array(
-    array('data' => $row->title),
+    array('data' => l($row->title, 'admin/build/quicktabs/edit/'. $row->qtid)),
     array('data' => l(t('Delete'), 'admin/build/quicktabs/delete/'. $row->qtid)),
     );
     $rows[] = $tablerow;
