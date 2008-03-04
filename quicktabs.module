@@ -447,6 +447,7 @@ function quicktabs_block_delete_submit($form_id, $form_values) {
   return 'admin/build/quicktabs';
 };
 
+
 /**
  * Callback function for admin/settings/quicktabs. Display the settings form.
  */
@@ -531,13 +532,13 @@ function quicktabs_add_css($tabstyle_css = NULL) {
     $tabstyle_css = variable_get('quicktabs_tabstyle', 'default');
   }
 
-  if ($tabstyles_css != 'default') {
+  if ($tabstyle_css != 'default') {
     drupal_add_css($tabstyle_css, 'module');
   }
 }
 
 /**
- * Implementation of hook_quicktabs_widgets.
+ * Implementation of hook_quicktabs_tabstyles.
  * 
  * This hook allows other modules to create additional tab styles for
  * the quicktabs module.

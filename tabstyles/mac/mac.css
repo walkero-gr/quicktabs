@@ -1,20 +1,20 @@
-.quicktabs_main{
+div.quicktabs_wrapper .quicktabs_main{
 	clear:left;
 }
-ul.quicktabs_tabs{
+div.quicktabs_wrapper ul.quicktabs_tabs{
 	margin:0;
 	font-size:11px;
   list-style: none;
 	padding:3px 0 23px 0;
 }
-ul.quicktabs_tabs li{
+div.quicktabs_wrapper ul.quicktabs_tabs li{
   float: left;
 	height:24px;
   margin:0 5px;
   padding: 0 0 0 15px;
   background:transparent url(images/mac.png) no-repeat 0 0px;
 }
-ul.quicktabs_tabs li a{
+div.quicktabs_wrapper ul.quicktabs_tabs li a{
   margin: 0;
 	display:block;
   padding:0px 15px 5px 0px;
@@ -23,17 +23,17 @@ ul.quicktabs_tabs li a{
   color: #fff;
   background:transparent url(images/mac.png) no-repeat right -25px ;
 }
-ul.quicktabs_tabs li:hover a{
+div.quicktabs_wrapper ul.quicktabs_tabs li:hover a{
   background-position: right -75px ;
 }
-ul.quicktabs_tabs li:hover{
+div.quicktabs_wrapper ul.quicktabs_tabs li:hover{
   background-position: 0 -50px;
 }
-ul.quicktabs_tabs li.active a,
-ul.quicktabs_tabs li.active a:hover{
+div.quicktabs_wrapper ul.quicktabs_tabs li.active a,
+div.quicktabs_wrapper ul.quicktabs_tabs li.active a:hover{
   background-position:right -125px;
 }
-ul.quicktabs_tabs li.active{
+div.quicktabs_wrapper ul.quicktabs_tabs li.active{
   background-position: 0 -100px;
 }
 

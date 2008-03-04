@@ -1,19 +1,19 @@
-.quicktabs_main{
+div.quicktabs_wrapper .quicktabs_main{
 	clear:left;
 }
 
-ul.quicktabs_tabs {
+div.quicktabs_wrapper ul.quicktabs_tabs {
 	background: #bcd6eb url('images/bg.gif') repeat-x bottom;
 	padding: 3px 0px 3px;
 	height: 20px;
 	margin-bottom: 1px;
 }     
 
-.sidebar ul.quicktabs_tabs {
+.sidebar div.quicktabs_wrapper ul.quicktabs_tabs {
 	padding-bottom: 3px;
 }
 
-ul.quicktabs_tabs li {
+div.quicktabs_wrapper ul.quicktabs_tabs li {
   margin: 0px;
   display: block;
   float: left;
@@ -22,7 +22,7 @@ ul.quicktabs_tabs li {
   background: none;
 } 
 
-.sidebar ul.quicktabs_tabs li {
+.sidebar div.quicktabs_wrapper ul.quicktabs_tabs li {
   margin: 0px;
   display: block;
   float: left;
@@ -31,25 +31,25 @@ ul.quicktabs_tabs li {
   background: none;
 }
 
-ul.quicktabs_tabs li a:link,
-ul.quicktabs_tabs li a:visited {
+div.quicktabs_wrapper ul.quicktabs_tabs li a:link,
+div.quicktabs_wrapper ul.quicktabs_tabs li a:visited {
   color: #fff;
   padding: 8px 12px 3px 11px;
 }  
 
-ul.quicktabs_tabs li.active a {
+div.quicktabs_wrapper ul.quicktabs_tabs li.active a {
   color: #027AC6 !important;
   background: url('images/tab-right.gif') no-repeat right bottom;
 }
-ul.quicktabs_tabs li.active {
+div.quicktabs_wrapper ul.quicktabs_tabs li.active {
 	background: url('images/tab-left.gif') no-repeat left bottom;
 }     
 
-.sidebar ul.quicktabs_tabs li.active a {
+.sidebar div.quicktabs_wrapper ul.quicktabs_tabs li.active a {
   color: #027AC6 !important;
   background: url('images/tab-right-sidebar.gif') no-repeat right bottom;
 }
-.sidebar ul.quicktabs_tabs li.active {
+.sidebar div.quicktabs_wrapper ul.quicktabs_tabs li.active {
 	background: url('images/tab-left-sidebar.gif') no-repeat left bottom;
 }
 

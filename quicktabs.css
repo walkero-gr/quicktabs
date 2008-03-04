@@ -8,8 +8,7 @@ iframe body {
   background: none;
   background-color: #FFFFFF;
 }
-
-ul.quicktabs_tabs li {
+div.quicktabs_wrapper ul.quicktabs_tabs li {
   display: inline;
   background: none;
   list-style-type: none;
