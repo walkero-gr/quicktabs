@@ -2,11 +2,12 @@
 	 http://drupal.org/project/zen
 */
 
-div.quicktabs_wrapper .quicktabs_main{
-	clear:left;
+.quicktabs_main{
+	clear:both;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs{
-	margin:0;
+ul.quicktabs_tabs{
+	margin:0 0 10px 0;
+	padding:0 0 3px;
 	font-size:1em;
   list-style: none;
 	height:21px;
@@ -15,35 +16,36 @@ div.quicktabs_wrapper ul.quicktabs_tabs{
 *html ul.quicktabs_tabs li{
 	margin-bottom:-5px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li{
+ul.quicktabs_tabs li{
   float: left;
   margin:0 5px;
   padding: 0 0 0 5px;
   background:transparent url(images/tab-left-ie6.png) no-repeat left -38px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li a{
+ul.quicktabs_tabs li a{
+	font:bold 12px/170% Verdana;
+	font-size-adjust:none;
   display: block;
   margin: 0;
   padding:4px 17px 0px 12px;
   border-width: 0;
   font-weight:bold;
   text-decoration:none;
-  color: #777;
   background: transparent url(images/tab-right-ie6.png) no-repeat right -38px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li:hover a{
+ul.quicktabs_tabs li:hover a{
   border-width: 0;
   background:transparent url(images/tab-right-ie6.png) no-repeat right -76px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li:hover{
+ul.quicktabs_tabs li:hover{
   background:transparent url(images/tab-left-ie6.png) no-repeat left -76px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li.active a,
-div.quicktabs_wrapper ul.quicktabs_tabs li.active a:hover{
+ul.quicktabs_tabs li.active a,
+ul.quicktabs_tabs li.active a:hover{
+  text-decoration:none;
   border-width: 0;
-  color: #000;
   background:transparent url(images/tab-right-ie6.png) no-repeat right 0;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li.active{
+ul.quicktabs_tabs li.active{
   background:transparent url(images/tab-left-ie6.png) no-repeat left 0;
 }

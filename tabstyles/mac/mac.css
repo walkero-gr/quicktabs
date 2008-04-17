@@ -1,20 +1,21 @@
-div.quicktabs_wrapper .quicktabs_main{
-	clear:left;
+.quicktabs_main{
+	clear:both;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs{
-	margin:0;
+ul.quicktabs_tabs{
+	margin:0 0 10px 0;
 	font-size:11px;
   list-style: none;
 	padding:3px 0 23px 0;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li{
+ul.quicktabs_tabs li{
   float: left;
 	height:24px;
   margin:0 5px;
   padding: 0 0 0 15px;
   background:transparent url(images/mac.png) no-repeat 0 0px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li a{
+ul.quicktabs_tabs li a{
+	font:bold 12px/170% Verdana;
   margin: 0;
 	display:block;
   padding:0px 15px 5px 0px;
@@ -23,17 +24,17 @@ div.quicktabs_wrapper ul.quicktabs_tabs li a{
   color: #fff;
   background:transparent url(images/mac.png) no-repeat right -25px ;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li:hover a{
+ul.quicktabs_tabs li:hover a{
   background-position: right -75px ;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li:hover{
+ul.quicktabs_tabs li:hover{
   background-position: 0 -50px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li.active a,
-div.quicktabs_wrapper ul.quicktabs_tabs li.active a:hover{
+ul.quicktabs_tabs li.active a,
+ul.quicktabs_tabs li.active a:hover{
   background-position:right -125px;
 }
-div.quicktabs_wrapper ul.quicktabs_tabs li.active{
+ul.quicktabs_tabs li.active{
   background-position: 0 -100px;
 }
 
