@@ -5,8 +5,8 @@
 /**
  * Implementation of hook_help().
  */
-function quicktabs_help($section) {
-  switch ($section) {
+function quicktabs_help($path, $arg) {
+  switch ($path) {
     case 'admin/build/quicktabs':
       return t('<p>The Quick Tabs module allows you to create blocks of tabbed content. You can create a block on your site containing up to six tabs with corresponding content. Clicking on the tabs makes the corresponding content display instantly (it uses jQuery). The content for each tabbed section can be either a view or an existing block. It is an ideal way to do something like the Most Popular / Most Emailed stories tabs you see on many news websites.</p>
 <p>Once created, the Quick Tabs blocks show up in your block listing, ready to be configured and enabled like other blocks.</p>
@@ -18,52 +18,70 @@ function quicktabs_help($section) {
   }
 }
 
+function quicktabs_theme() {
+  return array(
+    'quicktabs_settings' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'quicktabs_preview_page' => array(
+      'arguments' => array(),
+    ),
+    'qt_tabs' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
 /** 
  * Implementation of hook_menu(). 
  */ 
-function quicktabs_menu($may_cache) { 
+function quicktabs_menu() { 
   $items = array(); 
-  if ($may_cache) { 
-    $items[] = array( 
-      'path' => 'admin/build/quicktabs', 
-      'title' => t('Quick Tabs'),
-      'description' => t('Create blocks of tabbed content - content for each tab can be a view or a block'),
-      'callback' => 'quicktabs_list', 
-      'access' => user_access('administer quicktabs blocks'), 
+
+    $items['admin/build/quicktabs'] = array( 
+      'title' => 'Quick Tabs',
+      'description' => 'Create blocks of tabbed content - content for each tab can be a view or a block',
+      'page callback' => 'quicktabs_list', 
+      'access arguments' => array('administer quicktabs blocks'), 
     );
-    $items[] = array('path' => 'admin/build/quicktabs/list', 'title' => t('List'),
+    $items['admin/build/quicktabs/list'] = array(
+      'title' => 'List',
       'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);    
-    $items[] = array(
-      'path' => 'admin/build/quicktabs/add',
-      'title' => t('New QT block'),
-      'access' => user_access('create quicktabs block'),
-      'callback' => 'quicktabs_new',
+    $items['admin/build/quicktabs/add'] = array(
+      'title' => 'New QT block',
+      'access arguments' => array('create quicktabs block'),
+      'page callback' => 'quicktabs_new',
       'type' => MENU_LOCAL_TASK);
-    $items[] = array('path' => 'admin/build/quicktabs/delete', 'title' => t('Delete QT block'),
-      'access' => user_access('administer blocks'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('quicktabs_block_delete'),
+    $items['admin/build/quicktabs/delete'] = array(
+      'title' => 'Delete QT block',
+      'access arguments' => array('administer blocks'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('quicktabs_block_delete'),
       'type' => MENU_CALLBACK);
-    $items[] = array('path' => 'admin/build/quicktabs/edit', 'title' => t('Edit QT block'),
-      'access' => user_access('administer blocks'),
-      'callback' => 'quicktabs_block_edit',
+    $items['admin/build/quicktabs/edit'] = array(
+      'title' => 'Edit QT block',
+      'access arguments' => array('administer blocks'),
+      'page callback' => 'quicktabs_block_edit',
       'type' => MENU_CALLBACK);
-    $items[] = array(
-      'path'     => 'admin/settings/quicktabs',
-      'title'    => t('Quick Tabs'),
-      'description' => t('Select a style for your Quick Tabs blocks'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('quicktabs_settings'),
+    $items['admin/settings/quicktabs'] = array(
+      'title'    => 'Quick Tabs',
+      'description' => 'Select a style for your Quick Tabs blocks',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('quicktabs_settings'),
       'type'     => MENU_NORMAL_ITEM,
-      'access'   => user_access('administer site configuration'),
+      'access arguments'   => array('administer site configuration'),
     );
-    $items[] = array(
-      'path'     => 'quicktabs/preview',
-      'callback' => 'quicktabs_preview_page',
+    $items['quicktabs/preview'] = array(
+      'page callback' => 'quicktabs_preview_page',
       'type'     => MENU_CALLBACK,
-      'access'   => user_access('administer site configuration'),
-    );    
-  } 
+      'access arguments'   => array('administer site configuration'),
+    );
+    $items['quicktabs/ahah'] = array(
+      'page callback' => 'quicktabs_ahah',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array('administer site configuration'),
+    );
+
   return $items; 
 }
 
@@ -90,16 +108,9 @@ function quicktabs_list() {
 }
 
 function quicktabs_new() {
-  drupal_add_js(drupal_get_path('module', 'quicktabs') .'/js/quicktabs_form.js');
-  $output = '';
-  if (module_exists('views')) {
-    $views = quicktabs_get_views();
-  }
-  else {
-    $views = NULL;
-  }
-  $blocks = quicktabs_get_blocks();
-  $output .= drupal_get_form('quicktabs_form', $views, $blocks);
+  //drupal_add_js(drupal_get_path('module', 'quicktabs') .'/js/quicktabs_form.js');
+
+  $output = drupal_get_form('quicktabs_form');
   return $output;
 } 
 
@@ -136,208 +147,276 @@ function quicktabs_get_blocks() {
   return $blocksarray;
 }
 
-function quicktabs_form($views, $blocks, $form_values=NULL) {
-  $form = array();
-  $form['#multistep'] = TRUE;
-  $step = isset($form_values) ? (int) $form_values['step'] : 1; 
-  $form['step'] = array(
-    '#type' => 'hidden', 
-    '#value' => $step + 1 
-  );
-  $form['indicator'] = array( 
-    '#type' => 'fieldset', 
-    '#title' => ($step == 1 ? t('QT: Basic Information') : t('QT: Tab contents')) 
-  );
-  switch ($step) {
-    case 1:
-      $form['formtype'] = array(
-        '#type' => 'hidden', 
-        '#value' => 'new' 
-      );      
-      $form['indicator']['title'] = array(
-      '#title' => t('Block Title'),
-      '#type' => 'textfield',
-      '#description' => t('The title of the whole block'),
-      '#weight' => 0
-      );      
-      $form['indicator']['num_tabs_options'] = array(
-      '#type' => 'value',
-      '#value' => array(
-      '2' => 2,
-      '3' => 3,
-      '4' => 4,
-      '5' => 5,
-      '6' => 6
-      )
-      );
-      $form['indicator']['num_tabs'] = array(
-      '#title' => t('Number of tabs'),
-      '#type' => 'select',
-      '#options' => $form['indicator']['num_tabs_options']['#value'],
-      '#weight' => 1
-      );
-      break;
-    case 2:
-      $blocktitle = $form_values['title']; 
-      $form['indicator']['title'] = array( 
-      '#type' => 'hidden', 
-      '#value' => $blocktitle 
-      );
-      $form['indicator']['showtitle'] = array(
-        '#type' => 'markup',
-        '#value' => $blocktitle,
-      );
-      $i=1;
-      $tabs = $form_values['num_tabs'];
-      $formtype = $form_values['formtype'];
-      $form['formtype'] = array( 
-      '#type' => 'hidden', 
-      '#value' => $formtype 
-      );  
-      if ($formtype == 'edit') {
-        $tabcontent = $form_values['tabs'];
-        $form['qtid'] = array( 
-        '#type' => 'hidden', 
-        '#value' => $form_values['qtid'] 
-        );          
-      }
-      while ($i <= $tabs) {
-      $form['indicator']['tab_'. $i] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Tab '. $i),
-      '#weight' => $i
-      );      
-      $form['indicator']['tab_'. $i]['title_'. $i] = array(
-      '#type' => 'textfield',
-      '#title' => t('Tab title'),
-      '#default_value' => $tabcontent[$i-1]['title'] ? $tabcontent[$i-1]['title'] : NULL,
-      '#description' => t('The title to appear on the tab itself')
-      );
-      if (module_exists('views')) {
-        $form['indicator']['tab_'. $i]['type_options'] = array(
-        '#type' => 'value',
-        '#value' => array(
-        'block' => 'block',
-        'view' => 'view',
-        )
-        );        
-        $form['indicator']['tab_'. $i]['type_'. $i] = array(
-        '#type' => 'radios',
-        '#options' => $form['indicator']['tab_'. $i]['type_options']['#value'],
-        '#title' => t('Tab Content'),
-        '#default_value' => $tabcontent[$i-1]['type'] ? $tabcontent[$i-1]['type'] : 'block',
-        '#description' => t('Will this tab contain a view or a block?')
-        );
+function quicktabs_form(&$form = NULL, $form_state = NULL) {
 
-        $form['indicator']['tab_'. $i]['vid_'. $i] = array(
-        '#type' => 'select',
-        '#options' => $views,
-        '#default_value' => $tabcontent[$i-1]['type']=='view' ? $tabcontent[$i-1]['bvid'] : NULL,
-        '#title' => t('Select a view')
-        );
-        $form['indicator']['tab_'. $i]['args_'. $i] = array(
-        '#type' => 'textfield',
-        '#title' => 'arguments',
-        '#required' => false,
-        '#default_value' => $tabcontent[$i-1]['type']=='view' ? $tabcontent[$i-1]['args'] : NULL,
-        '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
-        );        
-        $form['indicator']['tab_'. $i]['limit_'. $i] = array(
-        '#type' => 'textfield',
-        '#title' => t('Limit'),
-        '#default_value' => $tabcontent[$i-1]['type']=='view' ? $tabcontent[$i-1]['limit'] : NULL,      
-        '#description' => t('Limit the number of results')
-        );
-      }
-      else {
-        $form['indicator']['tab_'. $i]['type_'. $i] = array(
-        '#type' => 'hidden', 
-        '#value' => 'block' 
-        );
-      }
-      $form['indicator']['tab_'. $i]['bid_'. $i] = array(
-      '#type' => 'select',
-      '#options' => $blocks,
-      '#default_value' => $tabcontent[$i-1]['type']=='block' ? $tabcontent[$i-1]['bvid'] : NULL,      
-      '#title' => t('Select a block')
-      );
-      $i++;
-      }
-      break;    
+  $form = array(
+    '#cache' => TRUE,
+  );
+  
+  $form['title'] = array(
+  '#title' => t('Block Title'),
+  '#type' => 'textfield',
+  '#description' => t('The title of the whole block'),
+  '#default_value' => ($form_state['values']['title'] ? $form_state['values']['title'] : ''),
+  '#weight' => -5
+  );      
+
+  $formtype = $form_state['values']['formtype'];
+  if ($formtype == 'edit') {
+    $tabcontent = $form_state['values']['tabs'];
+    $form['qtid'] = array( 
+    '#type' => 'hidden', 
+    '#value' => $form_state['values']['qtid'] 
+    );          
   }
-  if ($step < 2) {
-    $form['submit'] = array( 
-    '#type' => 'submit', 
-    '#value' => t('Next') 
-    ); 
-    $form['#redirect'] = FALSE;
+  
+  if (isset($form_state['qt_count'])) {
+    $qt_count = $form_state['qt_count'];
   }
   else {
-    $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-    ); 		
+    $qt_count = max(2, empty($tabcontent) ? 2 : count($tabcontent));
   }
+  // Add a wrapper for the tabs and Add Another Tab button.
+  $form['qt_wrapper'] = array(
+    '#tree' => FALSE,
+    '#weight' => -4,
+    '#prefix' => '<div class="clear-block" id="quicktabs-tabs-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $form['qt_wrapper']['tabs'] = array(
+    '#prefix' => '<div id="quicktabs-tabs">',
+    '#suffix' => '</div>',
+    '#theme' => 'qt_tabs',    
+  );
+
+  // Add the current tabs to the form.
+  for ($delta = 0; $delta < $qt_count; $delta++) {
+
+    $weight = isset($tabcontent[$delta]['weight']) ? $tabcontent[$delta]['weight'] : $delta-10;
+    $title = isset($tabcontent[$delta]['title']) ? $tabcontent[$delta]['title'] : '';
+    $type = isset($tabcontent[$delta]['type']) ? $tabcontent[$delta]['type'] : 'block';
+    $bvid = isset($tabcontent[$delta]['bvid']) ? $tabcontent[$delta]['bvid'] : NULL;
+
+    $form['qt_wrapper']['tabs'][$delta] = _quicktabs_form($delta, $weight, $title, $type, $bvid);
+  }
+
+
+  $form['qt_wrapper']['tabs_more'] = array(
+    '#type' => 'submit',
+    '#value' => t('More tabs'),
+    '#description' => t("Click here to add more tabs."),
+    '#weight' => 1,
+    '#submit' => array('qt_more_tabs_submit'), // If no javascript action.
+    '#ahah' => array(
+      'path' => 'quicktabs/ahah',
+      'wrapper' => 'quicktabs-tabs',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+$form['submit'] = array(
+'#type' => 'submit',
+'#value' => t('Submit'),
+); 		
+
   return $form;
 
 }
 
-function quicktabs_form_validate($form_id, $form_values) {
-  if ($form_values['step'] < 3) { 
-    if (empty($form_values['title'])) {
-      form_set_error('title', t('You must give your Quick Tabs block a title.'));
+
+// TODO: function for when there's no js - does it even make sense to bother
+// with this, given the nature of the module??
+//function qt_more_tabs_submit($form, &$form_state) {
+//  // Set the form to rebuild and run submit handlers.
+//  //node_form_submit_build_node($form, $form_state);
+//
+//  // Make the changes we want to the form state.
+//  if ($form_state['values']['tabs_more']) {
+//    $form_state['qt_count'] = count($form_state['values']['tabs']) + 5;
+//  }
+//}
+
+function _quicktabs_form($delta, $weight = -10, $title = '', $type='block', $tabcontent = 0) {
+  //$admin = user_access('administer quicktabs blocks');
+
+  $form = array(
+    '#tree' => TRUE,
+  );
+  //if (module_exists('views')) {
+  //  $views = quicktabs_get_views();
+  //}
+  //else {
+  //  $views = NULL;
+  //}
+  $blocks = quicktabs_get_blocks();
+  
+  // We'll manually set the #parents property of these fields so that
+  // their values appear in the $form_state['values']['choice'] array.
+  $form['tabweight'] = array(
+    '#type' => 'weight',
+    '#default_value' => $weight,
+    '#parents' => array('tabs', $delta, 'tabweight'),    
+  );
+  
+  $form['tabtext'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Tab @n', array('@n' => ($delta + 1))),
+    '#default_value' => $title,
+    '#parents' => array('tabs', $delta, 'tabtext'),
+  );
+
+  //$form['tabtype'] = array(
+  //  '#type' => 'hidden',
+  //  '#title' => t('Type for tab @n', array('@n' => ($delta + 1))),
+  //  '#value' => $type,
+  //  '#parents' => array('tabs', $delta, 'tabtype'),
+  //);
+
+  $form['bvid'] = array(
+  '#type' => 'select',
+  '#options' => $blocks,
+  '#default_value' => $tabcontent,      
+  '#title' => t('Select a block / view'),
+  '#parents' => array('tabs', $delta, 'bvid'),
+  );  
+
+  return $form;
+}
+
+/**
+ * Menu callback for AHAH additions.
+ */
+function quicktabs_ahah() {
+  $delta = count($_POST['tabs']);
+
+  $maxweight = -10;
+  foreach ($_POST['tabs'] as $tab) {
+    if ($tab['tabweight'] > $maxweight) {
+      $maxweight = $tab['tabweight'];
     }
-    return; 
+  }
+  $newweight = $maxweight+1;
+  if ($delta < 10) {
+    // Build our new form element.
+    $form_element = _quicktabs_form($delta, $newweight);
+    drupal_alter('form', $form_element, array(), 'quicktabs_ahah');
+  }
+    // Build the new form.
+    $form_state = array('submitted' => FALSE);
+    $form_build_id = $_POST['form_build_id'];
+    // Add the new element to the stored form. Without adding the element to the
+    // form, Drupal is not aware of this new elements existence and will not
+    // process it. We retreive the cached form, add the element, and resave.
+    $form = form_get_cache($form_build_id, $form_state);
+    $form['qt_wrapper']['tabs'][$delta] = $form_element;
+    form_set_cache($form_build_id, $form, $form_state);
+    $form += array(
+      '#post' => $_POST,
+      '#programmed' => FALSE,
+    );
+  
+    // Rebuild the form.
+    $form = form_builder('quicktabs_form', $form, $form_state);
+  
+    // Render the new output.
+    $qt_form = $form['qt_wrapper']['tabs'];
+    unset($qt_form['#prefix'], $qt_form['#suffix']); // Prevent duplicate wrappers.
+    if ($delta < 10) {
+      $stripe = $delta % 2 ? 'even' : 'odd';
+      $qt_form[$delta]['#attributes']['class'] = empty($qt_form[$delta]['#attributes']['class']) ? 'draggable ahah-new-content'. $stripe : $qt_form[$delta]['#attributes']['class'] .'draggable ahah-new-content';
+      //$qt_form[$delta]['tabtype']['#value'] = 'block';
+      $qt_form[$delta]['bvid']['#value'] = 0;
+    } else {
+      $maxtabs = '<div>You cannot have more than 10 tabs</div>';
+    }
+    $output = theme('status_messages') . drupal_render($qt_form) . $maxtabs;
+
+  drupal_json(array('status' => TRUE, 'data' => $output));
+}
+
+function theme_qt_tabs($form) {
+  // Change the button title to reflect the behavior when using JavaScript.
+  drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
+  drupal_add_js('if (Drupal.jsEnabled) { $(document).ready(function() { $("#edit-tabs-more").val("'. t('Add another tab') .'"); }); }', 'inline');
+
+  $rows = array();
+  $headers = array(
+    t('Tab Title'),
+    t('Weight'),
+    //t('Tab type'),
+    t('Content'),
+  );
+
+  foreach (element_children($form) as $key) {
+    // No need to print the field title every time.
+    unset($form[$key]['tabtext']['#title'], $form[$key]['tabtype']['#title'], $form[$key]['bvid']['#title']);
+    $form[$key]['tabweight']['#attributes']['class'] = 'qt-tabs-weight';
+    // Build the table row.
+    $row = array(
+      'data' => array(
+        array('data' => drupal_render($form[$key]['tabtext']), 'class' => 'qt-tab-title'),
+        array('data' => drupal_render($form[$key]['tabweight']), 'class' => 'qt-tab-weight'),
+        //array('data' => drupal_render($form[$key]['tabtype']), 'class' => 'qt-tab-type'),
+        array('data' => drupal_render($form[$key]['bvid']), 'class' => 'qt-tab-bvid'),
+      ),
+      'class' => 'draggable',
+    );
+
+    // Add additional attributes to the row, such as a class for this row.
+    if (isset($form[$key]['#attributes'])) {
+      $row = array_merge($row, $form[$key]['#attributes']);
+    }
+    $rows[] = $row;
+  }
+
+  $output = theme('table', $headers, $rows, array('id' => 'qt-tablist-table'));
+  $output .= drupal_render($form);
+  return $output;
+}
+
+
+
+
+
+
+
+function quicktabs_form_validate($form, &$form_state) {
+  if (empty($form_state['values']['title'])) {
+    form_set_error('title', t('You must give your Quick Tabs block a title.'));
   }
   else {
-    $done = FALSE;
-    $j=1;
-    while (!$done) {
-      if (!isset($form_values['title_'. $j])) {
-        $done = TRUE;
+    foreach ($form_state['values']['tabs'] as $j => $tab) {
+      if (empty($tab['tabtext'])) {
+        form_set_error('tabs]['. $j .'][tabtext', t('You must give each tab a title.'));	  
       }
-      else {
-        if (empty($form_values['title_'. $j])) {
-          form_set_error('title_'. $j, t('You must give each tab a title.'));	  
-        }
-        if ($form_values['type_'. $j] == 'view' && empty($form_values['limit_'. $j])) {
-          form_set_error('limit_'. $j, t('You must enter a limit for each view.'));		  
-        }					
-      } 
-      $j++;
+      //if ($form_state['values']['type_'. $j] == 'view' && empty($form_state['values']['limit_'. $j])) {
+      //  form_set_error('limit_'. $j, t('You must enter a limit for each view.'));		  
+      //}
     }  
   }
 }
 
-function quicktabs_form_submit($form_id, $form_values) { 
-  if ($form_values['step'] < 3) { 
-    return; 
-  }
+function quicktabs_form_submit($form, $form_state) { 
   $formvalues_tabs = array();
-  $done = FALSE;
-  $j=1;
-  while (!$done) {
-    if (!isset($form_values['title_'. $j])) {
-      $done = TRUE;
-    }
-    else {
-      $formvalues_tabs[] = array(
-      'title' => $form_values['title_'. $j],
-      'type' => $form_values['type_'. $j],
-      'bvid' => ($form_values['type_'. $j]=='block' ? $form_values['bid_'. $j] : $form_values['vid_'. $j]),
-      'args' => ($form_values['type_'. $j]=='block' ? '' : $form_values['args_'. $j]),
-      'limit' => ($form_values['type_'. $j]=='block' ? '0' : $form_values['limit_'. $j])
-      );					
-    }
-    $j++;
+  foreach ($form_state['values']['tabs'] as $j => $tab) {
+    $formvalues_tabs[] = array(
+    'title' => $form_state['values']['tabs'][$j]['tabtext'],
+    'type' => 'block',
+    'bvid' => $form_state['values']['tabs'][$j]['bvid'],
+    'weight' => $form_state['values']['tabs'][$j]['tabweight'],
+//      'args' => ($form_state['values']['tabs'][$j]['type']=='block' ? '' : $form_state['values']['args_'. $j]),
+//      'limit' => ($form_state['values']['tabs'][$j]['type_'. $j]=='block' ? '0' : $form_state['values']['limit_'. $j])
+    );
   }
+
   $fullcontent = array(
-    'blocktitle' => $form_values['title'],
+    'blocktitle' => $form_state['values']['title'],
     'blockcontent' => $formvalues_tabs,
   );
 
-  if ($form_values['formtype'] == 'edit') {
-    $qtid = $form_values['qtid'];
+  if ($form_state['values']['qtid']) {
+    $qtid = $form_state['values']['qtid'];
     quicktabs_updateblock($qtid, $fullcontent);
     $msg = t('Your Quick Tabs block has been updated.');    
   }
@@ -346,12 +425,12 @@ function quicktabs_form_submit($form_id, $form_values) {
     $msg = t('Your Quick Tabs block has been created and can now be enabled.');  
   }
   drupal_set_message($msg); 
-  return 'admin/build/block';
+  drupal_goto('admin/build/block');
 }
 
 
 function quicktabs_createblock($fullcontent) {
-  $qtid = db_next_id('quicktabs');
+  $qtid = db_last_insert_id('quicktabs', 'qtid');
   $title = $fullcontent['blocktitle'];
   $tabs = serialize($fullcontent['blockcontent']);
   db_query('INSERT INTO {quicktabs} (qtid, title, tabs) VALUES(%d, "%s", "%s")', $qtid, $title, $tabs);
@@ -388,6 +467,11 @@ function quicktabs_block($op = 'list', $delta = 0, $edit = array()) {
         drupal_add_js(drupal_get_path('module', 'quicktabs') .'/js/quicktabs.js');
         $mainblock['subject'] = $jqueryblock->title;
         $tabs = unserialize($jqueryblock->tabs);
+        foreach ($tabs as $key => $tab) {
+          $weight[$key]  = $tab['weight'];
+        }
+        array_multisort($weight, SORT_ASC, $tabs);
+        
         $output = '<div class="quicktabs_wrapper">';
         $output .= '<ul class="quicktabs_tabs">';
         foreach ($tabs as $i => $tab) {
@@ -397,22 +481,22 @@ function quicktabs_block($op = 'list', $delta = 0, $edit = array()) {
         $output .= '<div class="quicktabs_main">';
         foreach ($tabs as $j => $tab) {
           $output .= '<div class="quicktabs">';
-          if ($tab['type'] == 'view') {
-            if (module_exists('views')) {
-              if ($tab['args']!='') {
-                $args = explode(',', $tab['args']);
-              }
-              else {
-                $args = array();
-              }	    	    	    
-              $view = views_get_view($tab['bvid']);
-              $output .= views_build_view('embed', $view, $args, false, $tab['limit']);
-            }
-            else {
-              $output .= 'Views module not enabled, cannot display tab content';
-            }
-          }
-          else {
+          //if ($tab['type'] == 'view') {
+          //  if (module_exists('views')) {
+          //    if ($tab['args']!='') {
+          //      $args = explode(',', $tab['args']);
+          //    }
+          //    else {
+          //      $args = array();
+          //    }	    	    	    
+          //    $view = views_get_view($tab['bvid']);
+          //    $output .= views_build_view('embed', $view, $args, false, $tab['limit']);
+          //  }
+          //  else {
+          //    $output .= 'Views module not enabled, cannot display tab content';
+          //  }
+          //}
+          //else {
             $pos = strpos($tab['bvid'], '_delta_');
             $blockmodule = substr($tab['bvid'], 0, $pos);
             $blockdelta = substr($tab['bvid'], $pos+7);
@@ -420,7 +504,7 @@ function quicktabs_block($op = 'list', $delta = 0, $edit = array()) {
             $block->module = $blockmodule;
             $block->delta = $blockdelta;
             $output .= $block->content ? theme('block', $block) : '';
-          }
+          //}
           $output .= '</div>';  
         }
         $output .= '</div></div>';	
@@ -436,7 +520,7 @@ function quicktabs_block_get_name($qtid) {
   return $result;
 }
 
-function quicktabs_block_delete($qtid) {
+function quicktabs_block_delete(&$form_state, $qtid =0) {
   $qt_name = quicktabs_block_get_name($qtid);
   $form['qtid'] = array('#type' => 'hidden', '#value' => $qtid);
   $form['qt_name'] = array('#type' => 'hidden', '#value' => $qt_name);
@@ -446,24 +530,18 @@ function quicktabs_block_delete($qtid) {
 function quicktabs_block_edit($qtid) {
   if ($qtblock = db_fetch_object(db_query('SELECT title, tabs FROM {quicktabs} WHERE qtid = %d', $qtid))) {
     $tabs = unserialize($qtblock->tabs);
-    $form_values = array(
-      'step' => 2,
+    foreach ($tabs as $key => $tab) {
+      $weight[$key]  = $tab['weight'];
+    }
+    array_multisort($weight, SORT_ASC, $tabs);
+    $form_state = array();
+    $form_state['values'] = array(
       'qtid' => $qtid,
       'title' => $qtblock->title,
-      'num_tabs' => count($tabs),
       'tabs' => $tabs,
       'formtype' => 'edit',
     );
-    drupal_add_js(drupal_get_path('module', 'quicktabs') .'/js/quicktabs_form.js');
-    $output = '';
-    if (module_exists('views')) {
-      $views = quicktabs_get_views();
-    }
-    else {
-      $views = NULL;
-    }
-    $blocks = quicktabs_get_blocks();
-    $output .= drupal_get_form('quicktabs_form', $views, $blocks, $form_values);
+    $output = drupal_get_form('quicktabs_form', $form_state);
     return $output; 
   }
   else {
@@ -474,11 +552,11 @@ function quicktabs_block_edit($qtid) {
 /**
  * Deletion of Quick Tabs blocks.
  */
-function quicktabs_block_delete_submit($form_id, $form_values) {
-  db_query('DELETE FROM {quicktabs} WHERE qtid = %d', $form_values['qtid']);
-  drupal_set_message(t('The Quick Tabs block %name has been removed.', array('%name' => $form_values['qt_name'])));
+function quicktabs_block_delete_submit($form, $form_state) {
+  db_query('DELETE FROM {quicktabs} WHERE qtid = %d', $form_state['values']['qtid']);
+  drupal_set_message(t('The Quick Tabs block %name has been removed.', array('%name' => $form_state['values']['qt_name'])));
   cache_clear_all();
-  return 'admin/build/quicktabs';
+  drupal_goto('admin/build/quicktabs');
 };
 
 /**
@@ -494,7 +572,7 @@ function quicktabs_settings() {
     '#description' => t('Choose a tab style for your Quick Tabs blocks.'),
     '#attributes' => array('class' => 'quicktabs-tabstyles clear-block'),
   );
-  return system_settings_form($form);
+  return $form;
 }
 
 function theme_quicktabs_settings($form) {
@@ -543,7 +621,7 @@ function theme_quicktabs_preview_page() {
   $output .= drupal_get_css();
   $output .= drupal_get_js();
   $output .= ' </head>';
-  $output .= ' <body style="background: none; background-color: #fff; color: #000;">';
+  $output .= ' <body style="background: none; background-color: #fff; color: #000;" class="quicktabs_iframe">';
   $output .= '<div class="quicktabs_wrapper">';
   $output .= '<ul class="quicktabs_tabs"><li><a href="#">One</a></li><li><a href="#">Two</a></li></ul>';
   $output .= '<div class="quicktabs_main"><div class="quicktabs"></div><div class="quicktabs"></div></div></div>';

@@ -1,49 +1,52 @@
 <?php
 // $Id$
 
-function quicktabs_install() {
-  switch ($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      db_query("CREATE TABLE {quicktabs} (
-        qtid int(10) unsigned NOT NULL default '0',
-        title varchar(255) NOT NULL default '',
-        tabs mediumtext NOT NULL,
-        PRIMARY KEY (qtid)
-        ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;"
-      );
-      $success = TRUE;
-    break;
 
-    case 'pgsql':
-      db_query("CREATE TABLE {quicktabs} (
-        qtid int(10) unsigned NOT NULL default '0',
-        title varchar(255) NOT NULL default '',
-        tabs mediumtext NOT NULL,
-        PRIMARY KEY (qtid) 
-        )");
-      $success = TRUE;
-      break;
-    default:
-        drupal_set_message(t('Unsupported database'));
-  }
-  
-  if ($success) {
-    drupal_set_message(t('Module tables installed successfully'));
-  }
-  else {
-    drupal_set_message(t('Module installation was unsuccessful'), 'error');
-  }
+function quicktabs_schema() {
+  $schema['quicktabs'] = array(
+    'description' => t('The quicktabs table.'),
+    'fields' => array(
+      'qtid' => array(
+        'description' => t('The primary identifier for a qt block.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'title' => array(
+        'description' => t('The title of this quicktabs block.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      'tabs' => array(
+        'description' => t('A serialized array of the contents of this qt block.'),
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+        'default' => ''),
+      ),
+    'primary key' => array('qtid'),
+  );
+  return $schema;
+}
+
+function mymodule_install() {
+  // Create my tables.
+  drupal_install_schema('quicktabs');
+}
+
+function mymodule_uninstall() {
+  // Drop my tables.
+  drupal_uninstall_schema('quicktabs');
+}
+
+function quicktabs_install() {
+  drupal_install_schema('quicktabs');
 }
 
 function quicktabs_uninstall() {
-  if (db_table_exists('quicktabs')) {
-    db_query("DROP TABLE {quicktabs}");
-  }
+  drupal_uninstall_schema('quicktabs');
   // Delete any variables that have been set.
-  // We don't just DELETE FROM {variable}, even though we could.
   $result = db_query("SELECT name FROM {variable} WHERE name LIKE 'quicktabs_%'");
-  // Instead we use the API, because API's can change!
   while ($row = db_fetch_object($result)) {
     variable_del($row->name);
   }
