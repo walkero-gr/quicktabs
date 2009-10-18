@@ -53,20 +53,6 @@ function quicktabs_schema() {
   return $schema;
 }
 
- /**
- * Implement hook_install().
- */
-function quicktabs_install() {
-  drupal_install_schema('quicktabs');
-}
-
- /**
- * Implement hook_uninstall().
- */
-function quicktabs_uninstall() {
-  drupal_uninstall_schema('quicktabs');
-}
-
 /**
  * Update to Drupal 7.
  * Could be solved later. Set the version number for new installs for now.

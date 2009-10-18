@@ -14,8 +14,9 @@ Drupal.quicktabs = Drupal.quicktabs || {};
 // setting up the inital behaviours
 Drupal.quicktabs.prepare = function(el) {
   var i = 0;
-  var qtid = el.id.split('-')[1];
-  
+  // el.id format: "quicktabs-$qtid"
+  var qtid = el.id.substring(el.id.indexOf('-') +1);
+
   $(el).find('ul.quicktabs_tabs li a').each(function(){
     this.myTabIndex = i++;
     this.qtid = qtid;
@@ -170,7 +171,7 @@ var quicktabsClick = function() {
             qtAjaxPath +=  tab.tabObj.qtid;
             break;
         }
-        
+
         $.ajax({
           url: qtAjaxPath,
           type: 'GET',

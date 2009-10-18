@@ -15,12 +15,12 @@ function quicktabs_list() {
     array('data' => t('Operations'), 'colspan' => 3),
   );
   $rows = array();
-  while ($row = db_fetch_object($result)) {
+  foreach ($result as $row) {
     $tablerow = array(
       array('data' => $row->title),
-      array('data' => l('Edit', 'admin/structure/quicktabs/' . $row->qtid . '/edit')),
-      array('data' => l('Clone', 'admin/structure/quicktabs/' . $row->qtid . '/clone')),
-      array('data' => l('Delete', 'admin/structure/quicktabs/' . $row->qtid . '/delete')),
+      array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/' . $row->qtid . '/edit')),
+      array('data' => l(t('Clone'), 'admin/structure/quicktabs/manage/' . $row->qtid . '/clone')),
+      array('data' => l(t('Delete'), 'admin/structure/quicktabs/manage/' . $row->qtid . '/delete')),
     );
     $rows[] = $tablerow;
   }
@@ -40,7 +40,7 @@ function quicktabs_list() {
 /**
  * Clone QuickTabs.
  */
-function quicktabs_clone($quicktab) {
+function quicktabs_clone(stdClass $quicktab) {
   $quicktab->qtid = 0;
   $quicktab->title = '';
   return drupal_get_form('quicktabs_form', 'clone', $quicktab);
@@ -49,7 +49,11 @@ function quicktabs_clone($quicktab) {
 /**
  * Build the quicktab creation and edit form.
  */
-function quicktabs_form($form_state, $formtype, $quicktab = NULL) {
+function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
+  if (!isset($quicktab)) {
+    $quicktab = new stdClass;
+  }
+
   $form = _qt_admin_main_form($form_state, $quicktab);
 
   if ($formtype == 'edit') {
@@ -77,7 +81,7 @@ function quicktabs_form($form_state, $formtype, $quicktab = NULL) {
 /*
  * The main section of admin page.
  */
-function _qt_admin_main_form($form_state, &$quicktab) {
+function _qt_admin_main_form($form_state, stdClass &$quicktab) {
   $form['#cache'] = TRUE;
 
   // The contents of $quicktab will either come from the db or from $form_state.
@@ -162,7 +166,7 @@ function _qt_admin_main_form($form_state, &$quicktab) {
 /*
  * Build one row (one tabpage) on the QT admin form.
  */
-function _quicktabs_form($tab) {
+function _quicktabs_form(array $tab) {
   $form['#tree'] = TRUE;
   $delta = $tab['delta'];
 
@@ -253,7 +257,9 @@ function _quicktabs_form($tab) {
  *
  * @ingroup themeable
  */
-function theme_quicktabs_admin_form_tabs($form) {
+function theme_quicktabs_admin_form_tabs($variables) {
+  $form = $variables['form'];
+
   drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
   $rows = array();
   $header = array(
@@ -394,7 +400,7 @@ function quicktabs_form_submit($form, &$form_state) {
 /**
  * Deletion of quicktab block.
  */
-function quicktabs_block_delete(&$form_state, $quicktab) {
+function quicktabs_block_delete($form, $form_state, stdClass $quicktab) {
   $form['qtid'] = array('#type' => 'hidden', '#value' => $quicktab->qtid);
   $form['qt_name'] = array('#type' => 'hidden', '#value' => $quicktab->title);
   return confirm_form($form, t('Are you sure you want to delete the quicktab block %name?', array('%name' => $quicktab->title)), 'admin/structure/quicktabs', '', t('Delete'), t('Cancel'));
