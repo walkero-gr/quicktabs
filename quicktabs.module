@@ -281,7 +281,10 @@ function quicktabs_ajax_qtabs($qtid) {
   );
 
   $output = quicktabs_render_tabpage($tabpage);
-  drupal_json_output(array('status' => TRUE, 'data' => $output));
+
+  $scripts = drupal_add_js(NULL, NULL);
+  $settings = call_user_func_array('array_merge_recursive', $scripts['settings']['data']);
+  drupal_json_output(array('status' => TRUE, 'data' => $output, 'settings' => $settings));
 }
 
 /**
@@ -293,7 +296,7 @@ function quicktabs_render_tabpage($tab) {
     case 'qtabs':
       if (isset($tab['qtid'])) {
         if ($quicktabs = quicktabs_load($tab['qtid'])) {
-          $output = theme('quicktabs', array('quicktab' => $quicktabs));
+          $output = quicktabs_render($quicktabs);
         }
       }
       break;
@@ -533,20 +536,3 @@ function _quicktabs_get_active_tab($quicktabs) {
   return NULL;
 }
 
-/**
- * Helper function to add quicktabs settings to ajax tabs.
- */
-function _quicktabs_prepare_qts($tabs) {
-  foreach ($tabs as $key => $tab) {
-    if ($tab['type'] == 'qtabs') {
-      $quicktabs = quicktabs_load($tab['qtid']);
-      // We need to pass qt details to js in case there is ajax paging.
-      $settings = array(
-        'quicktabs' => array(
-          'qt_'. $tab['qtid'] => $quicktabs,
-        ),
-      );
-      drupal_add_js($settings, 'setting');
-    }
-  }
-}

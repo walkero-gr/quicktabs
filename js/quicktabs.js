@@ -2,7 +2,8 @@
 Drupal.settings.views = Drupal.settings.views || {'ajax_path': 'views/ajax'};
 
 Drupal.behaviors.quicktabs = {
-  attach: function (context) {
+  attach: function (context, settings) {
+    $.extend(true, Drupal.settings, settings);
     $('.quicktabs_wrapper:not(.quicktabs-processed)', context).addClass('quicktabs-processed').each(function(){
       Drupal.quicktabs.prepare(this);
     });
@@ -69,7 +70,7 @@ Drupal.quicktabs.tab = function (el) {
 Drupal.quicktabs.tab.prototype.success = function(response) {
   var result = Drupal.parseJson(response.data);
   this.container.append(Drupal.theme('quicktabsResponse', this, result));
-  Drupal.attachBehaviors(this.container);
+  Drupal.attachBehaviors(this.container, response.settings);
 }
 
 // function to call on completed ajax call

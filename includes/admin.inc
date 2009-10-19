@@ -148,6 +148,7 @@ function _qt_admin_main_form($form_state, stdClass &$quicktab) {
     '#weight' => 1,
     '#submit' => array('qt_more_tabs_submit'),
     '#ajax' => array(
+      'callback' => 'quicktabs_ajax',
       'wrapper' => 'quicktab-tabs',
       'method' => 'replace',
       'effect' => 'fade',
@@ -242,6 +243,7 @@ function _quicktabs_form(array $tab) {
     '#attributes' => array('class' => array('delete-tab'), 'title' => t('Click here to delete this tab.')),
     '#submit' => array('qt_remove_tab_submit'),
     '#ajax' => array(
+      'callback' => 'quicktabs_ajax',
       'wrapper' => 'quicktab-tabs',
       'method' => 'replace',
       'effect' => 'fade',
@@ -303,12 +305,20 @@ function theme_quicktabs_admin_form_tabs($variables) {
     '#weight' => -1,
   );
 
-  // Add our JS file, which has some Drupal core JS overrides, and ensures ahah behaviours get re-attached
-  drupal_add_js(drupal_get_path('module', 'quicktabs') . '/js/quicktabs_ahah.js', 'module', 'footer');
   drupal_add_js(drupal_get_path('module', 'quicktabs') . '/js/quicktabs_form.js');
   drupal_add_css(drupal_get_path('module', 'quicktabs') . '/css/quicktabs-admin.css');
 
   $output = drupal_render($build);
+  return $output;
+}
+
+
+/**
+ * ajax callback.
+ */
+function quicktabs_ajax($form, $form_state) {
+  $form_tabs = $form['qt_wrapper']['tabs'];
+  $output = drupal_render($form_tabs);
   return $output;
 }
 
@@ -361,7 +371,7 @@ function quicktabs_form_validate($form, &$form_state) {
         if (empty($tab['title'])) {
           form_set_error('tabs]['. $j .'][title', t('Title is required for each tab.'));
         }
-        elseif ($tab['type'] == 'qtabs' && $tab['qtabs']['qtid'] == $form_state['values']['qtid']) {
+        elseif ($tab['type'] == 'qtabs' && isset($form_state['values']['qtid']) && $tab['qtabs']['qtid'] == $form_state['values']['qtid']) {
           form_set_error('tabs]['. $j .'][qtabs][qtid', t('You cannot put a quicktab inside itself.'));
         }
         elseif ($tab['type'] == 'view') {
