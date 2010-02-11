@@ -84,7 +84,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
       $tab_titles[$delta] = $tab['title'];
     }
   }
-  
+
   if (!$no_tabs) {
     $form['default_tab'] = array(
       '#type' => 'select',
@@ -153,7 +153,7 @@ function _qt_admin_main_form($form_state, stdClass &$quicktab) {
     '#description' => t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
     '#weight' => -4,
   );
-  
+
   // Add a wrapper for the tabs and Add Another Tab button.
   $form['qt_wrapper'] = array(
     '#tree' => FALSE,
