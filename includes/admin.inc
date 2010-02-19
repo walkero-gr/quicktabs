@@ -80,7 +80,6 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     }
   }
 
-
   $form['default_tab'] = array(
     '#type' => 'select',
     '#title' => t('Default tab'),
@@ -93,7 +92,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
   return $form;
 }
 
-/*
+/**
  * The main section of admin page.
  */
 function _quicktabs_admin_main_form($form_state, stdClass &$quicktab) {
@@ -328,9 +327,8 @@ function theme_quicktabs_admin_form_tabs($variables) {
     '#attributes' => array('id' => 'qt-tablist-table'),
     '#weight' => -1,
   );
-
-  drupal_add_js(drupal_get_path('module', 'quicktabs') . '/js/quicktabs_form.js');
-  drupal_add_css(drupal_get_path('module', 'quicktabs') . '/css/quicktabs-admin.css');
+  $build['#attached']['css'][] = drupal_get_path('module', 'quicktabs') . '/css/quicktabs-admin.css';
+  $build['#attached']['js'][] = drupal_get_path('module', 'quicktabs') . '/js/quicktabs_form.js';
 
   $output = drupal_render($build);
   return $output;
