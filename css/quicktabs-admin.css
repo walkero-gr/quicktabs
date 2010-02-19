@@ -2,7 +2,8 @@
 
 /* Admin form */
 
-#qt-tablist-table label {
+#qt-tablist-table .form-type-select label,
+#qt-tablist-table .form-type-textfield label {
   float: left;
   clear: left;
   width: 120px;

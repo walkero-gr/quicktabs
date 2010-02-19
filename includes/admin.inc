@@ -54,7 +54,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     $quicktab = new stdClass;
   }
 
-  $form = _qt_admin_main_form($form_state, $quicktab);
+  $form = _quicktabs_admin_main_form($form_state, $quicktab);
 
   if ($formtype == 'edit') {
     $form['qtid'] = array(
@@ -63,19 +63,14 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     );
   }
 
-  $no_tabs = TRUE;
-
   if (empty($quicktab->tabs)) {
     $quicktab->tabs = array(
       0 => array(),
       1 => array(),
     );
   }
-  else {
-    $no_tabs = FALSE;
-    $tab_titles = array();
-  }
 
+  $tab_titles = array();
   // Add current tabs to the form.
   foreach ($quicktab->tabs as $delta => $tab) {
     $tab['delta'] = $delta;
@@ -85,16 +80,15 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     }
   }
 
-  if (!$no_tabs) {
-    $form['default_tab'] = array(
-      '#type' => 'select',
-      '#title' => t('Default tab'),
-      '#options' => $tab_titles,
-      '#default_value' => $quicktab->default_tab,
-      '#weight' => -5,
-    );
-  }
 
+  $form['default_tab'] = array(
+    '#type' => 'select',
+    '#title' => t('Default tab'),
+    '#options' => $tab_titles,
+    '#default_value' => $quicktab->default_tab,
+    '#access' => !empty($tab_titles),
+    '#weight' => -5,
+  );
 
   return $form;
 }
@@ -102,7 +96,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
 /*
  * The main section of admin page.
  */
-function _qt_admin_main_form($form_state, stdClass &$quicktab) {
+function _quicktabs_admin_main_form($form_state, stdClass &$quicktab) {
   $form['#cache'] = TRUE;
 
   // The contents of $quicktab will either come from the db or from $form_state.
@@ -149,7 +143,7 @@ function _qt_admin_main_form($form_state, stdClass &$quicktab) {
   $form['hide_empty_tabs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide empty tabs'),
-    '#default_value' => isset($quicktabs['hide_empty_tabs']) ? $quicktabs['hide_empty_tabs'] : 0,
+    '#default_value' => isset($quicktab->hide_empty_tabs) ? $quicktab->hide_empty_tabs : 0,
     '#description' => t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
     '#weight' => -4,
   );
@@ -176,7 +170,7 @@ function _qt_admin_main_form($form_state, stdClass &$quicktab) {
     '#value' => t('More tabs'),
     '#attributes' => array('class' => array('add-tab'), 'title' => t('Click here to add more tabs.')),
     '#weight' => 1,
-    '#submit' => array('qt_more_tabs_submit'),
+    '#submit' => array('quicktabs_more_tabs_submit'),
     '#ajax' => array(
       'callback' => 'quicktabs_ajax',
       'wrapper' => 'quicktab-tabs',
@@ -271,7 +265,7 @@ function _quicktabs_form(array $tab) {
     '#suffix' => '<label for="edit-remove">' . t('Delete') . '</label></div>',
     '#value' => 'remove_' . $delta,
     '#attributes' => array('class' => array('delete-tab'), 'title' => t('Click here to delete this tab.')),
-    '#submit' => array('qt_remove_tab_submit'),
+    '#submit' => array('quicktabs_remove_tab_submit'),
     '#ajax' => array(
       'callback' => 'quicktabs_ajax',
       'wrapper' => 'quicktab-tabs',
@@ -355,7 +349,7 @@ function quicktabs_ajax($form, $form_state) {
 /**
  * Submit handler for the "Add Tab" button.
  */
-function qt_more_tabs_submit($form, &$form_state) {
+function quicktabs_more_tabs_submit($form, &$form_state) {
   $quicktab = _quicktabs_convert_form_to_quicktab($form_state);
   // Add an empty tab at the end.
   $quicktab->tabs[] = array();
@@ -369,7 +363,7 @@ function qt_more_tabs_submit($form, &$form_state) {
 /**
  * Submit handler for the "Remove Tab" button.
  */
-function qt_remove_tab_submit($form, &$form_state) {
+function quicktabs_remove_tab_submit($form, &$form_state) {
   // Get the tab delta for the clicked button.
   $delta = $form_state['clicked_button']['#parents'][1];
   // Copy the form_state because unset() does not work on variable

@@ -126,14 +126,13 @@ function quicktabs_permission() {
   return array(
     'administer quicktabs' => array(
       'title' => t('Administer Quick Tabs'),
-      'description' => t('Perform administration tasks for Quick Tabs module.'),
     ),
   );
 }
 
 
 /**
- * Implements hook_block_list().
+ * Implements hook_block_info().
  */
 function quicktabs_block_info() {
   $blocks = array();
@@ -400,7 +399,6 @@ function quicktabs_render_tabpage($tab) {
   return $output;
 }
 
-
 /**
  * Fetch the necessary CSS files for the tab styles.
  */
@@ -462,11 +460,17 @@ function theme_quicktabs_tabs($variables) {
 
   $output .= '<ul class="quicktabs_tabs quicktabs-style-'. drupal_strtolower($quicktabs->style) .'">';
   foreach ($quicktabs->tabs as $i => $tab) {
-    $class = 'qtab-'. $i;
+    $class[] = 'qtab-'. $i;
     // Add first, last and active classes to the list of tabs to help out themers.
-    $class .= ($i == $active_tab ? ' active' : '');
-    $class .= ($index == 1 ? ' first' : '');
-    $class .= ($index == $tabs_count ? ' last': '');
+    if ($i == $active_tab) {
+      $class[] = 'active';
+    }
+    if ($index == 1) {
+      $class[] = 'first';
+    }
+    if ($index == $tabs_count) {
+      $class[] = 'last';
+    }
     $attributes_li = drupal_attributes(array('class' => $class));
 
     $options = _quicktabs_construct_link_options($quicktabs, $i);
@@ -503,7 +507,6 @@ function quicktabs_quicktabs_tabstyles() {
   }
   return $tabstyles;
 }
-
 
 /**
  * Helper function to construct link options for tab links.
@@ -569,4 +572,3 @@ function _quicktabs_get_active_tab($quicktabs) {
   }
   return NULL;
 }
-
