@@ -283,7 +283,7 @@ function _quicktabs_form(array $tab) {
  * @ingroup themeable
  */
 function theme_quicktabs_admin_form_tabs($variables) {
-  $form = $variables['form'];
+  $tabs = $variables['tabs'];
 
   drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
   $rows = array();
@@ -295,27 +295,28 @@ function theme_quicktabs_admin_form_tabs($variables) {
     t('Operations'),
   );
 
-  foreach (element_children($form) as $key) {
-    $form[$key]['weight']['#attributes']['class'] = array('qt-tabs-weight');
+  foreach (element_children($tabs) as $key) {
+    $tab = &$tabs[$key];
+    $tab['weight']['#attributes']['class'] = array('qt-tabs-weight');
     // Build the table row.
     $row = array(
       'data' => array(
-        array('data' => drupal_render($form[$key]['title']), 'class' => array('qt-tab-title')),
-        array('data' => drupal_render($form[$key]['weight']), 'class' => array('qt-tab-weight')),
-        array('data' => drupal_render($form[$key]['type']), 'class' => array('qt-tab-type')),
+        array('data' => drupal_render($tab['title']), 'class' => array('qt-tab-title')),
+        array('data' => drupal_render($tab['weight']), 'class' => array('qt-tab-weight')),
+        array('data' => drupal_render($tab['type']), 'class' => array('qt-tab-type')),
         // tab content (only 1 tab content (block, node or view) will be displayed. see: quicktabs_form.js)
-        array('data' => drupal_render($form[$key]['block']), 'class' => array('qt-tab-content', 'qt-tab-block-content')),
-        array('data' => (module_exists('views') ? drupal_render($form[$key]['view']) : ''), 'class' => array('qt-tab-content', 'qt-tab-view-content')),
-        array('data' => drupal_render($form[$key]['node']), 'class' => array('qt-tab-content', 'qt-tab-node-content')),
-        array('data' => drupal_render($form[$key]['qtabs']), 'class' => array('qt-tab-content', 'qt-tab-qtabs-content')),
-        array('data' => drupal_render($form[$key]['remove']), 'class' => array('qt-tab-remove')),
+        array('data' => drupal_render($tab['block']), 'class' => array('qt-tab-content', 'qt-tab-block-content')),
+        array('data' => (module_exists('views') ? drupal_render($tab['view']) : ''), 'class' => array('qt-tab-content', 'qt-tab-view-content')),
+        array('data' => drupal_render($tab['node']), 'class' => array('qt-tab-content', 'qt-tab-node-content')),
+        array('data' => drupal_render($tab['qtabs']), 'class' => array('qt-tab-content', 'qt-tab-qtabs-content')),
+        array('data' => drupal_render($tab['remove']), 'class' => array('qt-tab-remove')),
       ),
       'class' => array('draggable'),
     );
 
     // Add additional attributes to the row, such as a class for this row.
-    if (isset($form[$key]['#attributes'])) {
-      $row = array_merge($row, $form[$key]['#attributes']);
+    if (isset($tab['#attributes'])) {
+      $row = array_merge($row, $tab['#attributes']);
     }
     $rows[] = $row;
   }
@@ -333,7 +334,6 @@ function theme_quicktabs_admin_form_tabs($variables) {
   $output = drupal_render($build);
   return $output;
 }
-
 
 /**
  * ajax callback.

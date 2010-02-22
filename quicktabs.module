@@ -23,7 +23,8 @@ function quicktabs_theme() {
   return array(
     // list quicktabs
     'quicktabs_admin_form_tabs' => array(
-      'render element' => 'form',
+      'render element' => 'tabs',
+      'file' => 'includes/admin.inc',
     ),
     'quicktabs_tabs' => array(
       'variables' => array('quicktabs', 'active_tab' => 'none'),
