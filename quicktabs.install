@@ -2,9 +2,9 @@
 // $Id$
 
 /**
-* @file
-* Install, update and uninstall functions for the quicktabs module.
-*/
+ * @file
+ *   Install, update and uninstall functions for the quicktabs module.
+ */
 
 /**
  * Implement hook_schema().

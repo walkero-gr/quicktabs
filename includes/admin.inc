@@ -1,7 +1,7 @@
 <?php
 // $Id$
 /**
- * @file admin.inc
+ * @file
  * Provides the Quick Tabs' administrative interface.
  */
 
@@ -40,7 +40,7 @@ function quicktabs_list() {
 /**
  * Clone QuickTabs.
  */
-function quicktabs_clone(stdClass $quicktab) {
+function quicktabs_clone($quicktab) {
   $quicktab->qtid = 0;
   $quicktab->title = '';
   return drupal_get_form('quicktabs_form', 'clone', $quicktab);
@@ -84,7 +84,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     '#type' => 'select',
     '#title' => t('Default tab'),
     '#options' => $tab_titles,
-    '#default_value' => $quicktab->default_tab,
+    '#default_value' => isset($quicktab->default_tab) ? $quicktab->default_tab : 0,
     '#access' => !empty($tab_titles),
     '#weight' => -5,
   );
@@ -95,7 +95,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
 /**
  * The main section of admin page.
  */
-function _quicktabs_admin_main_form($form_state, stdClass &$quicktab) {
+function _quicktabs_admin_main_form($form_state, $quicktab) {
   $form['#cache'] = TRUE;
 
   // The contents of $quicktab will either come from the db or from $form_state.
@@ -391,10 +391,10 @@ function quicktabs_form_validate($form, &$form_state) {
       }
       foreach ($form_state['values']['tabs'] as $j => $tab) {
         if (empty($tab['title'])) {
-          form_set_error('tabs]['. $j .'][title', t('Title is required for each tab.'));
+          form_set_error('tabs][' . $j . '][title', t('Title is required for each tab.'));
         }
         elseif ($tab['type'] == 'qtabs' && isset($form_state['values']['qtid']) && $tab['qtabs']['qtid'] == $form_state['values']['qtid']) {
-          form_set_error('tabs]['. $j .'][qtabs][qtid', t('You cannot put a quicktab inside itself.'));
+          form_set_error('tabs][' . $j . '][qtabs][qtid', t('You cannot put a quicktab inside itself.'));
         }
         elseif ($tab['type'] == 'view') {
           // Remove spaces from view arguments.
@@ -432,7 +432,7 @@ function quicktabs_form_submit($form, &$form_state) {
 /**
  * Deletion of quicktab block.
  */
-function quicktabs_block_delete($form, $form_state, stdClass $quicktab) {
+function quicktabs_block_delete($form, $form_state, $quicktab) {
   $form['qtid'] = array('#type' => 'hidden', '#value' => $quicktab->qtid);
   $form['qt_name'] = array('#type' => 'hidden', '#value' => $quicktab->title);
   return confirm_form($form, t('Are you sure you want to delete the quicktab block %name?', array('%name' => $quicktab->title)), 'admin/structure/quicktabs', '', t('Delete'), t('Cancel'));
@@ -459,7 +459,7 @@ function quicktabs_get_blocks() {
     foreach ($blocks as $block) {
       if ($block['module'] != 'quicktabs') {
         $key = $block['module'] . '_delta_' . $block['delta'];
-        $blocksarray[$key] = $block['info'] . ' (' . $block['module'] . ':'. $block['delta'] . ')';
+        $blocksarray[$key] = $block['info'] . ' (' . $block['module'] . ':' . $block['delta'] . ')';
       }
     }
   }
