@@ -206,24 +206,22 @@ function _quicktabs_form(array $tab) {
     '#default_value' => isset($tab['title']) ? $tab['title'] : '',
   );
 
-  $tabtypes = array(
-    'block' => t('Block'),
-    'node' => t('Node'),
-    'qtabs' => t('QTab'),
-  );
+  if (module_exists('block')) {
+    $tabtypes['block'] = t('Block');
+    $form['block']['bid'] = array(
+      '#type' => 'select',
+      '#options' => quicktabs_get_blocks(),
+      '#default_value' => isset($tab['bid']) ? $tab['bid'] : '',
+      '#title' => t('Select a block'),
+    );
+    $form['block']['hide_title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide the title of this block'),
+      '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
+    );
+  }
 
-  $form['block']['bid'] = array(
-    '#type' => 'select',
-    '#options' => quicktabs_get_blocks(),
-    '#default_value' => isset($tab['bid']) ? $tab['bid'] : '',
-    '#title' => t('Select a block'),
-  );
-  $form['block']['hide_title'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Hide the title of this block'),
-    '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
-  );
-
+  $tabtypes['node'] = t('Node');
   $form['node']['nid'] = array(
     '#type' => 'textfield',
     '#title' => t('Node'),
@@ -243,6 +241,7 @@ function _quicktabs_form(array $tab) {
     '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
   );
 
+  $tabtypes['qtabs'] = t('QTab');
   $form['qtabs']['qtid'] = array(
     '#type' => 'textfield',
     '#title' => t('Quicktab'),
@@ -255,7 +254,7 @@ function _quicktabs_form(array $tab) {
   $form['type'] = array(
     '#type' => 'radios',
     '#options' => $tabtypes,
-    '#default_value' => isset($tab['type']) ? $tab['type'] : 'block',
+    '#default_value' => isset($tab['type']) ? $tab['type'] : key($tabtypes),
   );
 
   $form['remove'] = array(
@@ -305,7 +304,7 @@ function theme_quicktabs_admin_form_tabs($variables) {
         array('data' => drupal_render($tab['weight']), 'class' => array('qt-tab-weight')),
         array('data' => drupal_render($tab['type']), 'class' => array('qt-tab-type')),
         // tab content (only 1 tab content (block, node or view) will be displayed. see: quicktabs_form.js)
-        array('data' => drupal_render($tab['block']), 'class' => array('qt-tab-content', 'qt-tab-block-content')),
+        array('data' => (module_exists('block') ? drupal_render($tab['block']) : ''), 'class' => array('qt-tab-content', 'qt-tab-block-content')),
         array('data' => (module_exists('views') ? drupal_render($tab['view']) : ''), 'class' => array('qt-tab-content', 'qt-tab-view-content')),
         array('data' => drupal_render($tab['node']), 'class' => array('qt-tab-content', 'qt-tab-node-content')),
         array('data' => drupal_render($tab['qtabs']), 'class' => array('qt-tab-content', 'qt-tab-qtabs-content')),

@@ -131,7 +131,6 @@ function quicktabs_permission() {
   );
 }
 
-
 /**
  * Implements hook_block_info().
  */
@@ -346,26 +345,31 @@ function quicktabs_render_tabpage($tab) {
           }
         }
         elseif (!$hide_empty) {
-          $output = t('Views module not enabled, cannot display tab content.');
+          $output = t('Views module is not enabled, cannot display tab content.');
         }
       }
       break;
 
     case 'block':
       if (isset($tab['bid'])) {
-        $pos = strpos($tab['bid'], '_delta_');
-        $blockmodule = drupal_substr($tab['bid'], 0, $pos);
-        $blockdelta = drupal_substr($tab['bid'], $pos + 7);
-        $block = (object) module_invoke($blockmodule, 'block_view', $blockdelta);
-        if (isset($block->content)) {
-          $block->module = $blockmodule;
-          $block->delta = $blockdelta;
-          $block->region = 'quicktabs_tabpage';
-          if ($tab['hide_title'] || !isset($block->subject)) {
-            $block->subject = FALSE;
+        if (module_exists('block')) {
+          $pos = strpos($tab['bid'], '_delta_');
+          $blockmodule = drupal_substr($tab['bid'], 0, $pos);
+          $blockdelta = drupal_substr($tab['bid'], $pos + 7);
+          $block = (object) module_invoke($blockmodule, 'block_view', $blockdelta);
+          if (isset($block->content)) {
+            $block->module = $blockmodule;
+            $block->delta = $blockdelta;
+            $block->region = 'quicktabs_tabpage';
+            if ($tab['hide_title'] || !isset($block->subject)) {
+              $block->subject = FALSE;
+            }
+            // TODO: this seems clumsy, find out the proper way of rendering a themed block
+            $output = theme('block', array('elements' => array('#block' => $block, '#children' => $block->content, '#markup' => $block->content)));
           }
-          // TODO: this seems clumsy, find out the proper way of rendering a themed block
-          $output = theme('block', array('elements' => array('#block' => $block, '#children' => $block->content, '#markup' => $block->content)));
+        }
+        elseif (!$hide_empty) {
+          $output = t('Block module is not enabled, cannot display tab content.');
         }
       }
       break;
