@@ -95,7 +95,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
 /**
  * The main section of admin page.
  */
-function _quicktabs_admin_main_form($form_state, $quicktab) {
+function _quicktabs_admin_main_form($form_state, &$quicktab) {
   $form['#cache'] = TRUE;
 
   // The contents of $quicktab will either come from the db or from $form_state.
@@ -173,7 +173,6 @@ function _quicktabs_admin_main_form($form_state, $quicktab) {
     '#ajax' => array(
       'callback' => 'quicktabs_ajax',
       'wrapper' => 'quicktab-tabs',
-      'method' => 'replace',
       'effect' => 'fade',
     ),
   );
@@ -351,8 +350,6 @@ function quicktabs_more_tabs_submit($form, &$form_state) {
   // Add an empty tab at the end.
   $quicktab->tabs[] = array();
 
-  unset($form_state['submit_handlers']);
-  form_execute_handlers('submit', $form, $form_state);
   $form_state['quicktab'] = $quicktab;
   $form_state['rebuild'] = TRUE;
 }
