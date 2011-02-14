@@ -36,9 +36,6 @@
 #qt-tablist-table .qt-tab-content .form-item .form-text {
   width: 150px;
 }
-#qt-tablist-table .qt-tab-view-content input.form-submit {
-  display: none;
-}
 #qt-tablist-table .qt-tab-content {
   display: none;
 }

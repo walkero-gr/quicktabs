@@ -95,7 +95,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     );
   }
 
-  // @todo: what's this? add comment here.
+  // Add or remove tabs.
   if (isset($form_state['num_tabs']) && $form_state['num_tabs'] > count($quicktab->tabs)) {
     $quicktab->tabs[] = array();
   }
@@ -267,6 +267,7 @@ function _quicktabs_form(array $tab) {
     '#default_value' => isset($tab['title']) ? $tab['title'] : '',
   );
 
+  // Block settings
   if (module_exists('block')) {
     $tabtypes['block'] = t('Block');
     $form['block']['bid'] = array(
@@ -282,6 +283,41 @@ function _quicktabs_form(array $tab) {
     );
   }
 
+  // View settings
+  if (module_exists('views')) {
+    $views = quicktabs_get_views();
+    $views_keys = array_keys($views);
+    $tabtypes['view'] = t('View!translate_as_list_of_content', array('!translate_as_list_of_content' => ''));
+
+    $selected_view = (isset($tab['vid']) ? $tab['vid'] : (isset($views_keys[0]) ? $views_keys[0] : ''));
+    $form['view']['vid'] = array(
+      '#type' => 'select',
+      '#options' => $views,
+      '#default_value' => $selected_view,
+      '#title' => t('Select a view'),
+      '#ajax' => array(
+        'callback' => '_quicktabs_replace_view_displays_callback',
+      ),
+    );
+    $form['view']['display'] = array(
+      '#type' => 'select',
+      '#title' => 'display',
+      '#options' => _quicktabs_get_views_displays($selected_view),
+      '#default_value' => isset($tab['display']) ? $tab['display'] : '',
+      '#prefix' => '<div id="view-display-dropdown-' . $delta . '">',
+      '#suffix' => '</div>'
+    );
+    $form['view']['args'] = array(
+      '#type' => 'textfield',
+      '#title' => 'arguments',
+      '#size' => '40',
+      '#required' => FALSE,
+      '#default_value' => isset($tab['args']) ? $tab['args'] : '',
+      '#description' => t('Additional arguments to send to the view as if they were part of the URL in the form of arg1/arg2/arg3. You may use %0, %1, ..., %N to grab arguments from the URL.'),
+    );
+  }
+
+  // Node settings
   $tabtypes['node'] = t('Node');
   $form['node']['nid'] = array(
     '#type' => 'textfield',
@@ -302,6 +338,7 @@ function _quicktabs_form(array $tab) {
     '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
   );
 
+  // QTab settings
   $tabtypes['qtabs'] = t('QTab');
   $form['qtabs']['machine_name'] = array(
     '#type' => 'textfield',
@@ -546,6 +583,63 @@ function quicktabs_get_blocks() {
     }
   }
   return $blocksarray;
+}
+
+/**
+ * Ajax callback, triggered when view is changed.
+ */
+function _quicktabs_replace_view_displays_callback($form, $form_state) {
+  $view_name = $form_state['triggering_element']['#value'];
+  $delta = $form_state['triggering_element']['#parents'][1];
+  $display_options = _quicktabs_get_views_displays($view_name);
+  $form['qt_wrapper']['tabs'][$delta]['view']['display']['#options'] = $display_options;
+
+  $commands = array();
+  // Replace the view display dropdown.
+  $commands[] = ajax_command_replace("#view-display-dropdown-$delta", drupal_render($form['qt_wrapper']['tabs'][$delta]['view']['display']));
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Helper function to get all views.
+ */
+function quicktabs_get_views() {
+  $enabled_views = array();
+  $views = views_get_all_views();
+
+  foreach ($views as $view) {
+    // Skip disabled views.
+    if (!empty($views[$view->name]->disabled)) {
+      continue;
+    }
+    $enabled_views[$view->name] = $view->name;
+  }
+  ksort($enabled_views);
+  return $enabled_views;
+}
+
+/**
+ * Helper function to get all view displays.
+ */
+function _quicktabs_get_views_displays($view_name) {
+  $displays = array();
+  if (empty($view_name)) {
+    // No view.
+    return $displays;
+  }
+
+  $views = views_get_all_views();
+  $view = $views[$view_name];
+
+  if (empty($view->display)) {
+    // This view is broken.
+    return $displays;
+  }
+
+  foreach ($view->display as $id => $display) {
+    $displays[$id] = $id .': '. $display->display_title;
+  }
+  return $displays;
 }
 
 /**
