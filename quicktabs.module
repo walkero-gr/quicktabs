@@ -106,24 +106,6 @@ function quicktabs_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/admin.inc',
   );
-  $items['quicktabs/ajax/node'] = array(
-    'page callback' => 'quicktabs_ajax_node',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['quicktabs/ajax/block'] = array(
-    'page callback' => 'quicktabs_ajax_block',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['quicktabs/ajax/qtabs'] = array(
-    'page callback' => 'quicktabs_ajax_qtabs',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
   $items['qt'] = array(
     'page callback' => 'quicktabs_get_content',
     'access callback' => 'user_access',
@@ -315,7 +297,7 @@ function quicktabs_render($quicktab) {
 
   $active_tab = _quicktabs_get_active_tab($quicktab);
 
-  $tabs = qt_render_qt_tabs($quicktab, $active_tab);
+  $tabs = quicktabs_render_tabs($quicktab, $active_tab);
   $qt_ra['content']['tabs'] = array(
     '#theme' => 'quicktabs_tabs',
   );
@@ -364,6 +346,20 @@ function quicktabs_ajax_node($nid, $teaser = FALSE, $hide_title = FALSE) {
     'nid' => $nid,
     'teaser' => $teaser,
     'hide_title' => $hide_title,
+  );
+  $output = quicktabs_render_tabpage($tabpage);
+  return $output;
+}
+
+/**
+ * Ajax callback for view tabpage.
+ */
+function quicktabs_ajax_view($vid) {
+  $tabpage = array(
+    'type' => 'view',
+    'vid' => $vid,
+    'display' => 'default', //$display,
+    'args' => $args,
   );
   $output = quicktabs_render_tabpage($tabpage);
   return $output;
@@ -557,7 +553,7 @@ function theme_quicktabs($variables) {
  * @param $quicktabs
  * @param $active_tab
  */
-function qt_render_qt_tabs($quicktab, $active_tab) {
+function quicktabs_render_tabs($quicktab, $active_tab) {
   $tabs = array();
   //$output = '';
   $tabs_count = count($quicktab->tabs);
