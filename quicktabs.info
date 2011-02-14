@@ -3,6 +3,5 @@ name = Quick Tabs
 description = Create blocks of tabbed views and blocks.
 core = 7.x
 files[] = quicktabs.module
-files[] = quicktabs.install
 files[] = includes/admin.inc
-configure=admin/structure/quicktabs
+configure = admin/structure/quicktabs
