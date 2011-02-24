@@ -1,13 +1,27 @@
 (function($){
 $(function() {
-  $(".quicktabs_wrapper div.qt_temp").each(function(){
-    var content = $(this).html();
-    var $target = $(this).siblings('div.ui-tabs-panel').not('.ui-tabs-hide');
-    $(this).remove();
-    $target.html(content);
-  });
-  $(".quicktabs_wrapper li a").bind("click", function() {
-    $(this).parents(".quicktabs_wrapper").tabs("abort");
-  });
+  $.fn.quicktabs = function(options) {
+    options = $.extend(
+      // Default options
+      {
+        qtWrapper: 'quicktabs'
+      },
+
+      // Option overrides, passed to the plugin
+      options || {}
+    );
+
+    return this.each(function () {
+      var tab_options = {
+        idPrefix: "qt-" + options.qtWrapper + "-ui-tabs",
+        cache: true,
+        select: function(event, ui) {
+          $.data(ui.tab, "load.tabs", "");
+        }
+      }
+      $(this).tabs(tab_options);
+    });
+  }
+
 })
 })(jQuery)
