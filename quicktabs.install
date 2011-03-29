@@ -1,4 +1,5 @@
 <?php
+// $Id: quicktabs.install,v 1.4.4.4.2.2 2011/02/24 22:42:23 katbailey Exp $
 
 /**
  * @file
@@ -64,8 +65,8 @@ function quicktabs_schema() {
         'not null' => TRUE,
         'serialize' => TRUE,
       ),
-      'style' => array(
-        'description' => 'The tab style.',
+      'renderer' => array(
+        'description' => 'The rendering mechanism.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -95,14 +96,23 @@ function quicktabs_update_7300() {
   }
 
   db_drop_field('quicktabs', 'qtid');
-  $new_field = array(
+  $name_field = array(
     'description' => 'The primary identifier for a qt block.',
     'type' => 'varchar',
     'length' => 255,
     'not null' => TRUE,
   );
-  db_add_field('quicktabs', 'machine_name', $new_field);
+  db_add_field('quicktabs', 'machine_name', $name_field);
   db_add_primary_key('quicktabs', array('machine_name'));
+  
+  $renderer_field = array(
+    'description' => 'The rendering mechanism.',
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+  );
+  db_drop_field('quicktabs', 'style');
+  db_add_field('quicktabs', 'renderer', $renderer_field);
 
   $output = $used = array();
   foreach ($result as $qt) {
@@ -115,6 +125,8 @@ function quicktabs_update_7300() {
     }
     $row['machine_name'] = $used[] = $i == 0 ? $qt_name : "{$qt_name}_{$i}";
     unset($row['qtid']);
+    unset($row['style']);
+    $row['renderer'] = 'tabs';
     $placeholders = implode(', ', array_keys($row));
     $values = array();
     // Ugh - really?? Somebody tell me there's a better way to do this :-/
