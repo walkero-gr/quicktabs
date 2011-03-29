@@ -16,7 +16,7 @@ function quicktabs_list() {
   );
   $rows = array();
 
-  foreach (quicktabs_get_all_quicktabs() as $quicktab) {
+  foreach (quicktabs_load_multiple() as $quicktab) {
     if (module_exists('ctools')) {
       // Determine storage
       switch ($quicktab->export_type) {
@@ -171,19 +171,18 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
     '#required' => TRUE,
   );
 
-  $styles = module_invoke_all('quicktabs_tabstyles');
-  $style_options = array();
-  // The keys used for options must be valid html id-s.
-  foreach ($styles as $style) {
-    $style_options[$style] = $style;
+  $renderers = module_invoke_all('quicktabs_renderers');
+  $renderer_options = array();
+  foreach ($renderers as $renderer) {
+    $renderer_options[$renderer] = $renderer;
   }
-  ksort($style_options);
-  $form['style'] = array(
+  ksort($renderer_options);
+  $form['renderer'] = array(
     '#type' => 'select',
-    '#title' => t('Style'),
-    '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + $style_options,
-    '#default_value' => isset($quicktab->style) ? $quicktab->style : 'default',
-    '#description' => t('Choose the quicktab style.'),
+    '#title' => t('Renderer'),
+    '#options' => $renderer_options,
+    '#default_value' => isset($quicktab->renderer) ? $quicktab->renderer : 'tabs',
+    '#description' => t('Choose how to render the content.'),
     '#weight' => -8,
   );
 
@@ -342,7 +341,7 @@ function _quicktabs_form(array $tab) {
   $form['qtabs']['machine_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Quicktab'),
-    '#description' => t('The quicktab machine name.') . ' ' . t('Different styles may not work when putting an ajax quicktab inside ajax quicktab.'),
+    '#description' => t('The quicktab machine name.'),
     '#maxlength' => 10,
     '#size' => 20,
     '#default_value' => isset($tab['machine_name']) ? $tab['machine_name'] : '',
@@ -661,7 +660,7 @@ function _quicktabs_convert_form_to_quicktab($form_state) {
   $quicktab->ajax = $form_state['values']['ajax'];
   $quicktab->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
   $quicktab->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
-  $quicktab->style = $form_state['values']['style'];
+  $quicktab->renderer = $form_state['values']['renderer'];
   $quicktab->tabs = $formvalues_tabs;
 
   if (isset($form_state['values']['machine_name'])) {

@@ -1,6 +1,6 @@
-name = Quick Tabs
-description = Create blocks of tabbed views and blocks.
+name = Quicktabs
+description = Render content with tabs and other display styles
 core = 7.x
 files[] = quicktabs.module
-files[] = includes/admin.inc
+files[] = quicktabs.classes.inc
 configure = admin/structure/quicktabs
