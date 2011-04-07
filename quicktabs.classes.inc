@@ -3,7 +3,8 @@
 class QuickieFactory {
   
   function getQuickie($name, $contents, $renderer, $options) {
-    $func = create_function('$c', 'return strtoupper($c[0]);');
+    $renderer = ucfirst($renderer);
+    $func = create_function('$c', 'return strtoupper($c[1]);');
     $type = preg_replace_callback('/_([a-z])/', $func, $renderer);
     
     $class_name = "Quick$type";
@@ -28,12 +29,12 @@ abstract class Quickie {
   
   abstract function render();
   
-  protected function hide_empty() {
-    // Check if any tabs need to be hidden because of empty content.
+  protected function prepare_contents() {
+
     if ($this->options['hide_empty_tabs'] && !$this->options['ajax']) {
-      // Remove empty tabpages.
+      // Check if any tabs need to be hidden because of empty content.
       foreach ($this->contents as $key => $tab) {
-        $contents = self::render_content_item($tab, TRUE);
+        $contents = isset($tab['contents']) ? $tab['contents'] : self::render_content_item($tab, TRUE);
         if (empty($contents)) {
           unset($this->contents[$key]);
         }
@@ -43,6 +44,61 @@ abstract class Quickie {
       }
       $this->contents = array_merge($this->contents);
     }
+    elseif ($this->options['ajax']) {
+      // Make sure that there is at most 1 "custom" tab and it is the default tab.
+      // Custom content cannot be rendered via ajax.
+      $custom = FALSE; // keep track of whether we have found a custom tab.
+      foreach ($this->contents as $key => &$tab) {
+        if ($tab['type'] == 'custom') {
+          if (!$custom) {
+            $custom = TRUE;
+            $this->options['default_tab'] = $key;
+            $tab['rendered'] = $tab['contents'];
+          }
+          else {
+            throw new InvalidQuickieException('The contents specified cannot be rendered via ajax.');
+          }
+        }
+      }
+    }
+    else {
+      // Copy "contents" into the "rendered" property for custom tabs.
+      foreach ($this->contents as $key => &$tab) {
+        if ($tab['type'] == 'custom') {
+          $tab['rendered'] = $tab['contents'];
+        }
+      }
+    }
+    $this->prepare_views_args();
+  }
+  
+  /**
+  * Convert %-style View arguments from the URL into an array
+  */
+  protected function prepare_views_args() {
+    foreach ($this->contents as $key => &$content) {
+      if ($content['type'] == 'view') {
+        if ($this->options['ajax']) views_add_js('ajax_view');
+        
+        $url_args = arg();
+        $args = $content['args'];
+  
+        foreach ($url_args as $id => $arg) {
+          $args = str_replace("%$id", $arg, $args);
+        }
+        $args = preg_replace(',/?(%\d),', '', $args);
+        $args = $args ? explode('/', $args) : array();
+  
+        $content['args'] = $args;
+      }
+    }
+  }
+  
+  protected function get_active_tab() {
+    $active_tab = isset($this->options['default_tab']) ? $this->options['default_tab'] : key($this->contents);
+    $active_tab = isset($_GET['qt-' . $this->name]) ? $_GET['qt-' . $this->name] : $active_tab;
+    $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : 0;
+    return $active_tab;
   }
   
   /**
@@ -50,8 +106,6 @@ abstract class Quickie {
   */
   static function render_content_item($item, $hide_empty = FALSE) {
     static $cache;
-    $thing = $hide_empty ? 'stuff' : 'nuthin';
-    watchdog('qt', $thing);
     $cachekey = md5(serialize($item));
     if (isset($cache[$cachekey])) {
       return $cache[$cachekey];
@@ -59,7 +113,7 @@ abstract class Quickie {
     $output = array();
     if (isset($item['type'])) {
       $func = 'build_content_'. $item['type'];
-      if (is_callable('self', $func)) {
+      if (is_callable(array('self', $func))) {
         $output = self::$func($item, $hide_empty);
         $cache[$cachekey] = $output;
       }
@@ -158,20 +212,25 @@ abstract class Quickie {
   }
 }
 
-class QuickTabs extends Quickie {
+class QuickUiTabs extends Quickie {
   
-  static $type = 'tabs';
+  static $type = 'ui_tabs';
   
   function render() {
-    // First convert any Views arguments in our tabs to the necessary format
-    //$this->contents = _quicktabs_prepare_views_args($this->contents, $this->options['ajax']);
-    $this->hide_empty();
-  
-    $active_tab = isset($options['default_tab']) ? $options['default_tab'] : key($this->contents);
-    $active_tab = isset($_GET['qt-' . $this->name]) ? $_GET['qt-' . $this->name] : $active_tab;
-    $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : NULL;
     
-    
+    // This display style doesn't currently support the ajax option
+    $this->options['ajax'] = 0;
+
+    try {
+      // Ensures empty tabs are hidden, views args are converted from the url,
+      // and custom content won't be attempted to be ajax-rendered.
+      $this->prepare_contents();
+    }
+    catch (InvalidQuickieException $e) {
+      return array('#markup' => $e->getMessage());
+    }
+
+    $active_tab = $this->get_active_tab();
     if ($tabs = $this->build_tablinks($active_tab)) {
       $qt_name = $this->name;
       // Create the quicktabs renderable array and add the necessary css and js to it
@@ -181,10 +240,8 @@ class QuickTabs extends Quickie {
             //array('data' => drupal_get_path('module', 'quicktabs') .'/css/quicktabs.css'),
           ),
           'js' => array(
-            array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
-            array('data' => 'misc/progress.js', 'weight' => JS_LIBRARY),
             array(
-              'data' => 'jQuery(function() { jQuery(".quicktabs_wrapper").quicktabs({qtWrapper : "'. $qt_name .'"})})',
+              'data' => "jQuery(function() { jQuery('.quicktabs_wrapper').tabs({selected: $active_tab})})",
               'type' => 'inline',
             )
           ),
@@ -193,37 +250,144 @@ class QuickTabs extends Quickie {
           ),
         ),
         'content' => array(
-          '#theme' => 'quicktabs',
+          '#theme' => 'qt_ui_tabs',
           '#options' => array('attributes' => array(
             'id' => 'quicktabs-' . $qt_name,
             'class' => 'quicktabs_wrapper',
           )),
-          'tabs' => array('#theme' => 'quicktabs_tabs', '#options' => array('active' => $active_tab), 'tablinks' => $tabs),
+          'tabs' => array('#theme' => 'qt_ui_tabs_tabset', '#options' => array('active' => $active_tab), 'tablinks' => $tabs),
+        ),
+      );
+
+      // Render all tab content.
+      $qt_ra['content']['divs'] = array();
+      foreach ($this->contents as $key => $tab) {
+        $attribs = array(
+          'id' => 'qt-'. $qt_name .'-ui-tabs' . ($key+1),
+        );
+        $qt_ra['content']['divs'][] = array(
+          '#prefix' => '<div '. drupal_attributes($attribs) .'>',
+          '#suffix' => '</div>',
+          'content' => $tab_content = isset($tab['rendered']) ? $tab['rendered'] : self::render_content_item($tab),
+        );
+      }
+      return $qt_ra;
+    }
+    return array();
+  }
+
+  
+  /**
+   * @todo: Enter description here ...
+   * @param $active_tab
+   */
+  protected function build_tablinks($active_tab) {
+    $tabs = array();
+    $tabs_count = count($this->contents);
+    if ($tabs_count <= 0) {
+      return NULL;
+    }
+    $qt_name = $this->name;
+    foreach ($this->contents as $i => $tab) {
+      $href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
+      $tablink = array(
+	'#markup' => '<a href="'. $href .'">'. $tab['title'] .'</a>',
+      );
+      $tabs[] = $tablink;
+    }
+    return $tabs;
+  }
+}
+
+class QuickQuicktabs extends Quickie {
+  
+  static $type = 'quicktabs';
+  
+  function render() {
+
+    try {
+      // Ensures empty tabs are hidden, views args are converted from the url,
+      // and custom content won't be attempted to be ajax-rendered.
+      $this->prepare_contents();
+    }
+    catch (InvalidQuickieException $e) {
+      return array('#markup' => $e->getMessage());
+    }
+
+    // All we really want to do here is copy $this->contents into a tab_settings array
+    // to pass into our js, but unsetting the contents elements because that would cause
+    // crazy recursion; however, due to this crazy php weirdness http://bugs.php.net/bug.php?id=20993,
+    // assignment would create a reference to $this->contents, which is not what we want.
+    $tab_settings = array();
+    foreach ($this->contents as $content) {
+      $item = array();
+      foreach ($content as $name => $element) {
+        if (!in_array($name, array('contents', 'rendered'))) {
+          $item[$name] = $element;
+        }
+      }
+      $tab_settings[] = $item;
+    }
+
+    $active_tab = $this->get_active_tab();
+    if ($tabs = $this->build_tablinks($active_tab)) {
+      $qt_name = $this->name;
+      $style = isset($this->options['style']) ? $this->options['style'] : 'nostyle';
+      $qt_ra = array(
+        '#attached' => array(
+          'css' => array(
+            array('data' => drupal_get_path('module', 'quicktabs') .'/css/quicktabs.css'),
+            array('data' => quicktabs_get_css($this->options['style'])),
+          ),
+          'js' => array(
+            array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
+            array('data' => 'misc/progress.js', 'weight' => JS_LIBRARY),
+          ),
+        ),
+        'content' => array(
+          '#theme' => 'qt_quicktabs',
+          '#options' => array('attributes' => array(
+            'id' => 'quicktabs-' . $qt_name,
+            'class' => 'quicktabs_wrapper quicktabs-style-' . drupal_strtolower($style),
+          )),
+          'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_strtolower($style)), 'tablinks' => $tabs),
+          // The main content area, each quicktab container needs a unique id.
+          'container' => array(
+            '#prefix' => '<div id="quicktabs_container_' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_strtolower($style) .'">',
+            '#suffix' => '</div>',
+          ),
         ),
       );
     
+      if (!isset($javascript['setting'][1]['quicktabs']) || !array_key_exists('qt_' . $qt_name, $javascript['setting'][1]['quicktabs'])) {
+        $quicktabs_array = array_merge(array('name' => $qt_name, 'tabs' => $tab_settings), $this->options);
+        $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
+      }
+    
       if ($this->options['ajax']) {
-        // Render only the active tab content.
+        $tab = $this->contents[$active_tab];
         $attribs = array(
-          'id' => 'qt-'. $qt_name .'-ui-tabs' . ($active_tab+1),
+          'id' => 'quicktabs_tabpage_'. $qt_name . '_'. $active_tab,
+          'class' => array('quicktabs_tabpage'),
         );
-        $qt_ra['content']['active'] = array(
+        $qt_ra['content']['container']['active'] = array(
           '#prefix' => '<div '. drupal_attributes($attribs) .'>',
           '#suffix' => '</div>',
-          'content' =>  self::render_content_item($this->contents[$active_tab]),
+          'content' =>  isset($tab['rendered']) ? $tab['rendered'] : self::render_content_item($tab),
         );
       }
       else {
-        // Render all tab content.
-        $qt_ra['content']['divs'] = array();
+        // Render all tabpgages.
+        $qt_ra['content']['container']['divs'] = array();
         foreach ($this->contents as $key => $tab) {
           $attribs = array(
-            'id' => 'qt-'. $qt_name .'-ui-tabs' . ($key+1),
+            'id' => 'quicktabs_tabpage_'. $qt_name . '_'. $key,
+            'class' => array('quicktabs_tabpage', ($active_tab == $key ? '' : 'quicktabs-hide')),
           );
-          $qt_ra['content']['divs'][] = array(
+          $qt_ra['content']['container']['divs'][] = array(
             '#prefix' => '<div '. drupal_attributes($attribs) .'>',
             '#suffix' => '</div>',
-            'content' => $tab_content = isset($tab['rendered']) ? $tab['rendered'] : self::render_content_item($tab),
+            'content' => isset($tab['rendered']) ? $tab['rendered'] : self::render_content_item($tab),
           );
         }
       }
@@ -238,41 +402,21 @@ class QuickTabs extends Quickie {
    * @param $active_tab
    */
   protected function build_tablinks($active_tab) {
+  
     $tabs = array();
-    //$output = '';
     $tabs_count = count($this->contents);
     if ($tabs_count <= 0) {
       return NULL;
     }
-    $qt_name = $this->name;
+  
+  
     foreach ($this->contents as $i => $tab) {
-      $active = $i == $active_tab;
-      $class[] = 'qtab-' . $i;
-      // Add first, last and active classes to the list of tabs to help out themers.
-      if ($i == 0) {
-        $class[] = 'first';
-      }
-      if ($i == $tabs_count-1) {
-        $class[] = 'last';
-      }
-      $type = $tab['type'];
-      $type_ids = array('block' => 'bid', 'node' => 'nid', 'view' => 'vid', 'qtabs' => 'machine_name');
-      $ajax_href = 'qt/nojs/'. $type .'/'. $tab[$type_ids[$type]] .'/'. $qt_name .'/'. ($i + 1);
-      // Construct our render array for the link.
       $tablink = array(
         '#type' => 'link',
         '#title' => $tab['title'],
-        '#href' => $this->options['ajax'] && !$active ? $ajax_href : '#',
-        '#options' => $this->_quicktabs_construct_link_options($i),
+        '#href' =>  $_GET['q'],
+        '#options' => $this->construct_link_options($i),
       );
-      if ($this->options['ajax'] && !$active) {
-        $tablink['#ajax'] = array(
-          'wrapper' => 'qt-'. $qt_name .'-ui-tabs'. ($i + 1),
-          'method' => 'html',
-          'bindMethod' => 'one',
-          'progress' => array('type' => 'throbber', 'message' => NULL),
-        );
-      }
       $tabs[] = $tablink;
     }
   
@@ -282,22 +426,31 @@ class QuickTabs extends Quickie {
   /**
    * Helper function to construct link options for tab links.
    */
-  protected function _quicktabs_construct_link_options($tabkey) {
+  protected function construct_link_options($tabkey) {
+    $tab = $this->contents[$tabkey];
     $qt_name = $this->name;
     $ajax = $this->options['ajax'];
-    $tab = $this->contents[$tabkey];
     $id = 'quicktabs-tab-' . implode('-', array($qt_name, $tabkey));
-    $dest = $_GET['q'];
+  
     // Need to construct the correct querystring for the tab links.
     $query = drupal_get_query_parameters(NULL, array("qt-$qt_name", 'q', 'page'));
     $query["qt-{$qt_name}"] = $tabkey;
-    $query['dest'] = $dest;
+  
+    $class = array();
+    if ($ajax) {
+      $class[] = 'qt_ajax_tab';
+    }
+    else {
+      $class[] = 'qt_tab';
+    }
+  
     $link_options = array(
       'attributes' => array(
         'id' => $id,
+        'class' => $class,
       ),
       'query' => $query,
-      'fragment' => "qt-" . $qt_name . "-ui-tabs". ($tabkey+1),
+      'fragment' => 'qt-' . $qt_name,
     );
     return $link_options;
   }
@@ -308,23 +461,20 @@ class QuickAccordion extends Quickie {
   static $type = 'accordion';
   
   function render() {
-    // First convert any Views arguments in our tabs to the necessary format
-    //$this->contents = _quicktabs_prepare_views_args($this->contents, $this->options['ajax']);
+    
+    // This display style doesn't currently support the ajax option
+    $this->options['ajax'] = 0;
 
-    // Check if any tabs need to be hidden because of empty content.
-    if ($this->options['hide_empty_tabs'] && !$this->options['ajax']) {
-      // Remove empty tabpages.
-      foreach ($this->contents as $key => $tab) {
-        $contents = parent::render_content_item($tab, TRUE);
-        if (empty($contents)) {
-          unset($this->contents[$key]);
-        }
-        else {
-          $this->contents[$key]['rendered'] = $contents;
-        }
-      }
-      $this->contents = array_merge($this->contents);
+    try {
+      // Ensures empty tabs are hidden, views args are converted from the url,
+      // and custom content won't be attempted to be ajax-rendered.
+      $this->prepare_contents();
     }
+    catch (InvalidQuickieException $e) {
+      return array('#markup' => $e->getMessage());
+    }
+    
+    $active_tab = $this->get_active_tab();
     
     $qt_name = $this->name;
     // Create the quicktabs renderable array and add the necessary css and js to it
@@ -335,7 +485,7 @@ class QuickAccordion extends Quickie {
         ),
         'js' => array(
           array(
-            'data' => 'jQuery(function() { jQuery("#quickie-'. $qt_name .'").accordion()})',
+            'data' => "jQuery(function() { jQuery('#quickie-$qt_name').accordion({active: $active_tab})})",
             'type' => 'inline',
           )
         ),
@@ -360,4 +510,8 @@ class QuickAccordion extends Quickie {
     return $qt_ra;
   }
 
+}
+
+class InvalidQuickieException extends Exception {
+  
 }

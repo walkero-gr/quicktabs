@@ -230,7 +230,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
     '#weight' => 1,
     '#submit' => array('quicktabs_more_tabs_submit'),
     '#ajax' => array(
-      'callback' => 'quicktabs_ajax',
+      'callback' => 'quicktabs_ajax_callback',
       'wrapper' => 'quicktab-tabs',
       'effect' => 'fade',
     ),
@@ -434,7 +434,7 @@ function theme_quicktabs_admin_form_tabs($variables) {
 /**
  * ajax callback.
  */
-function quicktabs_ajax($form, $form_state) {
+function quicktabs_ajax_callback($form, $form_state) {
   $form_tabs = $form['qt_wrapper']['tabs'];
   //$output = drupal_render($form_tabs);
   return $form_tabs;

@@ -1,0 +1,4 @@
+name = Quick Tabs Styles
+description = Adds predefined tab styles to choose from per Quick Tabs block.
+core = 7.x
+configure=admin/structure/quicktabs/styles

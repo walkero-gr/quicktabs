@@ -77,8 +77,8 @@ function quicktabs_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'quicktabs.admin.inc',
   );
-  $items['qt'] = array(
-    'page callback' => 'quicktabs_get_content',
+  $items['quicktabs/ajax'] = array(
+    'page callback' => 'quicktabs_ajax',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -107,11 +107,17 @@ function quicktabs_theme() {
       'render element' => 'tabs',
       'file' => 'quicktabs.admin.inc',
     ),
-    'quicktabs_tabs' => array(
+    'qt_ui_tabs' => array(
+      'render element' => 'element',
+    ),
+    'qt_ui_tabs_tabset' => array(
       'render element' => 'tabset',
     ),
-    'quicktabs' => array(
+    'qt_quicktabs' => array(
       'render element' => 'element',
+    ),
+    'qt_quicktabs_tabset' => array(
+      'render element' => 'tabset',
     ),
     'quick_accordion' => array(
       'render element' => 'element',
@@ -137,22 +143,50 @@ function quicktabs_block_info() {
  * Implements hook_block_view().
  */
 function quicktabs_block_view($delta = '') {
-  $block = array();
-  if ($quicktabs = quicktabs_load($delta)) {
-    $contents = $quicktabs->tabs;
-    $name = $quicktabs->machine_name;
-    $renderer = $quicktabs->renderer;
-    $block['subject'] = $quicktabs->title;
-    unset($quicktabs->tabs, $quicktabs->machine_name, $quicktabs->renderer);
-    $options = (array) $quicktabs;
-    $qf = new QuickieFactory();
-    $qt = $qf->getQuickie($name, $contents, $renderer, $options);
-    $block['content'] = $qt->render();
+  if ($block = quicktabs_build_quicktabs($delta)) {
     if (!empty($block['content'])) {
       $block['content']['#contextual_links']['quicktabs'] = array('admin/structure/quicktabs/manage', array($delta));
     }
   }
   return $block;
+}
+
+function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = array()) {
+  $default_options = array('style' => 'nostyle', 'hide_empty_tabs' => 0, 'ajax' => 0, 'default_tab' => 0);
+  if ($info = (array)quicktabs_load($name)) {
+    $options = array_merge($default_options, $info, $overrides);
+    $contents = $info['tabs'];
+    unset($options['tabs'], $options['machine_name']);
+  }
+  elseif (!empty($custom_tabs)) {
+    $options = array_merge($default_options, $overrides);
+    $contents = array();
+  }
+  else {
+    return array();
+  }
+  $renderer = isset($options['renderer']) ? $options['renderer'] : 'quicktabs';
+  unset($options['renderer']);
+  foreach($custom_tabs as &$tab) {
+    $tab = array_merge(array('weight' => 0, 'type' => 'custom'), $tab);
+  }
+  $contents = array_merge($custom_tabs, $contents);
+  $weight = array();
+  foreach ($contents as $key => $item) {
+    $weight[$key] = $item['weight'];
+    if ($item['type'] == 'qtabs' && $item['machine_name'] == $name) {
+      unset($contents[$key]);
+      unset($weight[$key]);
+    }
+  }
+  array_multisort($weight, SORT_ASC, $contents);
+
+  $qf = new QuickieFactory();
+  $qt = $qf->getQuickie($name, $contents, $renderer, $options);
+
+  $block_arr = array('content' => $qt->render());
+  $block_arr['subject'] = isset($info['title']) ? $info['title'] : $name;
+  return $block_arr;
 }
 
 
@@ -161,15 +195,6 @@ function quicktabs_block_view($delta = '') {
  */
 function _quicktabs_unpack($qt) {
   $tabs = unserialize($qt->tabs);
-  $weight = array();
-  foreach ($tabs as $key => $tab) {
-    $weight[$key] = $tab['weight'];
-    if ($tab['type'] == 'qtabs' && $tab['machine_name'] == $qt->machine_name) {
-      unset($tabs[$key]);
-      unset($weight[$key]);
-    }
-  }
-  array_multisort($weight, SORT_ASC, $tabs);
 
   $qt->tabs = $tabs;
   // @todo: this needs to be used at ctools load also.
@@ -182,7 +207,7 @@ function _quicktabs_unpack($qt) {
  */
 function quicktabs_load($name) {
   $qts = quicktabs_load_multiple(array($name));
-  return $qts[$name];
+  return isset($qts[$name]) ? $qts[$name] : NULL;
 }
 
 /**
@@ -204,7 +229,7 @@ function quicktabs_load_multiple($names = array()) {
     $query->condition('q.machine_name', $names, 'IN');
   }
   $result = $query->execute();  
-  
+  $quicktabs = array();
   foreach ($result as $qt) {
     $quicktabs[$qt->machine_name] = _quicktabs_unpack($qt);
   }
@@ -212,79 +237,30 @@ function quicktabs_load_multiple($names = array()) {
 }
 
 /**
- * @todo: Enter description here ...
- * @param $method
- * @param $type
- * @param $id
- * @param $qt_name
- * @param $index
+ * Ajax callback for tab content.
  */
-function quicktabs_get_content($method = 'nojs', $type, $id, $qt_name, $index) {
-  if ($method == 'nojs') {
-    $query = drupal_get_query_parameters(NULL, array('q', 'dest'));
-    drupal_goto($_GET['dest'], array('query' => $query));
+function quicktabs_ajax($type) {
+
+  $args = func_get_args();
+  $type = array_shift($args);
+
+  $tabpage = array(
+    'type' => $type,
+  );
+  switch ($type) {
+    case 'node':
+      list($tabpage['nid'], $tabpage['teaser'], $tabpage['hide_title']) = $args;
+      break;
+    case 'block':
+      list($tabpage['bid'], $tabpage['hide_title']) = $args;
+      break;
+    case 'qtabs':
+      $tabpage['machine_name'] = $args[0];
+      break;
   }
-  else {
-    $func = 'quicktabs_ajax_'. $type;
-    $output = $func($id);
-    ajax_deliver($output);
-  }
-}
-
-/**
- * Ajax callback for node tabpage.
- */
-function quicktabs_ajax_node($nid, $teaser = FALSE, $hide_title = FALSE) {
-  $tabpage = array(
-    'type' => 'node',
-    'nid' => $nid,
-    'teaser' => $teaser,
-    'hide_title' => $hide_title,
-  );
-  $output = Quickie::render_content_item($tabpage);
-  return $output;
-}
-
-/**
- * Ajax callback for view tabpage.
- */
-function quicktabs_ajax_view($vid) {
-  // TODO: Need to get the display and args!!
-  $tabpage = array(
-    'type' => 'view',
-    'vid' => $vid,
-    'display' => 'default', //$display,
-    'args' => array(),
-  );
-  $output = Quickie::render_content_item($tabpage);
-  return $output;
-}
-
-/**
- * Ajax callback for block tabpage.
- */
-function quicktabs_ajax_block($bid, $hide_title = FALSE) {
-  $tabpage = array(
-    'type' => 'block',
-    'bid' => $bid,
-    'hide_title' => $hide_title,
-  );
 
   $output = Quickie::render_content_item($tabpage);
-  return $output;
-}
-
-/**
- * Ajax callback for qtabs tabpage.
- */
-function quicktabs_ajax_qtabs($qt_name) {
-  $tabpage = array(
-    'type' => 'qtabs',
-    'machine_name' => $qt_name,
-  );
-
-  $output = Quickie::render_content_item($tabpage);
-  return $output;
+  drupal_json_output(array('status' => 0, 'data' => drupal_render($output)));
 }
 
 /**
@@ -305,12 +281,46 @@ function theme_quicktabs_tab_access_denied($variables) {
   return t('You are not authorized to access this content.');
 }
 
+
+/**
+ * Fetch the necessary CSS files for the tab styles.
+ */
+function quicktabs_get_css($style) {
+  if ($style == 'default') {
+    // Get the default style.
+    $style = variable_get('quicktabs_tabstyle', 'nostyle');
+  }
+
+  $style_css = _quicktabs_get_style_css($style);
+  return $style_css;
+}
+
+/**
+ * Helper function to get the css file for given style.
+ */
+function _quicktabs_get_style_css($style = 'nostyle') {
+  static $tabstyles;
+
+  if ($style != 'nostyle') {
+    if (!isset($tabstyles)) {
+      $tabstyles = module_invoke_all('quicktabs_tabstyles');
+    }
+    foreach ($tabstyles as $css_file => $tabstyle) {
+      if ($style == $tabstyle) {
+        return $css_file;
+      }
+    }
+  }
+
+  return 'nostyle';
+}
+
 /**
  * Theme function to output quicktabs.
  *
  * @ingroup themeable
  */
-function theme_quicktabs($variables) {
+function theme_qt_ui_tabs($variables) {
   $element = $variables['element'];
   $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
   $output .= drupal_render($element['tabs']);
@@ -328,26 +338,12 @@ function theme_quicktabs($variables) {
   return $output;
 }
 
-/**
- * Theme function to output quicktabs.
- *
- * @ingroup themeable
- */
-function theme_quick_accordion($variables) {
-  $element = $variables['element'];
-  $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
-  foreach ($element['divs'] as $div) {
-    $output .= drupal_render($div);
-  }
 
-  $output .= '</div>';
-  return $output;
-}
 
 /**
  * @todo: Enter description here ...
  */
-function theme_quicktabs_tabs($vars) {
+function theme_qt_ui_tabs_tabset($vars) {
 
   $output = '<ul>';
   foreach ($vars['tabset']['tablinks'] as $i => $tab) {
@@ -359,3 +355,51 @@ function theme_quicktabs_tabs($vars) {
   return $output;
 }
 
+
+/**
+ * Theme function to output quicktabs.
+ *
+ * @ingroup themeable
+ */
+function theme_qt_quicktabs($variables) {
+  $element = $variables['element'];
+  $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
+  $output .= drupal_render($element['tabs']);
+  
+  $output .= drupal_render($element['container']);
+
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * @todo: Enter description here ...
+ */
+function theme_qt_quicktabs_tabset($vars) {
+
+  $output = '<ul class="quicktabs_tabs quicktabs-style-'. $vars['tabset']['#options']['style'] .'">';
+  foreach ($vars['tabset']['tablinks'] as $i => $tab) {
+    if (is_array($tab)) {
+      $active = $i == $vars['tabset']['#options']['active'] ? ' class="active"' : '';
+      $output .= '<li'. $active .'>'. drupal_render($tab) .'</li>';
+    }
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+/**
+ * Theme function to output quicktabs.
+ *
+ * @ingroup themeable
+ */
+function theme_qt_accordion($variables) {
+  $element = $variables['element'];
+  $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
+  foreach ($element['divs'] as $div) {
+    $output .= drupal_render($div);
+  }
+
+  $output .= '</div>';
+  return $output;
+}

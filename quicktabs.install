@@ -71,6 +71,12 @@ function quicktabs_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'style' => array(
+        'description' => 'The tab style.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array('machine_name'),
   );
@@ -79,65 +85,64 @@ function quicktabs_schema() {
 
 
 /**
- * Update to Drupal 7
+ * Update to 7.x-3.x
  */
 function quicktabs_update_7300() {
 
-  // If upgrading from 6.x-2.x, we will need to convert all QT instances to the
-  // new schema. 6.x-3.x will already be converted.
-  if (db_field_exists('quicktabs', 'machine_name')) {
-    return t('No updates necessary');
-  }
-
-  // Pull all existing quicktabs, and then delete existing quicktabs. We will reinsert.
-  $result = db_query("SELECT * FROM {quicktabs}");
-  if (!db_query("DELETE FROM {quicktabs}")) {
-    throw new DrupalUpdateException(t('Could not complete the update.'));
-  }
-
-  db_drop_field('quicktabs', 'qtid');
-  $name_field = array(
-    'description' => 'The primary identifier for a qt block.',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => TRUE,
-  );
-  db_add_field('quicktabs', 'machine_name', $name_field);
-  db_add_primary_key('quicktabs', array('machine_name'));
+  if (!db_field_exists('quicktabs', 'machine_name')) {
+    // Pull all existing quicktabs, and then delete existing quicktabs. We will reinsert.
+    $result = db_query("SELECT * FROM {quicktabs}");
+    if (!db_query("DELETE FROM {quicktabs}")) {
+      throw new DrupalUpdateException(t('Could not complete the update.'));
+    }
   
+    db_drop_field('quicktabs', 'qtid');
+    $name_field = array(
+      'description' => 'The primary identifier for a qt block.',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+    );
+    db_add_field('quicktabs', 'machine_name', $name_field);
+    db_add_primary_key('quicktabs', array('machine_name'));
+  
+    $output = $used = array();
+    foreach ($result as $qt) {
+      $row = (array)$qt;
+      // Generate a machine-readable string
+      $qt_name = strtolower(preg_replace('/[^a-zA-Z0-9_]+/', '_', $row['title']));
+      $i = 0;
+      while (in_array($i == 0 ? $qt_name : "{$qt_name}_{$i}", $used)) {
+        $i++;
+      }
+      $row['machine_name'] = $used[] = $i == 0 ? $qt_name : "{$qt_name}_{$i}";
+      unset($row['qtid']);
+      unset($row['style']);
+      $row['renderer'] = 'tabs';
+      $placeholders = implode(', ', array_keys($row));
+      $values = array();
+      // Ugh - really?? Somebody tell me there's a better way to do this :-/
+      foreach ($row as $name => $value) {
+        $values[':' . $name] = $value;
+      }
+      $tokens = implode(', ', array_keys($values));
+      db_query("INSERT INTO {quicktabs} ($placeholders) VALUES($tokens)", $values);
+  
+      $output[] = "Converted quicktab {$row['machine_name']}.";
+    }
+  }
+
+  // Add the renderer field
   $renderer_field = array(
     'description' => 'The rendering mechanism.',
     'type' => 'varchar',
     'length' => 255,
     'not null' => TRUE,
+    'default' => 'quicktabs',
   );
-  db_drop_field('quicktabs', 'style');
   db_add_field('quicktabs', 'renderer', $renderer_field);
+  $output[] = "Added the renderer field";
 
-  $output = $used = array();
-  foreach ($result as $qt) {
-    $row = (array)$qt;
-    // Generate a machine-readable string
-    $qt_name = strtolower(preg_replace('/[^a-zA-Z0-9_]+/', '_', $row['title']));
-    $i = 0;
-    while (in_array($i == 0 ? $qt_name : "{$qt_name}_{$i}", $used)) {
-      $i++;
-    }
-    $row['machine_name'] = $used[] = $i == 0 ? $qt_name : "{$qt_name}_{$i}";
-    unset($row['qtid']);
-    unset($row['style']);
-    $row['renderer'] = 'tabs';
-    $placeholders = implode(', ', array_keys($row));
-    $values = array();
-    // Ugh - really?? Somebody tell me there's a better way to do this :-/
-    foreach ($row as $name => $value) {
-      $values[':' . $name] = $value;
-    }
-    $tokens = implode(', ', array_keys($values));
-    db_query("INSERT INTO {quicktabs} ($placeholders) VALUES($tokens)", $values);
-
-    $output[] = "Converted quicktab {$row['machine_name']}.";
-  }
-
+  
   return implode('<br />', $output);
 }
