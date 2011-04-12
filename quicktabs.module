@@ -151,14 +151,44 @@ function quicktabs_block_view($delta = '') {
   return $block;
 }
 
+/**
+ * Constructs a Quicktabs instance.
+ *
+ * This function can be called by other modules to programmatically build a
+ * quicktabs instance.
+ *
+ * @param name. The machine name of the Quicktabs instance to build - if a name
+ *  is passed that does not correspond to an existing instance, then it is taken
+ *  to be a completely custom instance and is built from only the custom tabs
+ *  that are passed in.
+ *
+ * @param overrides. Options that will override the options of the Quicktabs
+ *  instance from the database, or if no existing instance is being used, these
+ *  will override the default options. Possible keys are 'style', 'hide_empty_tabs',
+ *  ajax', 'default_tab', 'renderer', 'title'.
+ *
+ * @param custom_tabs. An array representing custom tab contents, which will be
+ *  appended to the Quicktabs instance from the database, or if no existing instance
+ *  is being used, the custom tabs will be the entire contents. An example custom_tabs
+ *  array would be array(array('title' => 'custom', 'contents' => array('#markup' =>
+ *  t('Some markup'), 'weight' => 5));
+ *
+ * @return $block_arr. This will be an array that can be returned as block content
+ *  from hook_block_view (see quicktabs_block_view()) but can also just be added to
+ *  the page array during hook_page_alter, or output anywhere else where it's sure to
+ *  get passed through drupal_render().
+ */
 function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = array()) {
-  $default_options = array('style' => 'nostyle', 'hide_empty_tabs' => 0, 'ajax' => 0, 'default_tab' => 0);
+  $default_options = array('title' => '<none>', 'style' => 'nostyle', 'hide_empty_tabs' => 0, 'ajax' => 0, 'default_tab' => 0);
   if ($info = (array)quicktabs_load($name)) {
     $options = array_merge($default_options, $info, $overrides);
     $contents = $info['tabs'];
     unset($options['tabs'], $options['machine_name']);
   }
   elseif (!empty($custom_tabs)) {
+    // We'll be creating a custom Quicktabs instance. Make sure we're using an
+    // alphanumeric name.
+    $name = preg_replace('/[^[a-zA-Z]_]/', '_', $name);
     $options = array_merge($default_options, $overrides);
     $contents = array();
   }
@@ -267,7 +297,7 @@ function quicktabs_ajax($type) {
  * Implements hook_quicktabs_renderers().
  */
 function quicktabs_quicktabs_renderers() {
-  return array('accordion', 'tabs');
+  return array('quicktabs', 'accordion', 'ui_tabs');
 }
 
 /**
