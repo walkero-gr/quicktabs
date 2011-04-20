@@ -565,7 +565,6 @@ function quicktabs_block_delete_submit($form, &$form_state) {
  */
 function quicktabs_export_form($form, &$form_state, $quicktab) {
   ctools_include('export');
-  dsm($quicktab);
   // Generate export code
   $code = '$items = array();' ."\n";
   $code .= ctools_export_object('quicktabs', $quicktab, '');

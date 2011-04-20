@@ -40,6 +40,7 @@ function quicktabs_schema() {
       'hide_empty_tabs' => array(
         'description' => 'Whether this tabset hides empty tabs.',
         'type' => 'int',
+        'size' => 'tiny',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
@@ -48,7 +49,6 @@ function quicktabs_schema() {
         'description' => 'Default tab.',
         'type' => 'int',
         'unsigned' => TRUE,
-        'size' => 'tiny',
         'not null' => TRUE,
         'default' => 0,
       ),
