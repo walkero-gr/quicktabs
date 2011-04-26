@@ -215,7 +215,7 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   $qt = $qf->getQuickie($name, $contents, $renderer, $options);
 
   $block_arr = array('content' => $qt->render());
-  $block_arr['subject'] = isset($info['title']) ? $info['title'] : $name;
+  $block_arr['subject'] = isset($options['title']) ? $options['title'] : $name;
   return $block_arr;
 }
 
