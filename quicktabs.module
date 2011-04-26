@@ -407,7 +407,7 @@ function theme_qt_quicktabs($variables) {
  */
 function theme_qt_quicktabs_tabset($vars) {
 
-  $output = '<ul class="quicktabs_tabs quicktabs-style-'. $vars['tabset']['#options']['style'] .'">';
+  $output = '<ul class="quicktabs-tabs quicktabs-style-'. $vars['tabset']['#options']['style'] .'">';
   foreach ($vars['tabset']['tablinks'] as $i => $tab) {
     if (is_array($tab)) {
       $active = $i == $vars['tabset']['#options']['active'] ? ' class="active"' : '';

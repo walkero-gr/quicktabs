@@ -241,7 +241,7 @@ class QuickUiTabs extends Quickie {
           ),
           'js' => array(
             array(
-              'data' => "jQuery(function() { jQuery('.quicktabs_wrapper').tabs({selected: $active_tab})})",
+              'data' => "jQuery(function() { jQuery('.quicktabs-wrapper').tabs({selected: $active_tab})})",
               'type' => 'inline',
             )
           ),
@@ -253,7 +253,7 @@ class QuickUiTabs extends Quickie {
           '#theme' => 'qt_ui_tabs',
           '#options' => array('attributes' => array(
             'id' => 'quicktabs-' . $qt_name,
-            'class' => 'quicktabs_wrapper',
+            'class' => 'quicktabs-wrapper',
           )),
           'tabs' => array('#theme' => 'qt_ui_tabs_tabset', '#options' => array('active' => $active_tab), 'tablinks' => $tabs),
         ),
@@ -348,12 +348,12 @@ class QuickQuicktabs extends Quickie {
           '#theme' => 'qt_quicktabs',
           '#options' => array('attributes' => array(
             'id' => 'quicktabs-' . $qt_name,
-            'class' => 'quicktabs_wrapper quicktabs-style-' . drupal_strtolower($style),
+            'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_strtolower($style),
           )),
           'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_strtolower($style)), 'tablinks' => $tabs),
           // The main content area, each quicktab container needs a unique id.
           'container' => array(
-            '#prefix' => '<div id="quicktabs_container_' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_strtolower($style) .'">',
+            '#prefix' => '<div id="quicktabs-container-' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_strtolower($style) .'">',
             '#suffix' => '</div>',
           ),
         ),
@@ -367,8 +367,8 @@ class QuickQuicktabs extends Quickie {
       if ($this->options['ajax']) {
         $tab = $this->contents[$active_tab];
         $attribs = array(
-          'id' => 'quicktabs_tabpage_'. $qt_name . '_'. $active_tab,
-          'class' => array('quicktabs_tabpage'),
+          'id' => 'quicktabs-tabpage-'. $qt_name . '-'. $active_tab,
+          'class' => array('quicktabs-tabpage'),
         );
         $qt_ra['content']['container']['active'] = array(
           '#prefix' => '<div '. drupal_attributes($attribs) .'>',
@@ -381,8 +381,8 @@ class QuickQuicktabs extends Quickie {
         $qt_ra['content']['container']['divs'] = array();
         foreach ($this->contents as $key => $tab) {
           $attribs = array(
-            'id' => 'quicktabs_tabpage_'. $qt_name . '_'. $key,
-            'class' => array('quicktabs_tabpage', ($active_tab == $key ? '' : 'quicktabs-hide')),
+            'id' => 'quicktabs-tabpage-'. $qt_name . '-'. $key,
+            'class' => array('quicktabs-tabpage', ($active_tab == $key ? '' : 'quicktabs-hide')),
           );
           $qt_ra['content']['container']['divs'][] = array(
             '#prefix' => '<div '. drupal_attributes($attribs) .'>',
@@ -438,10 +438,10 @@ class QuickQuicktabs extends Quickie {
   
     $class = array();
     if ($ajax) {
-      $class[] = 'qt_ajax_tab';
+      $class[] = 'qt-ajax-tab';
     }
     else {
-      $class[] = 'qt_tab';
+      $class[] = 'qt-tab';
     }
   
     $link_options = array(
@@ -494,7 +494,7 @@ class QuickAccordion extends Quickie {
         '#theme' => 'quick_accordion',
         '#options' => array('attributes' => array(
           'id' => 'quickie-' . $qt_name,
-          'class' => 'quickie_wrapper',
+          'class' => 'quickie-wrapper',
         )),
       ),
     );

@@ -4,7 +4,7 @@ Drupal.settings.views = Drupal.settings.views || {'ajax_path': '/views/ajax'};
 Drupal.behaviors.quicktabs = {
   attach: function (context, settings) {
     $.extend(true, Drupal.settings, settings);
-    $('.quicktabs_wrapper:not(.quicktabs-processed)', context).addClass('quicktabs-processed').each(function(){
+    $('.quicktabs-wrapper:not(.quicktabs-processed)', context).addClass('quicktabs-processed').each(function(){
       Drupal.quicktabs.prepare(this);
     });
   }
@@ -16,17 +16,17 @@ Drupal.quicktabs = Drupal.quicktabs || {};
 Drupal.quicktabs.prepare = function(el) {
   // el.id format: "quicktabs-$name"
   var name = el.id.substring(el.id.indexOf('-') +1);
-  var $ul = $(el).find('ul.quicktabs_tabs:first');
+  var $ul = $(el).find('ul.quicktabs-tabs:first');
   $ul.find('li a').each(function(){this.name = name}).each(Drupal.quicktabs.initialiseLink);
 
   // Search for the active tab.
-  //var $active_tab = $(el).children('.quicktabs_tabs').find('li.active a');
-  //if ($active_tab.hasClass('qt_tab') || $active_tab.hasClass('qt_ajax_tab')) {
+  //var $active_tab = $(el).children('.quicktabs-tabs').find('li.active a');
+  //if ($active_tab.hasClass('qt-tab') || $active_tab.hasClass('qt-ajax-tab')) {
   //  $active_tab.trigger('click');
   //}
   //else {
   //  // Click on the first tab.
-  //  $(el).children('.quicktabs_tabs').find('li.first a').trigger('click');
+  //  $(el).children('.quicktabs-tabs').find('li.first a').trigger('click');
   //}
 }
 
@@ -37,7 +37,7 @@ Drupal.quicktabs.initialiseLink = function(index, element, tab) {
   if (!tab) {
     tab = new Drupal.quicktabs.tab(element);
   }
-  if (tab.tabpage.hasClass('quicktabs_tabpage') || tab.tabObj.type != 'view') {
+  if (tab.tabpage.hasClass('quicktabs-tabpage') || tab.tabObj.type != 'view') {
     $(element).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);
   }
   else {
@@ -56,11 +56,11 @@ Drupal.quicktabs.clickHandler = function(event) {
   tab.container.children().addClass('quicktabs-hide');
 
   // Show the active tabpage.
-  if (tab.tabpage.hasClass('quicktabs_tabpage')) {
+  if (tab.tabpage.hasClass('quicktabs-tabpage')) {
     tab.tabpage.removeClass('quicktabs-hide');
   }
   else {
-    if ($(this).hasClass('qt_ajax_tab')) {
+    if ($(this).hasClass('qt-ajax-tab')) {
       // construct the ajax path to retrieve the content, depending on type
       var qtAjaxPath = Drupal.settings.basePath + 'quicktabs/ajax/' + tab.tabObj.type + '/';
       switch (tab.tabObj.type) {
@@ -106,8 +106,8 @@ Drupal.quicktabs.tab = function (el) {
     }
     i++;
   }
-  this.tabpage_id = 'quicktabs_tabpage_' + this.name + '_' + this.tabKey;
-  this.container = $('#quicktabs_container_' + this.name);
+  this.tabpage_id = 'quicktabs-tabpage-' + this.name + '-' + this.tabKey;
+  this.container = $('#quicktabs-container-' + this.name);
   this.tabpage = this.container.find('#' + this.tabpage_id);
   // The 'this' variable will not persist inside of the options object.
   var tab = this;
@@ -202,7 +202,7 @@ Drupal.quicktabs.ajaxView = function(tab, element) {
 
 // theme function for ajax response
 Drupal.theme.prototype.quicktabsResponse = function(tab, new_content) {
-  var newDiv = tab.tabObj.type == 'view' ? '<div id="' + tab.tabpage_id + '" class="quicktabs_tabpage"><div class="view-dom-id-' + tab.dom_id + '"></div></div>' : '<div id="' + tab.tabpage_id + '" class="quicktabs_tabpage">' + new_content + '</div>';
+  var newDiv = tab.tabObj.type == 'view' ? '<div id="' + tab.tabpage_id + '" class="quicktabs-tabpage"><div class="view-dom-id-' + tab.dom_id + '"></div></div>' : '<div id="' + tab.tabpage_id + '" class="quicktabs-tabpage">' + new_content + '</div>';
   return newDiv;
 };
 })(jQuery);
