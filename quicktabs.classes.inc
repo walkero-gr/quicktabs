@@ -491,7 +491,7 @@ class QuickAccordion extends Quickie {
         ),
       ),
       'content' => array(
-        '#theme' => 'quick_accordion',
+        '#theme' => 'qt_accordion',
         '#options' => array('attributes' => array(
           'id' => 'quickie-' . $qt_name,
           'class' => 'quickie-wrapper',
