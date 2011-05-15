@@ -290,9 +290,10 @@ function quicktabs_ajax($type) {
       $tabpage['machine_name'] = $args[0];
       break;
   }
-
+  
   $output = Quickie::render_content_item($tabpage);
-  drupal_json_output(array('status' => 0, 'data' => drupal_render($output)));
+  $data = !empty($output) ? drupal_render($output) : '';
+  drupal_json_output(array('status' => 0, 'data' => $data));
 }
 
 /**

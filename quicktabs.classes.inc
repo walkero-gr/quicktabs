@@ -164,7 +164,7 @@ abstract class Quickie {
   }
   
   static function build_content_block($item, $hide_empty = FALSE) {
-    $output = '';
+    $output = array();
     if (isset($item['bid'])) {
       if (module_exists('block')) {
         $pos = strpos($item['bid'], '_delta_');
@@ -174,13 +174,14 @@ abstract class Quickie {
         $block = block_load($module, $delta);
         $block->region = 'quicktabs_tabpage';
   
-        $block_arr = _block_render_blocks(array($block));
-        if ($item['hide_title']) {
-          $block_arr["{$block->module}_{$block->delta}"]->subject = FALSE;
-        }
-        if (!empty($block_arr["{$block->module}_{$block->delta}"]->content)) {
-          $build = _block_get_renderable_array($block_arr);
-          $output = $build;
+        if ($block_arr = _block_render_blocks(array($block))) {
+          if ($item['hide_title']) {
+            $block_arr["{$block->module}_{$block->delta}"]->subject = FALSE;
+          }
+          if (!empty($block_arr["{$block->module}_{$block->delta}"]->content)) {
+            $build = _block_get_renderable_array($block_arr);
+            $output = $build;
+          }
         }
       }
       elseif (!$hide_empty) {
