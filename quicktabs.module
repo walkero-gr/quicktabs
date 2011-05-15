@@ -427,6 +427,7 @@ function theme_qt_quicktabs_tabset($vars) {
  * @ingroup themeable
  */
 function theme_qt_accordion($variables) {
+  print 'ohai';
   $element = $variables['element'];
   $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
   foreach ($element['divs'] as $div) {
