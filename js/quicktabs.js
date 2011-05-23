@@ -1,94 +1,66 @@
 (function ($) {
 Drupal.settings.views = Drupal.settings.views || {'ajax_path': '/views/ajax'};
 
+Drupal.quicktabs = Drupal.quicktabs || {};
+
+Drupal.quicktabs.getQTName = function (el) {
+  return el.id.substring(el.id.indexOf('-') +1);
+}
+
 Drupal.behaviors.quicktabs = {
   attach: function (context, settings) {
     $.extend(true, Drupal.settings, settings);
     $('.quicktabs-wrapper:not(.quicktabs-processed)', context).addClass('quicktabs-processed').each(function(){
       Drupal.quicktabs.prepare(this);
     });
+    if ($.fn.accordion) {
+      $('.quick-accordion').each(function(){
+        var qtKey = 'qt_' + Drupal.quicktabs.getQTName(this);
+        var active_tab = parseInt(Drupal.settings.quicktabs[qtKey].active_tab);
+        $(this).accordion({active: active_tab});
+      });
+    }
   }
 }
 
-Drupal.quicktabs = Drupal.quicktabs || {};
+
 
 // setting up the inital behaviours
 Drupal.quicktabs.prepare = function(el) {
   // el.id format: "quicktabs-$name"
-  var name = el.id.substring(el.id.indexOf('-') +1);
+  var name = Drupal.quicktabs.getQTName(el);
   var $ul = $(el).find('ul.quicktabs-tabs:first');
   $ul.find('li a').each(function(){this.name = name}).each(Drupal.quicktabs.initialiseLink);
-
-  // Search for the active tab.
-  //var $active_tab = $(el).children('.quicktabs-tabs').find('li.active a');
-  //if ($active_tab.hasClass('qt-tab') || $active_tab.hasClass('qt-ajax-tab')) {
-  //  $active_tab.trigger('click');
-  //}
-  //else {
-  //  // Click on the first tab.
-  //  $(el).children('.quicktabs-tabs').find('li.first a').trigger('click');
-  //}
 }
 
-Drupal.quicktabs.initialiseLink = function(index, element, tab) {
+Drupal.quicktabs.initialiseLink = function(index, element) {
   if (!element.myTabIndex) {
     element.myTabIndex = index;
   }
-  if (!tab) {
-    tab = new Drupal.quicktabs.tab(element);
+  var tab = new Drupal.quicktabs.tab(element);
+  var parent_li = $(element).parents('li').get(0);
+  if ($(parent_li).hasClass('active')) {
+    $(element).addClass('quicktabs-loaded');
   }
-  if (tab.tabpage.hasClass('quicktabs-tabpage') || tab.tabObj.type != 'view') {
-    $(element).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);
-  }
-  else {
-    Drupal.quicktabs.ajaxView(tab, element);
-  }
+
+  $(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
 }
 
 Drupal.quicktabs.clickHandler = function(event) {
   var tab = event.data.tab;
-
+  var element = this;
   // Set clicked tab to active.
   $(this).parents('li').siblings().removeClass('active');
   $(this).parents('li').addClass('active');
 
   // Hide all tabpages.
   tab.container.children().addClass('quicktabs-hide');
-
-  // Show the active tabpage.
-  if (tab.tabpage.hasClass('quicktabs-tabpage')) {
-    tab.tabpage.removeClass('quicktabs-hide');
+  
+  if (!tab.tabpage.hasClass("quicktabs-tabpage")) {
+    tab = new Drupal.quicktabs.tab(element);
   }
-  else {
-    if ($(this).hasClass('qt-ajax-tab')) {
-      // construct the ajax path to retrieve the content, depending on type
-      var qtAjaxPath = Drupal.settings.basePath + 'quicktabs/ajax/' + tab.tabObj.type + '/';
-      switch (tab.tabObj.type) {
-        case 'node':
-          qtAjaxPath +=  tab.tabObj.nid + '/' + tab.tabObj.teaser + '/' + tab.tabObj.hide_title;
-          break;
-        case 'block':
-          qtAjaxPath +=  tab.tabObj.bid + '/' + tab.tabObj.hide_title;
-          break;
-        case 'qtabs':
-          qtAjaxPath +=  tab.tabObj.machine_name;
-          break;
-      }
 
-      $.ajax({
-        url: qtAjaxPath,
-        type: 'GET',
-        data: null,
-        beforeSend: function (xmlhttprequest) {
-          var $progress = $('<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>');
-          $(tab.element).after($progress);
-        },
-        success: tab.options.success,
-        complete: tab.options.complete,
-        dataType: 'json'
-      });
-    }
-  }
+  tab.tabpage.removeClass('quicktabs-hide');
   return false;
 }
 
@@ -109,100 +81,59 @@ Drupal.quicktabs.tab = function (el) {
   this.tabpage_id = 'quicktabs-tabpage-' + this.name + '-' + this.tabKey;
   this.container = $('#quicktabs-container-' + this.name);
   this.tabpage = this.container.find('#' + this.tabpage_id);
-  // The 'this' variable will not persist inside of the options object.
-  var tab = this;
-  this.options = {
-    success: function(response) {
-      return tab.success(response);
-    },
-    complete: function(response) {
-      return tab.complete();
-    }
-  }
 }
 
-// ajax callback for non-views tabs
-Drupal.quicktabs.tab.prototype.success = function(response) {
-  this.container.append(Drupal.theme('quicktabsResponse', this, response.data));
-  this.tabpage = this.container.find('#' + this.tabpage_id);
-  Drupal.attachBehaviors(this.container, response.settings);
-}
-
-
-Drupal.quicktabs.tab.prototype.complete = function() {
-  $(this.element).parent().find('.ajax-progress').remove();
-}
-
-Drupal.quicktabs.view_dom_id = 0; // keeps track of ids to use for ajax-loaded views
-
-Drupal.quicktabs.ajaxView = function(tab, element) {
+if (Drupal.ajax) {
+  /**
+   * Handle an event that triggers an AJAX response.
+   *
+   * When an event that triggers an AJAX response happens, this method will
+   * perform the actual AJAX call. It is bound to the event using
+   * bind() in the constructor, and it uses the options specified on the
+   * ajax object.
+   */
+  Drupal.ajax.prototype.eventResponse = function (element, event) {
+    // Create a synonym for this to reduce code confusion.
+    var ajax = this;
   
-  var ajax_path = Drupal.settings.views.ajax_path;
-   //If there are multiple views this might've ended up showing up multiple times.
-  if (ajax_path.constructor.toString().indexOf("Array") != -1) {
-    ajax_path = ajax_path[0];
-  }
-  var args;
-  if (tab.tabObj.args != '') {
-    args = tab.tabObj.args.join('/');
-  } else {
-    args = '';
-  }
-  var dom_id = 0;
-  if (Drupal.quicktabs.view_dom_id > 0) {
-    dom_id = Drupal.quicktabs.view_dom_id;
-  }
-  else {
-    $('div.view').each(function(){
-      var classList = $(this).attr('class').split(/\s+/);
-      $.each(classList, function(index, item){
-        if (item.match(/^view\-dom-\id\-\d+/)) {
-          var this_dom_id = item.split(/\-/)[3];
-          if (this_dom_id > dom_id) {
-            dom_id = this_dom_id;
+    // Do not perform another ajax command if one is already in progress.
+    if (ajax.ajaxing) {
+      return false;
+    }
+  
+    try {
+      if (ajax.form) {
+        // If setClick is set, we must set this to ensure that the button's
+        // value is passed.
+        if (ajax.setClick) {
+          // Mark the clicked button. 'form.clk' is a special variable for
+          // ajaxSubmit that tells the system which element got clicked to
+          // trigger the submit. Without it there would be no 'op' or
+          // equivalent.
+          element.form.clk = element;
+        }
+  
+        ajax.form.ajaxSubmit(ajax.options);
+      }
+      else {
+        if (!$(element).hasClass('quicktabs-loaded')) {
+          ajax.beforeSerialize(ajax.element, ajax.options);
+          $.ajax(ajax.options);
+          if ($(element).hasClass('qt-ajax-tab')) {
+            $(element).addClass('quicktabs-loaded');
           }
         }
-      });
-    });
-  }
-
-  dom_id++;
-  Drupal.quicktabs.view_dom_id = dom_id;
-
-  var viewData = {
-    'view_name': tab.tabObj.vid,
-    'view_display_id': tab.tabObj.display,
-    'view_args': args,
-    'view_dom_id': dom_id
-  }
-  tab.dom_id = dom_id;
-  var element_settings = {};
-  element_settings.url = ajax_path;
-  element_settings.event = 'click';
-  element_settings.progress = { 'type': 'throbber' };
-  element_settings.submit = viewData;
-  
-  var ajax = new Drupal.ajax(false, element, element_settings);
-  // Override HTTP method type and the beforeSerialize and success methods.
-  ajax.options.type = 'GET';
-  ajax.beforeSerialize = function(element_settings, options) { return; };
-  ajax.old_success = ajax.success;
-  ajax.success = function(response, status) {
-    // Set clicked tab to active.
-    $(element).parents('li').siblings().removeClass('active');
-    $(element).parents('li').addClass('active');
-    tab.container.children().addClass('quicktabs-hide');
-    tab.container.append(Drupal.theme('quicktabsResponse', tab, null));
-    tab.tabpage = tab.container.find('#' + tab.tabpage_id);
-    $(element).unbind();
-    this.old_success(response, status);
-    Drupal.quicktabs.initialiseLink(element.myTabIndex, element, tab);
-  }
+      }
+    }
+    catch (e) {
+      // Unset the ajax.ajaxing flag here because it won't be unset during
+      // the complete response.
+      ajax.ajaxing = false;
+      alert("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
+    }
+    return false;
+  };
 }
 
-// theme function for ajax response
-Drupal.theme.prototype.quicktabsResponse = function(tab, new_content) {
-  var newDiv = tab.tabObj.type == 'view' ? '<div id="' + tab.tabpage_id + '" class="quicktabs-tabpage"><div class="view-dom-id-' + tab.dom_id + '"></div></div>' : '<div id="' + tab.tabpage_id + '" class="quicktabs-tabpage">' + new_content + '</div>';
-  return newDiv;
-};
+
 })(jQuery);

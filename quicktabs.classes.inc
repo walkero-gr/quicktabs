@@ -122,7 +122,7 @@ abstract class Quickie {
   }
   
   static function build_content_qtabs($item, $hide_empty = FALSE) {
-    $output = '';
+    $output = array();
     if (isset($item['machine_name'])) {
       if ($quicktabs = quicktabs_load($item['machine_name'])) {
         $contents = $quicktabs->tabs;
@@ -130,7 +130,7 @@ abstract class Quickie {
         unset($quicktabs->tabs, $quicktabs->machine_name);
         $options = (array) $quicktabs;
         $qf = new QuickieFactory();
-        $qt = $qf->getQuickie($name, $contents, 'tabs', $options);
+        $qt = $qf->getQuickie($name, $contents, $quicktabs->renderer, $options);
         $output = $qt->render();
       }
     }
@@ -359,7 +359,7 @@ class QuickQuicktabs extends Quickie {
           ),
         ),
       );
-    
+      $javascript = drupal_add_js();
       if (!isset($javascript['setting'][1]['quicktabs']) || !array_key_exists('qt_' . $qt_name, $javascript['setting'][1]['quicktabs'])) {
         $quicktabs_array = array_merge(array('name' => $qt_name, 'tabs' => $tab_settings), $this->options);
         $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
@@ -410,7 +410,6 @@ class QuickQuicktabs extends Quickie {
       return NULL;
     }
   
-  
     foreach ($this->contents as $i => $tab) {
       $tablink = array(
         '#type' => 'link',
@@ -418,6 +417,19 @@ class QuickQuicktabs extends Quickie {
         '#href' =>  $_GET['q'],
         '#options' => $this->construct_link_options($i),
       );
+      if ($this->options['ajax']) {
+        $type = $tab['type'];
+        $type_ids = array('block' => 'bid', 'node' => 'nid', 'view' => 'vid', 'qtabs' => 'machine_name');
+        $ajax_href = 'quicktabs/ajax/'. $this->name .'/'. $i . '/'. $type .'/'. $tab[$type_ids[$type]] .'/';
+        switch ($type) {
+          case 'view':
+            $ajax_href .=  $tab['display'] .'/'. $tab['args'];
+            break;
+        }
+        $tablink['#ajax'] = array(
+          'path' => $ajax_href,
+        );
+      }
       $tabs[] = $tablink;
     }
   
@@ -485,20 +497,22 @@ class QuickAccordion extends Quickie {
           array('system', 'ui.accordion'),
         ),
         'js' => array(
-          array(
-            'data' => "jQuery(function() { jQuery('#quickie-$qt_name').accordion({active: $active_tab})})",
-            'type' => 'inline',
-          )
+          array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
         ),
       ),
       'content' => array(
         '#theme' => 'qt_accordion',
         '#options' => array('attributes' => array(
           'id' => 'quickie-' . $qt_name,
-          'class' => 'quickie-wrapper',
+          'class' => array('quick-accordion','quickie-wrapper'),
         )),
       ),
     );
+    $javascript = drupal_add_js();
+    if (!isset($javascript['setting'][1]['quicktabs']) || !array_key_exists('qt_' . $qt_name, $javascript['setting'][1]['quicktabs'])) {
+      $quicktabs_array = array('name' => $qt_name, 'active_tab' => $active_tab);
+      $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
+    }
     // Render all tab content.
     $qt_ra['content']['divs'] = array();
     foreach ($this->contents as $key => $item) {

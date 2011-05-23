@@ -270,30 +270,54 @@ function quicktabs_load_multiple($names = array()) {
 
 /**
  * Ajax callback for tab content.
+ *
+ * @param name The machine name of the quicktabs instance.
+ *
+ * @param index The tab index we're returning content for.
+ *
+ * @param type The type of content we're rendering.
+ *
+ * @return a json-formatted ajax commands array.
  */
-function quicktabs_ajax($type) {
+function quicktabs_ajax($name, $index, $type) {
 
   $args = func_get_args();
-  $type = array_shift($args);
+  $variable_args = array_slice($args, 3);
 
   $tabpage = array(
     'type' => $type,
   );
   switch ($type) {
     case 'node':
-      list($tabpage['nid'], $tabpage['teaser'], $tabpage['hide_title']) = $args;
+      list($tabpage['nid'], $tabpage['teaser'], $tabpage['hide_title']) = $variable_args;
       break;
     case 'block':
-      list($tabpage['bid'], $tabpage['hide_title']) = $args;
+      list($tabpage['bid'], $tabpage['hide_title']) = $variable_args;
       break;
     case 'qtabs':
-      $tabpage['machine_name'] = $args[0];
+      $tabpage['machine_name'] = $variable_args[0];
       break;
+    case 'view':
+      list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $_REQUEST['view_args']) = $variable_args;
+      module_load_include('inc', 'views', 'includes/ajax');
+      $view = views_ajax();
+      foreach ($view['#commands'] as $command) {
+        if ($command['command'] == 'insert') {
+          $data = trim($command['data']);
+          break;
+        }
+      }
+  }
+  if (!isset($data)) {
+    $output = Quickie::render_content_item($tabpage);
+    $data = !empty($output) ? drupal_render($output) : '';
   }
   
-  $output = Quickie::render_content_item($tabpage);
-  $data = !empty($output) ? drupal_render($output) : '';
-  drupal_json_output(array('status' => 0, 'data' => $data));
+  $commands = array();
+  $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
+  $commands[] = ajax_command_append('#quicktabs-container-'. $name, '<div id="' . $tabpage_id .'" class="quicktabs-tabpage">'. $data .'</div>');
+  $page = array('#type' => 'ajax', '#commands' => $commands);
+  ajax_deliver($page);
 }
 
 /**
@@ -427,7 +451,6 @@ function theme_qt_quicktabs_tabset($vars) {
  * @ingroup themeable
  */
 function theme_qt_accordion($variables) {
-  print 'ohai';
   $element = $variables['element'];
   $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
   foreach ($element['divs'] as $div) {
