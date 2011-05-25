@@ -5,7 +5,7 @@
   display: block;
 }
 
-ul.quicktabs_tabs.quicktabs-style-navlist {
+ul.quicktabs-tabs.quicktabs-style-navlist {
   float: left;
   padding: 4px 0;
   margin: 0;
@@ -13,12 +13,12 @@ ul.quicktabs_tabs.quicktabs-style-navlist {
   z-index: 2;
   width: 20%;
 }
-ul.quicktabs_tabs.quicktabs-style-navlist li {
+ul.quicktabs-tabs.quicktabs-style-navlist li {
   display: block;
   margin-right: -1px;
   padding: 0;
 }
-ul.quicktabs_tabs.quicktabs-style-navlist li a {
+ul.quicktabs-tabs.quicktabs-style-navlist li a {
   display: block;
   color: #404040;
   text-align: right;
@@ -28,12 +28,12 @@ ul.quicktabs_tabs.quicktabs-style-navlist li a {
   height: 23px;
   font-weight: normal;
 }
-ul.quicktabs_tabs.quicktabs-style-navlist li.active {
+ul.quicktabs-tabs.quicktabs-style-navlist li.active {
   background: #F0F8FC;
   border-top: 1px solid #BFD0FF;
   border-bottom: 1px solid #BFD0FF;
 }
-ul.quicktabs_tabs.quicktabs-style-navlist li.active a {
+ul.quicktabs-tabs.quicktabs-style-navlist li.active a {
   color: #007734;
   font-weight: bold;
 }

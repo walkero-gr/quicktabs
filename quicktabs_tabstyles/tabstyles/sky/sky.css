@@ -12,13 +12,13 @@
   background: #fff;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky {
+ul.quicktabs-tabs.quicktabs-style-sky {
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li {
+ul.quicktabs-tabs.quicktabs-style-sky li {
   float: left;
   font-weight: normal;
   list-style: none;
@@ -28,12 +28,12 @@ ul.quicktabs_tabs.quicktabs-style-sky li {
   padding: 0;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li.active {
+ul.quicktabs-tabs.quicktabs-style-sky li.active {
   margin: -0.2em 0 0 0;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li a,
-ul.quicktabs_tabs.quicktabs-style-sky li a:visited {
+ul.quicktabs-tabs.quicktabs-style-sky li a,
+ul.quicktabs-tabs.quicktabs-style-sky li a:visited {
   float: left;
   display: block;
   height: 2.65em;
@@ -49,16 +49,16 @@ ul.quicktabs_tabs.quicktabs-style-sky li a:visited {
   position: relative;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li a:hover,
-ul.quicktabs_tabs.quicktabs-style-sky li.active a:hover {
+ul.quicktabs-tabs.quicktabs-style-sky li a:hover,
+ul.quicktabs-tabs.quicktabs-style-sky li.active a:hover {
   text-decoration: none;
   border-color: #B3B3B3;
   background: #B3B3B3 url('images/bg-shade-medium.png') repeat-x bottom left;
   color: #fff;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li.active a,
-ul.quicktabs_tabs.quicktabs-style-sky li.active a:visited {
+ul.quicktabs-tabs.quicktabs-style-sky li.active a,
+ul.quicktabs-tabs.quicktabs-style-sky li.active a:visited {
   height: 3.05em;
   min-height: 3.35em;
   line-height: 3.35em;
@@ -72,16 +72,16 @@ ul.quicktabs_tabs.quicktabs-style-sky li.active a:visited {
   top: -0.025em;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li:first-child a {
+ul.quicktabs-tabs.quicktabs-style-sky li:first-child a {
   border-left: solid 1px #eee;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li.active a {
+ul.quicktabs-tabs.quicktabs-style-sky li.active a {
   border-left: solid 1px #777;
 }
 
-ul.quicktabs_tabs.quicktabs-style-sky li a:focus,
-ul.quicktabs_tabs.quicktabs-style-sky li a:active {
+ul.quicktabs-tabs.quicktabs-style-sky li a:focus,
+ul.quicktabs-tabs.quicktabs-style-sky li a:active {
   outline: none;
   
 }
