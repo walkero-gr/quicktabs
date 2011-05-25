@@ -2,6 +2,6 @@
 developer documentation
 - Fix up the admin form so that the tabstyle dropdown only shows if quicktabs
 has been selected as the renderer
-- Get views arguments working properly
 - Add the Quicktabs views style plugin
+- Check that the QuickViewContent class's constructor is ok with ajax views.
 - A whole bunch more I'm sure!

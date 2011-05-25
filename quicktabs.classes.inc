@@ -660,7 +660,8 @@ class QuickViewContent extends QuickContent {
   }
   
   public function ajax_render_item($args) {
-    list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $_REQUEST['view_args']) = $args;
+    list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $view_args) = $args;
+    $_REQUEST['view_args'] = urldecode($view_args);
     module_load_include('inc', 'views', 'includes/ajax');
     $view = views_ajax();
     foreach ($view['#commands'] as $command) {
@@ -672,7 +673,8 @@ class QuickViewContent extends QuickContent {
   
   public function get_ajax_path($name, $index) {
     $path = parent::get_ajax_path($name, $index);
-    $path .= '/'. $this->item['vid'] . '/'. $this->item['display'] .'/'. $this->item['args'];
+    $args = urlencode(implode('/', $this->item['args']));
+    $path .= '/'. $this->item['vid'] . '/'. $this->item['display'] .'/'. $args;
     return $path;
   }
 }
