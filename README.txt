@@ -6,9 +6,10 @@ Description:
 -------------------------------------------------------------------------------
 
   This module provides a form for admins to create a block of tabbed content by
-selecting first the desired number of tabs and then selecting either an existing
-view or an existing block as the content of each tab. Arguments can be passed if
-a view is selected.
+selecting first the desired number of tabs and then selecting a view, a node, a
+block or an existing Quicktabs instance as the content of each tab. Arguments can
+be passed if a view is selected. The module can be extended to display other types
+of content.
 
 
 
@@ -25,13 +26,16 @@ Installation & Use:
 8.  You will be taken to the admin/build/block screen where you should see yor new tabbed block listed.
 9.  Configure & enable it as required.
 
+Developer Documentation:
+-------------------------------------------------------------------------------
+To come, I promise!
+
 
 
 
 Author:
 -------------------------------------------------------------------------------
 
-Katherine Bailey <katherine@raincitystudios.com>
+Katherine Bailey <katherine@katbailey.net>
 http://drupal.org/user/172987
-Tab Styles provided by Hubert Florin and Steve Krueger
 
