@@ -204,15 +204,28 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   $contents = array_merge($custom_tabs, $contents);
   $weight = array();
   foreach ($contents as $key => $item) {
+    // Load the plugin responsible for rendering this item
+    $plugin = ctools_get_plugins('quicktabs', 'contents', $item['type']);
+    $class = $plugin['handler']['class'];
+    ctools_plugin_load_class('quicktabs', 'contents', $item['type'], $class);
+  
+    // Add item's weight to our weights array so that we can then sort by weight.
     $weight[$key] = $item['weight'];
+    
+    // Make sure we're not going to try to load the same QuickSet instance
+    // inside itself.
     if ($item['type'] == 'qtabs' && $item['machine_name'] == $name) {
       unset($contents[$key]);
       unset($weight[$key]);
     }
   }
   array_multisort($weight, SORT_ASC, $contents);
-  
-  if ($qt = QuickieFactory::getQuickie($name, $contents, $renderer, $options)) {
+
+  $plugin = ctools_get_plugins('quicktabs', 'renderers', $renderer);
+  $class = $plugin['handler']['class'];
+  ctools_plugin_load_class('quicktabs', 'renderers', $renderer, $class);
+
+  if ($qt = QuickSetFactory::getQuickSet($name, $contents, $class, $options)) {
     $block_arr = array('content' => $qt->render());
     $block_arr['subject'] = isset($options['title']) ? $options['title'] : $name;
     return $block_arr;
@@ -283,7 +296,7 @@ function quicktabs_ajax($name, $index, $type) {
   $args = func_get_args();
   $variable_args = array_slice($args, 3);
 
-  $data = Quickie::ajax_render_content_item($type, $variable_args);
+  $data = QuickSet::ajax_render_content_item($type, $variable_args);
   
   $commands = array();
   $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
@@ -296,8 +309,87 @@ function quicktabs_ajax($name, $index, $type) {
  * Implements hook_quicktabs_renderers().
  */
 function quicktabs_quicktabs_renderers() {
-  return array('quicktabs', 'accordion', 'ui_tabs');
+  $info = array();
+  $path = drupal_get_path('module', 'quicktabs') . '/plugins';
+  $info['quicktabs'] = array(
+    'file' => 'QuickQuicktabs.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickQuicktabs',
+    ),
+  );
+  $info['ui_tabs'] = array(
+    'file' => 'QuickUiTabs.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickUitabs',
+    ),
+  );
+  $info['accordion'] = array(
+    'file' => 'QuickAccordion.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickAccordion',
+    ),
+  );
+  return $info;
 }
+
+/**
+ * Implements hook_quicktabs_contents().
+ */
+function quicktabs_quicktabs_contents() {
+  $info = array();
+  $path = drupal_get_path('module', 'quicktabs') . '/plugins';
+  $info['block'] = array(
+    'file' => 'QuickBlockContent.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickBlockContent',
+    ),
+  );
+  $info['view'] = array(
+    'file' => 'QuickViewContent.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickViewContent',
+    ),
+  );
+  $info['node'] = array(
+    'file' => 'QuickNodeContent.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickNodeContent',
+    ),
+  );
+  $info['qtabs'] = array(
+    'file' => 'QuickQtabsContent.inc',
+    'path' => $path,
+    'handler' => array(
+      'class' => 'QuickQtabsContent',
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_ctools_plugin_plugins().
+ */
+function quicktabs_ctools_plugin_type() {
+  return array(
+    'renderers' => array(
+      'cache' => TRUE,
+      'use hooks' => TRUE,
+      'classes' => array('handler'),
+    ),
+    'contents' => array(
+      'cache' => TRUE,
+      'use hooks' => TRUE,
+      'classes' => array('handler'),
+    )
+  );
+}
+
 
 /**
  * Theme function to display the access denied tab.

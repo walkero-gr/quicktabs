@@ -185,6 +185,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
       '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + $style_options,
       '#default_value' => isset($quicktab->style) ? $quicktab->style : 'default',
       '#description' => t('Choose the quicktab style.'),
+      '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
       '#weight' => -8,
     );
   }
@@ -194,12 +195,11 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
       '#value' => 'nostyle',
     );
   }
-
-
-  $renderers = module_invoke_all('quicktabs_renderers');
+  
+  $renderers = ctools_get_plugins('quicktabs', 'renderers');
   $renderer_options = array();
-  foreach ($renderers as $renderer) {
-    $renderer_options[$renderer] = $renderer;
+  foreach ($renderers as $name => $info) {
+    $renderer_options[$name] = $name;
   }
   ksort($renderer_options);
   $form['renderer'] = array(
@@ -290,87 +290,97 @@ function _quicktabs_form(array $tab) {
     '#default_value' => isset($tab['title']) ? $tab['title'] : '',
   );
 
+  ctools_include('plugins');
+  $contents = ctools_get_plugins('quicktabs', 'contents');
+  foreach ($contents as $name => $info) {
+    $tabtypes[$name] = $name;
+    $plugin = ctools_get_plugins('quicktabs', 'contents', $name);
+    $class = $plugin['handler']['class'];
+    ctools_plugin_load_class('quicktabs', 'contents', $name, $class);
+    $content_builder = new $class($tab);
+    $form[$name] = $content_builder->options_form($delta);
+  }
   // Block settings
-  if (module_exists('block')) {
-    $tabtypes['block'] = t('Block');
-    $form['block']['bid'] = array(
-      '#type' => 'select',
-      '#options' => quicktabs_get_blocks(),
-      '#default_value' => isset($tab['bid']) ? $tab['bid'] : '',
-      '#title' => t('Select a block'),
-    );
-    $form['block']['hide_title'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Hide the title of this block'),
-      '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
-    );
-  }
-
-  // View settings
-  if (module_exists('views')) {
-    $views = quicktabs_get_views();
-    $views_keys = array_keys($views);
-    $tabtypes['view'] = t('View!translate_as_list_of_content', array('!translate_as_list_of_content' => ''));
-
-    $selected_view = (isset($tab['vid']) ? $tab['vid'] : (isset($views_keys[0]) ? $views_keys[0] : ''));
-    $form['view']['vid'] = array(
-      '#type' => 'select',
-      '#options' => $views,
-      '#default_value' => $selected_view,
-      '#title' => t('Select a view'),
-      '#ajax' => array(
-        'callback' => '_quicktabs_replace_view_displays_callback',
-      ),
-    );
-    $form['view']['display'] = array(
-      '#type' => 'select',
-      '#title' => 'display',
-      '#options' => _quicktabs_get_views_displays($selected_view),
-      '#default_value' => isset($tab['display']) ? $tab['display'] : '',
-      '#prefix' => '<div id="view-display-dropdown-' . $delta . '">',
-      '#suffix' => '</div>'
-    );
-    $form['view']['args'] = array(
-      '#type' => 'textfield',
-      '#title' => 'arguments',
-      '#size' => '40',
-      '#required' => FALSE,
-      '#default_value' => isset($tab['args']) ? $tab['args'] : '',
-      '#description' => t('Additional arguments to send to the view as if they were part of the URL in the form of arg1/arg2/arg3. You may use %0, %1, ..., %N to grab arguments from the URL.'),
-    );
-  }
-
-  // Node settings
-  $tabtypes['node'] = t('Node');
-  $form['node']['nid'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Node'),
-    '#description' => t('The node ID of the node.'),
-    '#maxlength' => 10,
-    '#size' => 20,
-    '#default_value' => isset($tab['nid']) ? $tab['nid'] : '',
-  );
-  $form['node']['teaser'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Teaser view'),
-    '#default_value' => isset($tab['teaser']) ? $tab['teaser'] : 0,
-  );
-  $form['node']['hide_title'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Hide the title of this node'),
-    '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
-  );
-
-  // QTab settings
-  $tabtypes['qtabs'] = t('QTab');
-  $form['qtabs']['machine_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Quicktab'),
-    '#description' => t('The quicktab machine name.'),
-    '#maxlength' => 10,
-    '#size' => 20,
-    '#default_value' => isset($tab['machine_name']) ? $tab['machine_name'] : '',
-  );
+  //if (module_exists('block')) {
+  //  $tabtypes['block'] = t('Block');
+  //  $form['block']['bid'] = array(
+  //    '#type' => 'select',
+  //    '#options' => quicktabs_get_blocks(),
+  //    '#default_value' => isset($tab['bid']) ? $tab['bid'] : '',
+  //    '#title' => t('Select a block'),
+  //  );
+  //  $form['block']['hide_title'] = array(
+  //    '#type' => 'checkbox',
+  //    '#title' => t('Hide the title of this block'),
+  //    '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
+  //  );
+  //}
+  //
+  //// View settings
+  //if (module_exists('views')) {
+  //  $views = quicktabs_get_views();
+  //  $views_keys = array_keys($views);
+  //  $tabtypes['view'] = t('View!translate_as_list_of_content', array('!translate_as_list_of_content' => ''));
+  //
+  //  $selected_view = (isset($tab['vid']) ? $tab['vid'] : (isset($views_keys[0]) ? $views_keys[0] : ''));
+  //  $form['view']['vid'] = array(
+  //    '#type' => 'select',
+  //    '#options' => $views,
+  //    '#default_value' => $selected_view,
+  //    '#title' => t('Select a view'),
+  //    '#ajax' => array(
+  //      'callback' => '_quicktabs_replace_view_displays_callback',
+  //    ),
+  //  );
+  //  $form['view']['display'] = array(
+  //    '#type' => 'select',
+  //    '#title' => 'display',
+  //    '#options' => _quicktabs_get_views_displays($selected_view),
+  //    '#default_value' => isset($tab['display']) ? $tab['display'] : '',
+  //    '#prefix' => '<div id="view-display-dropdown-' . $delta . '">',
+  //    '#suffix' => '</div>'
+  //  );
+  //  $form['view']['args'] = array(
+  //    '#type' => 'textfield',
+  //    '#title' => 'arguments',
+  //    '#size' => '40',
+  //    '#required' => FALSE,
+  //    '#default_value' => isset($tab['args']) ? $tab['args'] : '',
+  //    '#description' => t('Additional arguments to send to the view as if they were part of the URL in the form of arg1/arg2/arg3. You may use %0, %1, ..., %N to grab arguments from the URL.'),
+  //  );
+  //}
+  //
+  //// Node settings
+  //$tabtypes['node'] = t('Node');
+  //$form['node']['nid'] = array(
+  //  '#type' => 'textfield',
+  //  '#title' => t('Node'),
+  //  '#description' => t('The node ID of the node.'),
+  //  '#maxlength' => 10,
+  //  '#size' => 20,
+  //  '#default_value' => isset($tab['nid']) ? $tab['nid'] : '',
+  //);
+  //$form['node']['teaser'] = array(
+  //  '#type' => 'checkbox',
+  //  '#title' => t('Teaser view'),
+  //  '#default_value' => isset($tab['teaser']) ? $tab['teaser'] : 0,
+  //);
+  //$form['node']['hide_title'] = array(
+  //  '#type' => 'checkbox',
+  //  '#title' => t('Hide the title of this node'),
+  //  '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
+  //);
+  //
+  //// QTab settings
+  //$tabtypes['qtabs'] = t('QTab');
+  //$form['qtabs']['machine_name'] = array(
+  //  '#type' => 'textfield',
+  //  '#title' => t('Quicktab'),
+  //  '#description' => t('The quicktab machine name.'),
+  //  '#maxlength' => 10,
+  //  '#size' => 20,
+  //  '#default_value' => isset($tab['machine_name']) ? $tab['machine_name'] : '',
+  //);
 
   $form['type'] = array(
     '#type' => 'radios',
