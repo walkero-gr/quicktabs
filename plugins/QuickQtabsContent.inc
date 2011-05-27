@@ -27,10 +27,7 @@ class QuickQtabsContent extends QuickContent {
         $name = $quicktabs->machine_name;
         unset($quicktabs->tabs, $quicktabs->machine_name);
         $options = (array) $quicktabs;
-        $plugin = ctools_get_plugins('quicktabs', 'renderers', $quicktabs->renderer);
-        $class = $plugin['handler']['class'];
-        ctools_plugin_load_class('quicktabs', 'renderers', $quicktabs->renderer, $class);
-        if ($qt = QuickSetFactory::getQuickSet($name, $contents, $class, $options)) {
+        if ($qt = QuickSet::factory($name, $contents, $quicktabs->renderer, $options)) {
           $output = $qt->render();
         }
       }

@@ -11,13 +11,6 @@ class QuickQuicktabs extends QuickSet {
   
   public function render() {
 
-    try {
-      $this->prepare_contents();
-    }
-    catch (InvalidQuickSetException $e) {
-      return array('#markup' => $e->getMessage());
-    }
-
     // All we really want to do here is copy $this->contents into a tab_settings array
     // to pass into our js, but without the "contents" element because that would cause
     // mad recursion; however, due to this php weirdness http://bugs.php.net/bug.php?id=20993,

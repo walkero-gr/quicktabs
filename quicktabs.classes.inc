@@ -5,34 +5,6 @@
  ***************************************************************************/
 
 /**
- * Factory class for creating QuickSet instances.
- */
-class QuickSetFactory {
-  
-  /**
-   * Factory method that creates a QuickSet instance based on the configuration
-   * that is passed to it. See the quicktabs_build_quicktabs() function in
-   * quicktabs.module to see how it is used.
-   */
-  public static function getQuickSet($name, $contents, $class, $options) {
-    // The exact class we return an instance of depends on the renderer parameter
-    // that was passed in. Examples are "accordion", "quicktabs" and "ui_tabs".
-
-    // The next three lines just convert underscore-based names to camel case, e.g.
-    // ui_tabs becomes UiTabs.
-    //$renderer = ucfirst($renderer);
-    //$func = create_function('$c', 'return strtoupper($c[1]);');
-    //$type = preg_replace_callback('/_([a-z])/', $func, $renderer);
-    
-    //$class_name = "Quick$type";
-    if (class_exists($class)) {
-      return new $class($name, $contents, $options);
-    }
-    return NULL;
-  }
-}
-
-/**
  * The abstract base class that all Quicktabs renderer classes extend.
  * Provides core functionality that can be used by all renderers.
  */
@@ -63,6 +35,40 @@ abstract class QuickSet {
   protected $options;
 
   /**
+   * Instantiate, populate and return a QuickSet object.
+   *
+   * @param $renderer
+   *
+   * @param $name
+   *   The unique name (machine name) of the QuickSet instance.
+   *
+   * @param $contents
+   *   The array of content items, each one itself an array with at least a 'type'
+   *   key, a title key, and the other info necessary for that type.
+   *
+   * @param $renderer
+   *   The plugin key for this renderer plugin
+   *
+   * @param $options
+   *   An array of options determining the behaviour of this QuickSet instance.
+   *  
+   */
+  public static function factory($name, $contents, $renderer, $options) {
+    ctools_include('plugins');
+    if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler')) {
+      $qs = new $class($name, $contents, $options);
+      try {
+        $qs->prepare_contents();
+        return $qs;
+      }
+      catch (InvalidQuickSetException $e) {
+        watchdog('Quicktabs', $e->getMessage());
+        return NULL;
+      }
+    }
+  }
+  
+  /**
    * Constructor
    */
   public function __construct($name, $contents, $options) {
@@ -90,7 +96,7 @@ abstract class QuickSet {
       foreach ($this->contents as $key => $tab) {
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
-        $builder = QuickContentFactory::getContentBuilder($tab['type'], $tab);
+        $builder = QuickContent::factory($tab['type'], $tab);
         $this->contents[$key]['builder'] = $builder;
         $contents = isset($tab['contents']) ? $tab['contents'] : $builder->render_item(TRUE);
         if (empty($contents)) {
@@ -112,7 +118,7 @@ abstract class QuickSet {
         $type = $tab['type'];
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
-        $builder = QuickContentFactory::getContentBuilder($type, $tab);
+        $builder = QuickContent::factory($type, $tab);
         $this->contents[$key]['builder'] = $builder;
         if ($type == 'custom') {
           if (!$custom) {
@@ -133,7 +139,7 @@ abstract class QuickSet {
       foreach ($this->contents as $key => &$tab) {
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
-        $builder = QuickContentFactory::getContentBuilder($tab['type'], $tab);
+        $builder = QuickContent::factory($tab['type'], $tab);
         $this->contents[$key]['builder'] = $builder;
         if ($tab['type'] == 'custom') {
           // Custom tabs already contain their rendered contents. We just need
@@ -161,32 +167,16 @@ abstract class QuickSet {
    * quicktabs_ajax() callback in quicktabs.module.
    */
   static function ajax_render_content_item($type, $args) {
-    $class_name = "Quick{$type}Content";
-    if (class_exists($class_name)) {
-      $content_builder = new $class_name(array('type' => $type));
-      return $content_builder->ajax_render_item($args);
+    if ($builder = QuickContent::factory($type, array('type' => $type))) {
+      return $builder->ajax_render_item($args);
     }
+    return '';
   }
 }
 
 /***************************************************************************
  * Classes related to individual tab content.
  ***************************************************************************/
-
-/**
- * Factory class for creating objects that implement the QuickContentBuilder
- * interface.
- */
-class QuickContentFactory {
-  
-  public static function getContentBuilder($type, $item) {
-    $type = ucfirst($type);
-    $class_name = "Quick{$type}Content";
-    if (class_exists($class_name)) {
-      return new $class_name($item);
-    }
-  }
-}
 
 /**
  * Interface that any class responsible for rendering individual tab content
@@ -248,7 +238,35 @@ abstract class QuickContent implements QuickContentBuilder {
    * @var array
    */
   protected $item;
-  
+
+  /**
+   * Instantiate, populate and return a QuickSet object.
+   *
+   * @param $renderer
+   *
+   * @param $name
+   *   The unique name (machine name) of the QuickSet instance.
+   *
+   * @param $contents
+   *   The array of content items, each one itself an array with at least a 'type'
+   *   key, a title key, and the other info necessary for that type.
+   *
+   * @param $renderer
+   *   The plugin key for this renderer plugin
+   *
+   * @param $options
+   *   An array of options determining the behaviour of this QuickSet instance.
+   *  
+   */
+  public static function factory($name, $item) {
+    ctools_include('plugins');
+    if ($class = ctools_plugin_load_class('quicktabs', 'contents', $name, 'handler')) {
+      $content = new $class($item);
+      return $content;
+    }
+    return NULL;
+  }
+
   /**
    * Constructor
    */

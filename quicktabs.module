@@ -223,9 +223,9 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
 
   $plugin = ctools_get_plugins('quicktabs', 'renderers', $renderer);
   $class = $plugin['handler']['class'];
-  ctools_plugin_load_class('quicktabs', 'renderers', $renderer, $class);
+  //ctools_plugin_load_class('quicktabs', 'renderers', $renderer, $class);
 
-  if ($qt = QuickSetFactory::getQuickSet($name, $contents, $class, $options)) {
+  if ($qt = quick_set_factory($name, $contents, $renderer, $options)) {
     $block_arr = array('content' => $qt->render());
     $block_arr['subject'] = isset($options['title']) ? $options['title'] : $name;
     return $block_arr;
@@ -373,7 +373,7 @@ function quicktabs_quicktabs_contents() {
 }
 
 /**
- * Implements hook_ctools_plugin_plugins().
+ * Implements hook_ctools_plugin_type().
  */
 function quicktabs_ctools_plugin_type() {
   return array(
@@ -390,6 +390,20 @@ function quicktabs_ctools_plugin_type() {
   );
 }
 
+/**
+ * Returns an object that implements the QuickContentBuilder interface.
+ */
+function quick_content_factory($name, $item) {
+  return QuickContent::factory($name, $item);
+}
+
+
+/**
+ * Returns an object that implements the QuickContentBuilder interface.
+ */
+function quick_set_factory($name, $contents, $renderer, $options) {
+  return QuickSet::factory($name, $contents, $renderer, $options);
+}
 
 /**
  * Theme function to display the access denied tab.

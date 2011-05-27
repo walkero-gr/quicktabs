@@ -12,13 +12,6 @@ class QuickUiTabs extends QuickSet {
     // This display style doesn't currently support the ajax option
     $this->options['ajax'] = 0;
 
-    try {
-      $this->prepare_contents();
-    }
-    catch (InvalidQuickSetException $e) {
-      return array('#markup' => $e->getMessage());
-    }
-
     $active_tab = $this->get_active_tab();
     if ($tabs = $this->build_tablinks($active_tab)) {
       $qt_name = $this->name;

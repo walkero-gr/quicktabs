@@ -100,7 +100,7 @@ class QuickViewContent extends QuickContent {
   
   public function get_ajax_path($name, $index) {
     $path = parent::get_ajax_path($name, $index);
-    $args = urlencode(implode('/', $this->item['args']));
+    $args = urlencode(implode('/', $this->item['actual_args']));
     $path .= '/'. $this->item['vid'] . '/'. $this->item['display'] .'/'. $args;
     return $path;
   }

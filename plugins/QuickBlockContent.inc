@@ -5,6 +5,7 @@
  * content.
  */
 class QuickBlockContent extends QuickContent {
+
   public function options_form($delta) {
     $tab = $this->item;
     $form = array();
@@ -20,8 +21,8 @@ class QuickBlockContent extends QuickContent {
       '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
     );
     return $form;
-
   }
+
   public function render_item($hide_empty = FALSE) {
     $item = $this->item;
     $output = array();
@@ -60,7 +61,7 @@ class QuickBlockContent extends QuickContent {
   }
   public function get_ajax_path($name, $index) {
     $path = parent::get_ajax_path($name, $index);
-    $path .= '/'. $this->item['bid'];
+    $path .= '/'. $this->item['bid'] . '/'. $this->item['hide_title'];
     return $path;
   }
 }
