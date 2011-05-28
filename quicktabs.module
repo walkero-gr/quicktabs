@@ -7,7 +7,7 @@
 function quicktabs_help($path, $arg) {
   switch ($path) {
     case 'admin/help#quicktabs':
-      $output = '<p>' . t('The Quick Tabs module allows you to create blocks of tabbed content. Clicking on the tabs makes the corresponding content display instantly (it uses jQuery). The content for each tabbed section can be either a node, view, block or another quicktab. It is an ideal way to do something like the Most Popular / Most Emailed stories tabs you see on many news websites. You may create an unlimited number of additional quicktabs, each of which will automatically have an associated block.') . '</p>';
+      $output = '<p>' . t('The Quick Tabs module allows you to create blocks of tabbed content. Clicking on the tabs makes the corresponding content display instantly (it uses jQuery). The content for each tabbed section can be a node, view, block or another quicktab. It is an ideal way to do something like the Most Popular / Most Emailed stories tabs you see on many news websites. You may create an unlimited number of additional quicktabs, each of which will automatically have an associated block.') . '</p>';
       $output .= '<p>' . t('The <a href="@quicktabs">quicktabs page</a> displays all quicktabs currently available on your site. Create new quicktabs using the <a href="@add-quicktab">add quicktab page</a> (the block containing a new quicktab must also be enabled on the <a href="@blocks">blocks administration page</a>).', array('@quicktabs' => url('admin/structure/quicktabs'), '@add-quicktab' => url('admin/structure/quicktab/add'), '@blocks' => url('admin/structure/block'))) . '</p>';
       return $output;
   }
@@ -205,9 +205,7 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   $weight = array();
   foreach ($contents as $key => $item) {
     // Load the plugin responsible for rendering this item
-    $plugin = ctools_get_plugins('quicktabs', 'contents', $item['type']);
-    $class = $plugin['handler']['class'];
-    ctools_plugin_load_class('quicktabs', 'contents', $item['type'], $class);
+    ctools_plugin_load_class('quicktabs', 'contents', $item['type'], 'handler');
   
     // Add item's weight to our weights array so that we can then sort by weight.
     $weight[$key] = $item['weight'];
@@ -221,10 +219,6 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   }
   array_multisort($weight, SORT_ASC, $contents);
 
-  $plugin = ctools_get_plugins('quicktabs', 'renderers', $renderer);
-  $class = $plugin['handler']['class'];
-  //ctools_plugin_load_class('quicktabs', 'renderers', $renderer, $class);
-
   if ($qt = quick_set_factory($name, $contents, $renderer, $options)) {
     $block_arr = array('content' => $qt->render());
     $block_arr['subject'] = isset($options['title']) ? $options['title'] : $name;
@@ -233,6 +227,30 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   return array();
 }
 
+/**
+ * Ajax callback for tab content.
+ *
+ * @param name The machine name of the quicktabs instance.
+ *
+ * @param index The tab index we're returning content for.
+ *
+ * @param type The type of content we're rendering.
+ *
+ * @return a json-formatted ajax commands array.
+ */
+function quicktabs_ajax($name, $index, $type) {
+
+  $args = func_get_args();
+  $variable_args = array_slice($args, 3);
+
+  $data = QuickSet::ajax_render_content_item($type, $variable_args);
+  
+  $commands = array();
+  $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
+  $commands[] = ajax_command_append('#quicktabs-container-'. $name, '<div id="' . $tabpage_id .'" class="quicktabs-tabpage">'. $data .'</div>');
+  $page = array('#type' => 'ajax', '#commands' => $commands);
+  ajax_deliver($page);
+}
 
 /**
  * Unpack a quicktabs row array from the database.
@@ -281,28 +299,23 @@ function quicktabs_load_multiple($names = array()) {
 }
 
 /**
- * Ajax callback for tab content.
- *
- * @param name The machine name of the quicktabs instance.
- *
- * @param index The tab index we're returning content for.
- *
- * @param type The type of content we're rendering.
- *
- * @return a json-formatted ajax commands array.
+ * Implements hook_ctools_plugin_type().
  */
-function quicktabs_ajax($name, $index, $type) {
-
-  $args = func_get_args();
-  $variable_args = array_slice($args, 3);
-
-  $data = QuickSet::ajax_render_content_item($type, $variable_args);
-  
-  $commands = array();
-  $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
-  $commands[] = ajax_command_append('#quicktabs-container-'. $name, '<div id="' . $tabpage_id .'" class="quicktabs-tabpage">'. $data .'</div>');
-  $page = array('#type' => 'ajax', '#commands' => $commands);
-  ajax_deliver($page);
+function quicktabs_ctools_plugin_type() {
+  return array(
+    // Renderer plugins control the display of sets of items, e.g. as tabs.
+    'renderers' => array(
+      'cache' => TRUE,
+      'use hooks' => TRUE,
+      'classes' => array('handler'),
+    ),
+    // Content plugins control the display of individual items.
+    'contents' => array(
+      'cache' => TRUE,
+      'use hooks' => TRUE,
+      'classes' => array('handler'),
+    )
+  );
 }
 
 /**
@@ -373,21 +386,10 @@ function quicktabs_quicktabs_contents() {
 }
 
 /**
- * Implements hook_ctools_plugin_type().
+ * Returns a QuickSet object.
  */
-function quicktabs_ctools_plugin_type() {
-  return array(
-    'renderers' => array(
-      'cache' => TRUE,
-      'use hooks' => TRUE,
-      'classes' => array('handler'),
-    ),
-    'contents' => array(
-      'cache' => TRUE,
-      'use hooks' => TRUE,
-      'classes' => array('handler'),
-    )
-  );
+function quick_set_factory($name, $contents, $renderer, $options) {
+  return QuickSet::factory($name, $contents, $renderer, $options);
 }
 
 /**
@@ -395,14 +397,6 @@ function quicktabs_ctools_plugin_type() {
  */
 function quick_content_factory($name, $item) {
   return QuickContent::factory($name, $item);
-}
-
-
-/**
- * Returns an object that implements the QuickContentBuilder interface.
- */
-function quick_set_factory($name, $contents, $renderer, $options) {
-  return QuickSet::factory($name, $contents, $renderer, $options);
 }
 
 /**
@@ -418,7 +412,7 @@ function theme_quicktabs_tab_access_denied($variables) {
 
 
 /**
- * Fetch the necessary CSS files for the tab styles.
+ * Fetch the necessary CSS files for the tab style.
  */
 function quicktabs_get_css($style) {
   if ($style == 'default') {
@@ -451,7 +445,24 @@ function _quicktabs_get_style_css($style = 'nostyle') {
 }
 
 /**
- * Theme function to output quicktabs.
+ * Theme function to output tablinks for jQuery UI style tabs.
+ *
+ * @ingroup themeable
+ */
+function theme_qt_ui_tabs_tabset($vars) {
+
+  $output = '<ul>';
+  foreach ($vars['tabset']['tablinks'] as $i => $tab) {
+    if (is_array($tab)) {
+      $output .= '<li>'. drupal_render($tab) .'</li>';
+    }
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+/**
+ * Theme function to output content for jQuery UI style tabs.
  *
  * @ingroup themeable
  */
@@ -473,42 +484,10 @@ function theme_qt_ui_tabs($variables) {
   return $output;
 }
 
-
-
 /**
- * @todo: Enter description here ...
- */
-function theme_qt_ui_tabs_tabset($vars) {
-
-  $output = '<ul>';
-  foreach ($vars['tabset']['tablinks'] as $i => $tab) {
-    if (is_array($tab)) {
-      $output .= '<li>'. drupal_render($tab) .'</li>';
-    }
-  }
-  $output .= '</ul>';
-  return $output;
-}
-
-
-/**
- * Theme function to output quicktabs.
+ * Theme function to output tablinks for classic Quicktabs style tabs.
  *
  * @ingroup themeable
- */
-function theme_qt_quicktabs($variables) {
-  $element = $variables['element'];
-  $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
-  $output .= drupal_render($element['tabs']);
-  
-  $output .= drupal_render($element['container']);
-
-  $output .= '</div>';
-  return $output;
-}
-
-/**
- * @todo: Enter description here ...
  */
 function theme_qt_quicktabs_tabset($vars) {
 
@@ -524,7 +503,24 @@ function theme_qt_quicktabs_tabset($vars) {
 }
 
 /**
- * Theme function to output quicktabs.
+ * Theme function to output content for classic Quicktabs style tabs.
+ *
+ * @ingroup themeable
+ */
+function theme_qt_quicktabs($variables) {
+  $element = $variables['element'];
+  $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
+  $output .= drupal_render($element['tabs']);
+  
+  $output .= drupal_render($element['container']);
+
+  $output .= '</div>';
+  return $output;
+}
+
+
+/**
+ * Theme function to output markup for the accordion style.
  *
  * @ingroup themeable
  */

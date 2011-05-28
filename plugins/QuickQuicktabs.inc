@@ -120,6 +120,7 @@ class QuickQuicktabs extends QuickSet {
         $type = $tab['type'];
         $ajax_href = $tab['builder']->get_ajax_path($this->name, $i);
         $tablink['#ajax'] = array(
+          'progress' => array('message' => '', 'type' => 'throbber'),
           'path' => $ajax_href,
         );
       }
