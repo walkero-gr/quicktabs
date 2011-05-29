@@ -3,5 +3,6 @@ description = Render content with tabs and other display styles
 core = 7.x
 files[] = quicktabs.module
 files[] = quicktabs.classes.inc
+files[] = includes/quicktabs_style_plugin.inc
 configure = admin/structure/quicktabs
 dependencies[] = "ctools"

@@ -105,7 +105,7 @@ abstract class QuickSet {
         else {
           // Since we have rendered the contents already at this point, we should
           // hold on to the rendered output so as not to have to render it again.
-          $this->contents[$key]['rendered'] = $contents;
+          $this->contents[$key]['rendered'] = is_array($contents) ? $contents : array('#markup' => $contents);
         }
       }
       $this->contents = array_merge($this->contents);
@@ -126,7 +126,7 @@ abstract class QuickSet {
             $this->options['default_tab'] = $key;
             // Custom tabs already contain their rendered contents. We just need
             // to copy them into the 'rendered' property of the tab.
-            $tab['rendered'] = $tab['contents'];
+            $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
           }
           else {
             throw new InvalidQuickSetException('The contents specified cannot be rendered via ajax.');
@@ -144,7 +144,7 @@ abstract class QuickSet {
         if ($tab['type'] == 'custom') {
           // Custom tabs already contain their rendered contents. We just need
           // to copy them into the 'rendered' property of the tab.
-          $tab['rendered'] = $tab['contents'];
+          $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
         }
       }
     }

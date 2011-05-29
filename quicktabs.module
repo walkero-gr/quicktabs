@@ -125,6 +125,10 @@ function quicktabs_theme() {
     'quicktabs_tab_access_denied' => array(
       'variables' => array('tab'),
     ),
+    'quicktabs_views_render' => array(
+      'variables' => array('view' => NULL, 'tabs' => NULL, 'name' => NULL),
+      'file' => 'quicktabs.views.inc',
+    ),
   );
 }
 
@@ -218,7 +222,6 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
     }
   }
   array_multisort($weight, SORT_ASC, $contents);
-
   if ($qt = quick_set_factory($name, $contents, $renderer, $options)) {
     $block_arr = array('content' => $qt->render());
     $block_arr['subject'] = isset($options['title']) ? $options['title'] : $name;
@@ -397,6 +400,17 @@ function quick_set_factory($name, $contents, $renderer, $options) {
  */
 function quick_content_factory($name, $item) {
   return QuickContent::factory($name, $item);
+}
+
+
+/**
+ * Implementation of hook_views_api().
+ */
+function quicktabs_views_api() {
+  return array(
+    'api' => 3,
+    //'path' => drupal_get_path('module', 'quicktabs') .'/includes',
+  );
 }
 
 /**
