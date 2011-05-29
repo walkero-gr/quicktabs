@@ -106,10 +106,13 @@ class quicktabs_style_plugin extends views_plugin_style {
         if ($this->view->field[$grouping_field]->options['label']) {
           $title = str_replace($this->view->field[$grouping_field]->options['label'] . ': ', '', $title);
         }
-
+        $contents = '';
+        foreach ($rows as $row) {
+          $contents .= '<div class="quicktabs-views-group">' . $row . '</div>';
+        }
         $tabs[] = array(
           'title' => $title,
-          'content' => $rows,
+          'contents' => array('#markup' => $contents),
         );
       }
 
@@ -119,13 +122,16 @@ class quicktabs_style_plugin extends views_plugin_style {
           $title = $this->get_field($index, $this->options['tab_title_field']);
           $tabs[] = array(
             'title' => $title,
-            'contents' => $row,
+            'contents' => array('#markup' => $row),
           );
         }
       }
     }
-    $vars = array('view' => $view, 'tabs' => $tabs, 'name' => $qt_name);
-    $output = theme('quicktabs_views_render', $vars);
+
+    $overrides = array('default_tab' => 0, 'hide_empty_tabs' => 0, 'ajax' => 0, 'style' => $view->style_options['tab_style']);
+    $quicktabs = quicktabs_build_quicktabs($qt_name, $overrides, $tabs);
+
+    $output = drupal_render($quicktabs);
 
     // If doing a live preview, add the JavaScript directly to the output.
     if (isset($view->live_preview) && $view->live_preview) {
@@ -145,13 +151,8 @@ class quicktabs_style_plugin extends views_plugin_style {
     }
 
     unset($view->row_index);
+    
     return $output;
   }
 
-  // Because we don't provide templates, but Views may complain when visiting
-  // the theme information if it can't find any. Specify the name of our theme
-  // function to keep it from causing any errors.
-  function theme_functions() {
-    return array('quicktabs_view_render');
-  }
 }

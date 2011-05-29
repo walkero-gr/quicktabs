@@ -26,19 +26,3 @@ function quicktabs_views_plugins() {
     ),
   );
 }
-
-function theme_quicktabs_views_render($variables) {
-  $tabs = $variables['tabs'];
-  $view = $variables['view'];
-  foreach ($tabs as $index => &$tab) {
-    if (is_array($tab['contents'])) {
-      foreach ($tabs[$index]['contents'] as &$content) {
-        $content = '<div class="quicktabs-views-group">' . $content . '</div>';
-      }
-    }
-    $tab['contents'] = array('#markup' => $tab['contents']);
-  }
-  $overrides = array('default_tab' => 0, 'hide_empty_tabs' => 0, 'ajax' => 0, 'style' => $view->style_options['tab_style']);
-  $quicktabs = quicktabs_build_quicktabs($variables['name'], $overrides, $tabs);
-  return drupal_render($quicktabs);
-}

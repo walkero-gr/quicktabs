@@ -125,10 +125,6 @@ function quicktabs_theme() {
     'quicktabs_tab_access_denied' => array(
       'variables' => array('tab'),
     ),
-    'quicktabs_views_render' => array(
-      'variables' => array('view' => NULL, 'tabs' => NULL, 'name' => NULL),
-      'file' => 'quicktabs.views.inc',
-    ),
   );
 }
 
