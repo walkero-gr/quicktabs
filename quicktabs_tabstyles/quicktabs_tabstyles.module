@@ -73,12 +73,12 @@ function theme_quicktabs_style_options($variables) {
   $markup = '';
 
   $tabs = array(
-    array('title' => t('One'), 'contents' => array('#markup' => t('First tab'))),
-    array('title' => t('Two'), 'contents' => array('#markup' => t('Second tab'))),
-    array('title' => t('Three'), 'contents' => array('#markup' => t('Third tab')))
+    array('title' => t('One'), 'contents' => array('#markup' => t('First tab')), 'weight' => 0),
+    array('title' => t('Two'), 'contents' => array('#markup' => t('Second tab')), 'weight' => 1),
+    array('title' => t('Three'), 'contents' => array('#markup' => t('Third tab')), 'weight' => 2)
   );
 
-  $options = array('renderer' => 'quick_tabs', 'hide_empty_tabs' => 0, 'ajax' => 0);
+  $options = array('renderer' => 'quicktabs', 'hide_empty_tabs' => 0, 'ajax' => 0);
   // Preview for each style.
   foreach (element_children($style_element) as $style) {
     $element = $style_element[$style];

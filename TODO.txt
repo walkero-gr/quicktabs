@@ -1,4 +1,0 @@
-- Write a README file that is actually relevant to this version and includes
-developer documentation
-- Add the Quicktabs views style plugin
-- A whole bunch more I'm sure!

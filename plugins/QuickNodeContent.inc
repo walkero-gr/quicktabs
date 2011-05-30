@@ -5,6 +5,7 @@
  * content.
  */
 class QuickNodeContent extends QuickContent {
+
   public function options_form($delta) {
     $tab = $this->item;
     $form = array();
@@ -28,6 +29,7 @@ class QuickNodeContent extends QuickContent {
     );
     return $form;
   }
+
   public function render_item($hide_empty = FALSE) {
     $item = $this->item;
     $output = array();
@@ -42,9 +44,9 @@ class QuickNodeContent extends QuickContent {
           }
           $output = $nstruct;
         }
-        //elseif (!$hide_empty) {
-        //  $output = theme('quicktabs_tab_access_denied', array($item));
-        //}
+        elseif (!$hide_empty) {
+          $output = array('#markup' => theme('quicktabs_tab_access_denied', array('tab' => $item)));
+        }
       }
     }
     return $output;

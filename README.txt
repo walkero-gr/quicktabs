@@ -6,30 +6,55 @@ Description:
 -------------------------------------------------------------------------------
 
   This module provides a form for admins to create a block of tabbed content by
-selecting first the desired number of tabs and then selecting a view, a node, a
-block or an existing Quicktabs instance as the content of each tab. Arguments can
-be passed if a view is selected. The module can be extended to display other types
-of content.
+selecting a view, a node, a block or an existing Quicktabs instance as the content
+of each tab.
+The module can be extended to display other types of content.
 
 
 
 Installation & Use:
 -------------------------------------------------------------------------------
 
-1.  Enable module in module list located at administer > build > modules.
-2.  Go to admin/settings/quicktabs to select a style for your tabs
-3.  Go to admin/build/quicktabs and click on the "New QT block" local task tab.
-4.  Add a title for your block and start entering information for your tabs
-5.  Use the Add another tab button to add more tabs.
-6.  Use the drag handles on the left to re-arrange tabs.
-7.  Once you have defined all the tabs, click 'Next'.
-8.  You will be taken to the admin/build/block screen where you should see yor new tabbed block listed.
-9.  Configure & enable it as required.
+1.  Enable module in module list located at administer > structure > modules.
+2.  Go to admin/structure/quicktabs and click on "Add Quicktabs Instance".
+3.  Add a title (this will be the block title) and start entering information for your tabs
+4.  Use the Add another tab button to add more tabs.
+5.  Use the drag handles on the left to re-arrange tabs.
+6.  Once you have defined all the tabs, click 'Save'.
+7.  You new block will be available at admin/structure/blocks.
+8.  Configure & enable it as required.
+9.  To add tab styles to your Quicktabs instances, enable the quicktabs_tabstyles module
+10. Edit the default style at admin/structure/quicktabs/styles
+11. Control the style of individual Quicktabs instances by editing the instance in
+question and selecting from the style dropdown.
 
-Developer Documentation:
+For Developers:
 -------------------------------------------------------------------------------
-To come, I promise!
+The basic Quicktabs functionality can be extended in several ways. The most basic is
+to use the quicktabs_build_quicktabs() function to create Quicktabs instances 
+programmatically, putting whatever you want into the Quicktabs instance. This function
+takes 3 parameters:
+$name - the name of an existing Quicktabs instance (i.e. existing in the database or
+in code), or a new name if creating an instance from scratch
+$overrides - an array of options to override the settings for the existing instance, or the
+default settings if creating an instance from scratch
+$custom_tabs - an array of tab content arrays. A very basic tab content array would be
+array('title' => 'My Custom Tab', 'contents' => 'Some text').
+One example of where this might prove useful is in a hook_page_alter implementation,
+where you could essentially put any render array that's part of the page into a
+Quicktabs instance. The contents property of a cusom tab can be a render array or
+a string of html.
 
+Another way to extend Quicktabs is to add a renderer plugin. Quicktabs comes with
+3 renderer plugins: jQuery UI Tabs, jQuery UI Accordion, and classic Quicktabs. A
+renderer plugin is a class that extends the QuickSet class and implements the render()
+method. See any of the existing renderer plugins for examples. Also see Quicktabs'
+implementation of hook_quicktabs_renderers().
+
+Lastly, Quicktabs can be extended by adding new types of entities that can be loaded
+as tab content. Quicktabs itself provides the node, block, view and qtabs tab content
+types. Your contents plugins should extend the QuickContent class. See the existing
+plugins and the hook_quicktabs_contents implementation for guidance.
 
 
 

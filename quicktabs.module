@@ -34,7 +34,7 @@ function quicktabs_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/quicktabs/add'] = array(
-    'title' => 'Add quicktab',
+    'title' => 'Add Quicktabs Instance',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('quicktabs_form', 'add'),
     'access arguments' => array('administer quicktabs'),
@@ -264,7 +264,7 @@ function _quicktabs_unpack($qt) {
 }
 
 /**
- * Load the quicktabs data.
+ * Load the quicktabs data. ("one" is a special case of "many" ;-))
  */
 function quicktabs_load($name) {
   $qts = quicktabs_load_multiple(array($name));
@@ -405,7 +405,6 @@ function quick_content_factory($name, $item) {
 function quicktabs_views_api() {
   return array(
     'api' => 3,
-    //'path' => drupal_get_path('module', 'quicktabs') .'/includes',
   );
 }
 
@@ -416,7 +415,6 @@ function quicktabs_views_api() {
  */
 function theme_quicktabs_tab_access_denied($variables) {
   $tab = $variables['tab'];
-
   return t('You are not authorized to access this content.');
 }
 

@@ -1,9 +1,5 @@
 <?php
 
-/***************************************************************************
- * Classes for rendering sets of content, e.g. as tabs
- ***************************************************************************/
-
 /**
  * The abstract base class that all Quicktabs renderer classes extend.
  * Provides core functionality that can be used by all renderers.
@@ -174,64 +170,11 @@ abstract class QuickSet {
   }
 }
 
-/***************************************************************************
- * Classes related to individual tab content.
- ***************************************************************************/
-
 /**
- * Interface that any class responsible for rendering individual tab content
- * must implement.
+ * Abstract base class for individual content items.
  */
-interface QuickContentBuilder {
-  /**
-   * Method for returning the form elements to display for this tab type on
-   * the admin form.
-   */
-  public function options_form($delta);
+abstract class QuickContent {
 
-  /**
-   * Method responsible for normal rendering of tab content.
-   *
-   * @param $hide_empty Used to decide whether, for example, an access denied
-   * response for content should be output as such or hidden.
-   *
-   * @return A render array of the tab content.
-   */
-  public function render_item($hide_emtpy);
-  
-  /**
-   * Returns an ajax path to be used on ajax-enabled links that retrieve this
-   * type of content. The ajax_render_item method (below) essentially reacts to
-   * the args of this path.
-   *
-   * @param $name The machine name of the instance.
-   *
-   * @param $index The index of the tab, i.e where it fits into the QuickSet
-   * instance.
-   */
-  public function get_ajax_path($name, $index);
-  
-  /**
-   * Method responsible for ajax rendering of tab content.
-   *
-   * @param $args An array of args that were passed to the ajax callback (based on
-   * the path returned in get_ajax_path).
-   *
-   * @return A string of rendered html.
-   */
-  public function ajax_render_item($args);
-}
-
-/**
- * Abstract base class for content builder class, implementing the QuickContentBuilder
- * inteface, providing default implementations of all its methods.
- */
-abstract class QuickContent implements QuickContentBuilder {
-  
-  public function options_form($delta) {
-    return array();
-  }
-  
   /**
    * An array containing the information that defines the tab content, e.g.
    * array('type' => 'view', 'vid' => 'myview', 'title' => 'My View').
@@ -273,22 +216,48 @@ abstract class QuickContent implements QuickContentBuilder {
   public function __construct($item) {
     $this->item = $item;
   }
-  
 
-  public function render_item($hide_empty = FALSE) {
-    return array();
-  }
+  /**
+   * Method for returning the form elements to display for this tab type on
+   * the admin form.
+   */  
+  abstract public function options_form($delta);
   
+  /**
+   * Method responsible for normal rendering of tab content.
+   *
+   * @param $hide_empty Used to decide whether, for example, an access denied
+   * response for content should be output as such or hidden.
+   *
+   * @return A render array of the tab content.
+   */
+  abstract public function render_item($hide_empty);
+
+  /**
+   * Returns an ajax path to be used on ajax-enabled links that retrieve this
+   * type of content. The ajax_render_item method (below) essentially reacts to
+   * the args of this path.
+   *
+   * @param $name The machine name of the instance.
+   *
+   * @param $index The index of the tab, i.e where it fits into the QuickSet
+   * instance.
+   */
   public function get_ajax_path($name, $index) {
     return 'quicktabs/ajax/'. $name .'/'. $index . '/'. $this->item['type'];
   }
-  public function ajax_render_item($args) {}
+  
+  /**
+   * Method responsible for ajax rendering of tab content.
+   *
+   * @param $args An array of args that were passed to the ajax callback (based on
+   * the path returned in get_ajax_path).
+   *
+   * @return A string of rendered html.
+   */
+  abstract public function ajax_render_item($args);
   
 }
-
-
-/***********************************************************************/
-
 
 
 /**

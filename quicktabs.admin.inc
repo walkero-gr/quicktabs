@@ -8,56 +8,43 @@
  * Page callback to list quicktabs in the system.
  */
 function quicktabs_list() {
-  $colspan = module_exists('ctools') ? 4 : 3;
   $header = array(
-    array('data' => t('Quicktab')),
+    array('data' => t('QuickSet')),
     array('data' => t('Storage')),
-    array('data' => t('Operations'), 'colspan' => $colspan),
+    array('data' => t('Operations'), 'colspan' => 4),
   );
   $rows = array();
 
-  foreach (quicktabs_load_multiple() as $quicktab) {
-    if (module_exists('ctools')) {
-      // Determine storage
-      switch ($quicktab->export_type) {
-        case EXPORT_IN_DATABASE | EXPORT_IN_CODE:
-          $storage = t('Overridden');
-          $delete = l(t('Revert'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/delete');
-          break;
-        case EXPORT_IN_DATABASE:
-          $storage = t('Normal');
-          $delete = l(t('Delete'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/delete');
-          break;
-        case EXPORT_IN_CODE:
-          $storage = t('Default');
-          $delete = '';
-          break;
-      }
+  foreach (quicktabs_load_multiple() as $quickset) {
+    // Determine storage
+    switch ($quickset->export_type) {
+      case EXPORT_IN_DATABASE | EXPORT_IN_CODE:
+        $storage = t('Overridden');
+        $delete = l(t('Revert'), 'admin/structure/quicktabs/manage/'. $quickset->machine_name .'/delete');
+        break;
+      case EXPORT_IN_DATABASE:
+        $storage = t('Normal');
+        $delete = l(t('Delete'), 'admin/structure/quicktabs/manage/'. $quickset->machine_name .'/delete');
+        break;
+      case EXPORT_IN_CODE:
+        $storage = t('Default');
+        $delete = '';
+        break;
+    }
 
-      $tablerow = array(
-        array('data' => $quicktab->title),
-        array('data' => $storage),
-        array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/edit')),
-        array('data' => l(t('Export'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/export')),
-        array('data' => l(t('Clone'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/clone')),
-        array('data' => $delete),
-      );
-    }
-    else {
-      $tablerow = array(
-        array('data' => $quicktab->title),
-        array('data' => t('Normal')),
-        array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/edit')),
-        array('data' => l(t('Clone'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/clone')),
-        array('data' => l(t('Delete'), 'admin/structure/quicktabs/manage/'. $quicktab->machine_name .'/delete')),
-      );
-    }
+    $tablerow = array(
+      array('data' => $quickset->title),
+      array('data' => $storage),
+      array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/'. $quickset->machine_name .'/edit')),
+      array('data' => l(t('Export'), 'admin/structure/quicktabs/manage/'. $quickset->machine_name .'/export')),
+      array('data' => l(t('Clone'), 'admin/structure/quicktabs/manage/'. $quickset->machine_name .'/clone')),
+      array('data' => $delete),
+    );
     $rows[] = $tablerow;
   }
 
-
   if (empty($rows)) {
-    $rows[] = array(array('data' => t('No quicktabs available.'), 'colspan' => $colspan + 2));
+    $rows[] = array(array('data' => t('No quicktabs instances available.'), 'colspan' => 6));
   }
 
   $build = array(
@@ -72,43 +59,43 @@ function quicktabs_list() {
 /**
  * Clone QuickTabs.
  */
-function quicktabs_clone($quicktab) {
-  unset($quicktab->machine_name);
-  $quicktab->title = '';
-  return drupal_get_form('quicktabs_form', 'clone', $quicktab);
+function quicktabs_clone($qt) {
+  unset($qt->machine_name);
+  $qt->title = '';
+  return drupal_get_form('quicktabs_form', 'clone', $qt);
 }
 
 /**
  * Build the quicktab creation and edit form.
  */
-function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
-  if (!isset($quicktab)) {
-    $quicktab = new stdClass;
+function quicktabs_form($form, $form_state, $formtype, $quickset = NULL) {
+  if (!isset($quickset)) {
+    $quickset = new stdClass;
   }
-  $form = _quicktabs_admin_main_form($form_state, $quicktab);
+  $form = _quicktabs_admin_main_form($form_state, $quickset);
 
-  if (empty($quicktab->tabs)) {
-    $quicktab->tabs = array(
+  if (empty($quickset->tabs)) {
+    $quickset->tabs = array(
       0 => array(),
       1 => array(),
     );
   }
 
   // Add or remove tabs.
-  if (isset($form_state['num_tabs']) && $form_state['num_tabs'] > count($quicktab->tabs)) {
-    $quicktab->tabs[] = array();
+  if (isset($form_state['num_tabs']) && $form_state['num_tabs'] > count($quickset->tabs)) {
+    $quickset->tabs[] = array();
   }
-  $form_state['num_tabs'] = count($quicktab->tabs);
+  $form_state['num_tabs'] = count($quickset->tabs);
 
   if (isset($form_state['to_remove'])) {
-    unset($quicktab->tabs[$form_state['to_remove']]);
+    unset($quickset->tabs[$form_state['to_remove']]);
     unset($form_state['to_remove']);
     $form_state['num_tabs']--;
   }
 
   $tab_titles = array();
   // Add current tabs to the form.
-  foreach ($quicktab->tabs as $delta => $tab) {
+  foreach ($quickset->tabs as $delta => $tab) {
     $tab['delta'] = $delta;
     $form['qt_wrapper']['tabs'][$delta] = _quicktabs_form($tab);
     if (isset($tab['title'])) {
@@ -120,7 +107,7 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
     '#type' => 'select',
     '#title' => t('Default tab'),
     '#options' => $tab_titles,
-    '#default_value' => isset($quicktab->default_tab) ? $quicktab->default_tab : 0,
+    '#default_value' => isset($quickset->default_tab) ? $quickset->default_tab : 0,
     '#access' => !empty($tab_titles),
     '#weight' => -5,
   );
@@ -131,14 +118,14 @@ function quicktabs_form($form, $form_state, $formtype, $quicktab = NULL) {
 /**
  * The main section of admin page.
  */
-function _quicktabs_admin_main_form($form_state, &$quicktab) {
+function _quicktabs_admin_main_form($form_state, &$quickset) {
   //$form['#cache'] = TRUE;
 
-  // The contents of $quicktab will either come from the db or from $form_state.
+  // The contents of $quickset will either come from the db or from $form_state.
   if (isset($form_state['values']['title'])) {
-    $quicktab = _quicktabs_convert_form_to_quicktab($form_state);
+    $quickset = _quicktabs_convert_form_to_quickset($form_state);
   }
-  if (empty($quicktab->machine_name)) {
+  if (empty($quickset->machine_name)) {
     $form['machine_name'] = array(
       '#title' => t('Machine Name'),
       '#type' => 'textfield',
@@ -151,12 +138,12 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
   else {
     $form['machine_name'] = array(
       '#type' => 'value',
-      '#value' => $quicktab->machine_name,
+      '#value' => $quickset->machine_name,
     );
     $form['machine_name_display'] = array(
       '#title' => t('Machine-readable name'),
       '#type' => 'item',
-      '#value' => "<code>{$quicktab->machine_name}</code>",
+      '#value' => "<code>{$quickset->machine_name}</code>",
       '#description' => t('The machine name will be used internally by quicktabs and will be used in the CSS ID of your quicktabs block.'),
       '#weight' => -8,
     );
@@ -166,7 +153,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
     '#title' => t('Block title'),
     '#description' => t('This will appear as the name of this block in administer >> site building >> blocks.'),
     '#type' => 'textfield',
-    '#default_value' => isset($quicktab->title) ? $quicktab->title : '',
+    '#default_value' => isset($quickset->title) ? $quickset->title : '',
     '#weight' => -10,
     '#required' => TRUE,
   );
@@ -183,7 +170,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
       '#type' => 'select',
       '#title' => t('Style'),
       '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + $style_options,
-      '#default_value' => isset($quicktab->style) ? $quicktab->style : 'default',
+      '#default_value' => isset($quickset->style) ? $quickset->style : 'default',
       '#description' => t('Choose the quicktab style.'),
       '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
       '#weight' => -8,
@@ -207,7 +194,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
     '#type' => 'select',
     '#title' => t('Renderer'),
     '#options' => $renderer_options,
-    '#default_value' => isset($quicktab->renderer) ? $quicktab->renderer : 'tabs',
+    '#default_value' => isset($quickset->renderer) ? $quickset->renderer : 'tabs',
     '#description' => t('Choose how to render the content.'),
     '#weight' => -8,
   );
@@ -219,7 +206,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
       TRUE => t('Yes') . ': ' . t('Load only the first tab on page view'),
       FALSE => t('No') . ': ' . t('Load all tabs on page view.'),
     ),
-    '#default_value' => isset($quicktab->ajax) ? $quicktab->ajax : 0,
+    '#default_value' => isset($quickset->ajax) ? $quickset->ajax : 0,
     '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p>'),
     '#weight' => -6,
   );
@@ -227,7 +214,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
   $form['hide_empty_tabs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide empty tabs'),
-    '#default_value' => isset($quicktab->hide_empty_tabs) ? $quicktab->hide_empty_tabs : 0,
+    '#default_value' => isset($quickset->hide_empty_tabs) ? $quickset->hide_empty_tabs : 0,
     '#description' => t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
     '#weight' => -4,
   );
@@ -450,17 +437,17 @@ function quicktabs_form_validate($form, &$form_state) {
  */
 function quicktabs_form_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#id'] == 'edit-submit-form') {
-    $quicktab = _quicktabs_convert_form_to_quicktab($form_state);
+    $quickset = _quicktabs_convert_form_to_quickset($form_state);
 
-    $exists = quicktabs_load($quicktab->machine_name);
+    $exists = quicktabs_load($quickset->machine_name);
     if ($exists && empty($exists->in_code_only)) {
-      $ret = drupal_write_record('quicktabs', $quicktab, 'machine_name');
+      $ret = drupal_write_record('quicktabs', $quickset, 'machine_name');
       if ($ret == SAVED_UPDATED) {
         drupal_set_message(t('The quicktab block has been updated.'));
       }
     }
     else {
-      $ret = drupal_write_record('quicktabs', $quicktab);
+      $ret = drupal_write_record('quicktabs', $quickset);
       if ($ret == SAVED_NEW) {
         drupal_set_message(t('The quicktab block has been created.'));
       }
@@ -472,10 +459,10 @@ function quicktabs_form_submit($form, &$form_state) {
 /**
  * Deletion of quicktab block.
  */
-function quicktabs_block_delete($form, $form_state, $quicktab) {
-  $form['machine_name'] = array('#type' => 'hidden', '#value' => $quicktab->machine_name);
-  $form['title'] = array('#type' => 'hidden', '#value' => $quicktab->title);
-  return confirm_form($form, t('Are you sure you want to delete the quicktab block %title?', array('%title' => $quicktab->title)), 'admin/structure/quicktabs', '', t('Delete'), t('Cancel'));
+function quicktabs_block_delete($form, $form_state, $quickset) {
+  $form['machine_name'] = array('#type' => 'hidden', '#value' => $quickset->machine_name);
+  $form['title'] = array('#type' => 'hidden', '#value' => $quickset->title);
+  return confirm_form($form, t('Are you sure you want to delete the quicktab block %title?', array('%title' => $quickset->title)), 'admin/structure/quicktabs', '', t('Delete'), t('Cancel'));
 }
 
 /**
@@ -491,12 +478,12 @@ function quicktabs_block_delete_submit($form, &$form_state) {
 /**
  * Export form for quicktabs.
  */
-function quicktabs_export_form($form, &$form_state, $quicktab) {
+function quicktabs_export_form($form, &$form_state, $quickset) {
   ctools_include('export');
   // Generate export code
   $code = '$items = array();' ."\n";
-  $code .= ctools_export_object('quicktabs', $quicktab, '');
-  $code .= '$items["'. $quicktab->machine_name .'"] = $quicktab;' ."\n";
+  $code .= ctools_export_object('quicktabs', $quickset, '');
+  $code .= '$items["'. $quickset->machine_name .'"] = $quickset;' ."\n";
   $code .= 'return $items;';
 
   // Create form
@@ -595,7 +582,7 @@ function _quicktabs_get_views_displays($view_name) {
 /**
  * Helper function to convert the data on admin form into quicktab presentation.
  */
-function _quicktabs_convert_form_to_quicktab($form_state) {
+function _quicktabs_convert_form_to_quickset($form_state) {
   $formvalues_tabs = array();
   if (!empty($form_state['values']['tabs'])) {
     foreach ($form_state['values']['tabs'] as $j => $tab) {
@@ -607,18 +594,18 @@ function _quicktabs_convert_form_to_quicktab($form_state) {
     }
     array_multisort($weight, SORT_ASC, $formvalues_tabs);
   }
-  $quicktab = new stdClass();
-  $quicktab->title = $form_state['values']['title'];
-  $quicktab->ajax = $form_state['values']['ajax'];
-  $quicktab->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
-  $quicktab->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
-  $quicktab->renderer = $form_state['values']['renderer'];
-  $quicktab->style = $form_state['values']['style'];
-  $quicktab->tabs = $formvalues_tabs;
+  $quickset = new stdClass();
+  $quickset->title = $form_state['values']['title'];
+  $quickset->ajax = $form_state['values']['ajax'];
+  $quickset->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
+  $quickset->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
+  $quickset->renderer = $form_state['values']['renderer'];
+  $quickset->style = $form_state['values']['style'];
+  $quickset->tabs = $formvalues_tabs;
 
   if (isset($form_state['values']['machine_name'])) {
-    $quicktab->machine_name = $form_state['values']['machine_name'];
+    $quickset->machine_name = $form_state['values']['machine_name'];
   }
 
-  return $quicktab;
+  return $quickset;
 }

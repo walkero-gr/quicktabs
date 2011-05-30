@@ -6,9 +6,6 @@
  */
 class QuickQuicktabs extends QuickSet {
   
-  // TODO: figure out if I actually need this static var for anything.
-  public static $type = 'quicktabs';
-  
   public function render() {
 
     // All we really want to do here is copy $this->contents into a tab_settings array
@@ -31,6 +28,7 @@ class QuickQuicktabs extends QuickSet {
     if ($tabs = $this->build_tablinks($active_tab)) {
       $qt_name = $this->name;
       $style = isset($this->options['style']) ? $this->options['style'] : 'nostyle';
+      if ($style == 'default') $style = variable_get('quicktabs_tabstyle', 'nostyle');
       $qt_ra = array(
         '#attached' => array(
           'css' => array(
@@ -58,7 +56,13 @@ class QuickQuicktabs extends QuickSet {
       );
       // Add our JS settings
       $javascript = drupal_add_js();
-      if (!isset($javascript['setting'][1]['quicktabs']) || !array_key_exists('qt_' . $qt_name, $javascript['setting'][1]['quicktabs'])) {
+      foreach ($javascript['settings']['data'] as $key => $settings) {
+        if (key($settings) == 'quicktabs') {
+          $qtkey = $key;
+          break;
+        }
+      }
+      if (!isset($qtkey) || !array_key_exists('qt_' . $qt_name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
         $quicktabs_array = array_merge(array('name' => $qt_name, 'tabs' => $tab_settings), $this->options);
         $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
       }

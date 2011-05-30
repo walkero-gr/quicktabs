@@ -5,8 +5,6 @@
  */
 class QuickAccordion extends QuickSet {
   
-  public static $type = 'accordion';
-  
   public function render() {
     
     // This display style doesn't currently support the ajax option
@@ -34,7 +32,13 @@ class QuickAccordion extends QuickSet {
       ),
     );
     $javascript = drupal_add_js();
-    if (!isset($javascript['setting'][1]['quicktabs']) || !array_key_exists('qt_' . $qt_name, $javascript['setting'][1]['quicktabs'])) {
+    foreach ($javascript['settings']['data'] as $key => $settings) {
+      if (key($settings) == 'quicktabs') {
+        $qtkey = $key;
+        break;
+      }
+    }
+    if (!isset($qtkey) || !array_key_exists('qt_' . $qt_name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
       $quicktabs_array = array('name' => $qt_name, 'active_tab' => $active_tab);
       $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
     }
