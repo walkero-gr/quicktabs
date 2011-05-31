@@ -125,62 +125,31 @@ function _quicktabs_admin_main_form($form_state, &$quickset) {
   if (isset($form_state['values']['title'])) {
     $quickset = _quicktabs_convert_form_to_quickset($form_state);
   }
-  if (empty($quickset->machine_name)) {
-    $form['machine_name'] = array(
-      '#title' => t('Machine Name'),
-      '#type' => 'textfield',
-      '#description' => t('A unique ID that will be used internally and in the CSS ID of your quicktabs block. must contain only lowercase letters, numbers, and underscores.'),
-      '#default_value' => '',
-      '#weight' => -8,
-      '#required' => TRUE,
-    );
-  }
-  else {
-    $form['machine_name'] = array(
-      '#type' => 'value',
-      '#value' => $quickset->machine_name,
-    );
-    $form['machine_name_display'] = array(
-      '#title' => t('Machine-readable name'),
-      '#type' => 'item',
-      '#value' => "<code>{$quickset->machine_name}</code>",
-      '#description' => t('The machine name will be used internally by quicktabs and will be used in the CSS ID of your quicktabs block.'),
-      '#weight' => -8,
-    );
-  }
-
+  
   $form['title'] = array(
-    '#title' => t('Block title'),
-    '#description' => t('This will appear as the name of this block in administer >> site building >> blocks.'),
+    '#title' => t('Title'),
+    '#description' => t('This will appear as the block title.'),
     '#type' => 'textfield',
     '#default_value' => isset($quickset->title) ? $quickset->title : '',
-    '#weight' => -10,
+    '#weight' => -9,
     '#required' => TRUE,
   );
   
-  $styles = module_invoke_all('quicktabs_tabstyles');
-  if (count($styles)) {
-    $style_options = array();
-    // The keys used for options must be valid html id-s.
-    foreach ($styles as $style) {
-      $style_options[$style] = $style;
-    }
-    ksort($style_options);
-    $form['style'] = array(
-      '#type' => 'select',
-      '#title' => t('Style'),
-      '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + $style_options,
-      '#default_value' => isset($quickset->style) ? $quickset->style : 'default',
-      '#description' => t('Choose the quicktab style.'),
-      '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
-      '#weight' => -8,
-    );
-  }
-  else {
-    $form['style'] = array(
-      '#type' => 'value',
-      '#value' => 'nostyle',
-    );
+  $form['machine_name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 32,
+    '#machine_name' => array(
+      'exists' => 'quicktabs_machine_name_exists',
+      'source' => array('title'),
+    ),
+    '#description' => t('A unique machine-readable name for this Quicktabs instance. It must only contain lowercase letters, numbers, and underscores. The machine name will be used internally by Quicktabs and will be used in the CSS ID of your Quicktabs block.'),
+    '#weight' => -8,
+  );
+
+  if (!empty($quickset->machine_name)) {
+    $form['machine_name']['#default_value'] = $quickset->machine_name;
+    $form['machine_name']['#disabled'] = TRUE;
+    $form['machine_name']['#value'] = $quickset->machine_name;
   }
 
   ctools_include('plugins');
@@ -196,8 +165,33 @@ function _quicktabs_admin_main_form($form_state, &$quickset) {
     '#options' => $renderer_options,
     '#default_value' => isset($quickset->renderer) ? $quickset->renderer : 'tabs',
     '#description' => t('Choose how to render the content.'),
-    '#weight' => -8,
+    '#weight' => -7,
   );
+
+  $styles = module_invoke_all('quicktabs_tabstyles');
+  if (count($styles)) {
+    $style_options = array();
+    // The keys used for options must be valid html id-s.
+    foreach ($styles as $style) {
+      $style_options[$style] = $style;
+    }
+    ksort($style_options);
+    $form['style'] = array(
+      '#type' => 'select',
+      '#title' => t('Style'),
+      '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + $style_options,
+      '#default_value' => isset($quickset->style) ? $quickset->style : 'default',
+      '#description' => t('Choose the quicktab style.'),
+      '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
+      '#weight' => -6,
+    );
+  }
+  else {
+    $form['style'] = array(
+      '#type' => 'value',
+      '#value' => 'nostyle',
+    );
+  }
 
   $form['ajax'] = array(
     '#type' => 'radios',
@@ -208,7 +202,8 @@ function _quicktabs_admin_main_form($form_state, &$quickset) {
     ),
     '#default_value' => isset($quickset->ajax) ? $quickset->ajax : 0,
     '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p>'),
-    '#weight' => -6,
+    '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
+    '#weight' => -5,
   );
 
   $form['hide_empty_tabs'] = array(

@@ -398,6 +398,14 @@ function quick_content_factory($name, $item) {
   return QuickContent::factory($name, $item);
 }
 
+/**
+ * Determine if the machine name is in use.
+ */
+function quicktabs_machine_name_exists($machine_name) {
+  $qt_exists = db_query_range('SELECT 1 FROM {quicktabs} WHERE machine_name = :name', 0, 1, array(':name' => $machine_name))->fetchField();
+
+  return $qt_exists;
+}
 
 /**
  * Implementation of hook_views_api().
