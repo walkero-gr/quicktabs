@@ -59,6 +59,7 @@ class QuickBlockContent extends QuickContent {
     $output = $this->render_item();
     return !empty($output) ? drupal_render($output) : '';
   }
+
   public function get_ajax_path($name, $index) {
     $path = parent::get_ajax_path($name, $index);
     $path .= '/'. $this->item['bid'] . '/'. $this->item['hide_title'];

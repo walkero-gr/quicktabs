@@ -10,11 +10,11 @@ Drupal.quicktabs.getQTName = function (el) {
 Drupal.behaviors.quicktabs = {
   attach: function (context, settings) {
     $.extend(true, Drupal.settings, settings);
-    $('.quicktabs-wrapper:not(.quicktabs-processed)', context).addClass('quicktabs-processed').each(function(){
+    $('.quicktabs-wrapper', context).once(function(){
       Drupal.quicktabs.prepare(this);
     });
     if ($.fn.accordion) {
-      $('.quick-accordion').each(function(){
+      $('.quick-accordion').once(function(){
         var qtKey = 'qt_' + Drupal.quicktabs.getQTName(this);
         var active_tab = parseInt(Drupal.settings.quicktabs[qtKey].active_tab);
         $(this).accordion({active: active_tab});
@@ -23,27 +23,21 @@ Drupal.behaviors.quicktabs = {
   }
 }
 
-
-
-// setting up the inital behaviours
+// Setting up the inital behaviours
 Drupal.quicktabs.prepare = function(el) {
   // el.id format: "quicktabs-$name"
-  var name = Drupal.quicktabs.getQTName(el);
+  var qt_name = Drupal.quicktabs.getQTName(el);
   var $ul = $(el).find('ul.quicktabs-tabs:first');
-  $ul.find('li a').each(function(){this.name = name}).each(Drupal.quicktabs.initialiseLink);
-}
-
-Drupal.quicktabs.initialiseLink = function(index, element) {
-  if (!element.myTabIndex) {
-    element.myTabIndex = index;
-  }
-  var tab = new Drupal.quicktabs.tab(element);
-  var parent_li = $(element).parents('li').get(0);
-  if ($(parent_li).hasClass('active')) {
-    $(element).addClass('quicktabs-loaded');
-  }
-
-  $(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
+  $ul.find('li a').each(function(i, element){
+    element.myTabIndex = i;
+    element.qt_name = qt_name;
+    var tab = new Drupal.quicktabs.tab(element);
+    var parent_li = $(element).parents('li').get(0);
+    if ($(parent_li).hasClass('active')) {
+      $(element).addClass('quicktabs-loaded');
+    }
+    $(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
+  });
 }
 
 Drupal.quicktabs.clickHandler = function(event) {
@@ -64,12 +58,11 @@ Drupal.quicktabs.clickHandler = function(event) {
   return false;
 }
 
-// constructor for an individual tab
+// Constructor for an individual tab
 Drupal.quicktabs.tab = function (el) {
   this.element = el;
   this.tabIndex = el.myTabIndex;
-  this.name = el.name;
-  var qtKey = 'qt_' + this.name;
+  var qtKey = 'qt_' + el.qt_name;
   var i = 0;
   for (var key in Drupal.settings.quicktabs[qtKey].tabs) {
     if (i == this.tabIndex) {
@@ -78,8 +71,8 @@ Drupal.quicktabs.tab = function (el) {
     }
     i++;
   }
-  this.tabpage_id = 'quicktabs-tabpage-' + this.name + '-' + this.tabKey;
-  this.container = $('#quicktabs-container-' + this.name);
+  this.tabpage_id = 'quicktabs-tabpage-' + el.qt_name + '-' + this.tabKey;
+  this.container = $('#quicktabs-container-' + el.qt_name);
   this.tabpage = this.container.find('#' + this.tabpage_id);
 }
 
@@ -87,10 +80,9 @@ if (Drupal.ajax) {
   /**
    * Handle an event that triggers an AJAX response.
    *
-   * When an event that triggers an AJAX response happens, this method will
-   * perform the actual AJAX call. It is bound to the event using
-   * bind() in the constructor, and it uses the options specified on the
-   * ajax object.
+   * We unfortunately need to override this function, which originally comes from
+   * misc/ajax.js, in order to be able to cache loaded tabs, i.e. once a tab
+   * content has loaded it should not need to be loaded again.
    */
   Drupal.ajax.prototype.eventResponse = function (element, event) {
     // Create a synonym for this to reduce code confusion.

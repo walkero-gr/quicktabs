@@ -10,8 +10,8 @@ class QuickQtabsContent extends QuickContent {
     $form = array();
     $form['qtabs']['machine_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Quicktab'),
-      '#description' => t('The quicktab machine name.'),
+      '#title' => t('Quicktabs instance'),
+      '#description' => t('The machine name of the existing Quicktabs instance.'),
       '#maxlength' => 10,
       '#size' => 20,
       '#default_value' => isset($tab['machine_name']) ? $tab['machine_name'] : '',

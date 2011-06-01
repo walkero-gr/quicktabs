@@ -6,7 +6,7 @@ Drupal.quicktabsShowHide = function() {
 
 Drupal.behaviors.quicktabsform = {
   attach: function (context, settings) {
-    $('#quicktabs-form tr').not('.quicktabs-form-processed').addClass('quicktabs-form-processed').each(function(){
+    $('#quicktabs-form tr').once(function(){
       var currentRow = $(this);
       currentRow.find('div.form-item :input[name*="type"]').bind('click', Drupal.quicktabsShowHide);
       $(':input[name*="type"]:checked', this).trigger('click');
