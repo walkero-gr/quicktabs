@@ -3,32 +3,44 @@
 /**
  * Renders the content using the jQuery UI Accordion widget.
  */
-class QuickAccordion extends QuickSet {
+class QuickAccordion extends QuickRenderer {
   
   public function render() {
-    
-    // This display style doesn't currently support the ajax option
-    $this->options['ajax'] = 0;
-    
-    $active_tab = $this->get_active_tab();
-    
-    $qt_name = $this->name;
-    // Create the quicktabs renderable array and add the necessary css and js to it
-    $qt_ra = array(
-      '#attached' => array(
-        'library' => array(
-          array('system', 'ui.accordion'),
-        ),
-        'js' => array(
-          array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
-        ),
+    $quickset = $this->quickset;
+
+    // Build our render array...
+    $render_array = array();
+    $render_array['#attached'] = $this->add_attached();
+    $render_array['content'] = array(
+      '#theme' => 'qt_accordion',
+      '#options' => array('attributes' => array(
+        'id' => 'quickset-' . $quickset->getName(),
+        'class' => array('quick-accordion'),
+      )),
+      'divs' => array(),
+    );
+
+    // Render all tab content.
+    foreach ($quickset->getContents() as $key => $item) {
+      $render_array['content']['divs'][] = array(
+        '#prefix' => '<h3><a href= "#">'. $item['title'] .'</a></h3><div>',
+        '#suffix' => '</div>',
+        'content' => isset($item['rendered']) ? $item['rendered'] : $item['builder']->render_item(),
+      );
+    }
+    return $render_array;
+  }
+  
+  /**
+   * Add any necessary js, css and libraries for the render array.
+   */
+  protected function add_attached() {
+    $attached = array(
+      'library' => array(
+        array('system', 'ui.accordion'),
       ),
-      'content' => array(
-        '#theme' => 'qt_accordion',
-        '#options' => array('attributes' => array(
-          'id' => 'quickset-' . $qt_name,
-          'class' => array('quick-accordion','quickset-wrapper'),
-        )),
+      'js' => array(
+        array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
       ),
     );
     $javascript = drupal_add_js();
@@ -38,20 +50,12 @@ class QuickAccordion extends QuickSet {
         break;
       }
     }
-    if (!isset($qtkey) || !array_key_exists('qt_' . $qt_name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array('name' => $qt_name, 'active_tab' => $active_tab);
-      $qt_ra['#attached']['js'][] = array('data' => array('quicktabs' => array('qt_' . $qt_name => $quicktabs_array)), 'type' => 'setting');
+    $name = $this->quickset->getName();
+    if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
+      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->get_active_tab());
+      $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
     }
-    // Render all tab content.
-    $qt_ra['content']['divs'] = array();
-    foreach ($this->contents as $key => $item) {
-      $qt_ra['content']['divs'][] = array(
-        '#prefix' => '<h3><a href= "#">'. $item['title'] .'</a></h3><div>',
-        '#suffix' => '</div>',
-        'content' => isset($item['rendered']) ? $item['rendered'] : $item['builder']->render_item(),
-      );
-    }
-    return $qt_ra;
+    return $attached;
   }
 
 }

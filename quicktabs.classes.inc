@@ -1,10 +1,9 @@
 <?php
 
 /**
- * The abstract base class that all Quicktabs renderer classes extend.
- * Provides core functionality that can be used by all renderers.
+ * The class responsible for creating Quicktabs instances.
  */
-abstract class QuickSet {
+class QuickSet {
   
   /**
    * The unique name of the QuickSet object.
@@ -29,11 +28,26 @@ abstract class QuickSet {
    * @var array
    */
   protected $options;
+  
 
   /**
-   * Instantiate, populate and return a QuickSet object.
-   *
-   * @param $renderer
+   * Accessors.
+   */
+  
+  public function getName() {
+    return $this->name;
+  }
+  
+  public function getContents() {
+    return $this->contents;
+  }
+  
+  public function getOptions() {
+    return $this->options;
+  }
+
+  /**
+   * Instantiate, populate and return a QuickSet object wrapped in a renderer.
    *
    * @param $name
    *   The unique name (machine name) of the QuickSet instance.
@@ -49,18 +63,17 @@ abstract class QuickSet {
    *   An array of options determining the behaviour of this QuickSet instance.
    *  
    */
-  public static function factory($name, $contents, $renderer, $options) {
+  public static function rendered_quickset_factory($name, $contents, $renderer, $options) {
     ctools_include('plugins');
     if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler')) {
-      $qs = new $class($name, $contents, $options);
       try {
-        $qs->prepare_contents();
-        return $qs;
+        $qs = new self($name, $contents, $options);
       }
       catch (InvalidQuickSetException $e) {
         watchdog('Quicktabs', $e->getMessage());
         return NULL;
       }
+      return new $class($qs);
     }
   }
   
@@ -71,12 +84,8 @@ abstract class QuickSet {
     $this->name = $name;
     $this->contents = $contents;
     $this->options = $options;
+    $this->prepare_contents();
   }
-  
-  /**
-   * Method to render a QuickSet object as a render array.
-   */
-  abstract public function render();
 
   /**
    * This method does some initial set-up of the "tab" contents, such as hiding
@@ -86,7 +95,9 @@ abstract class QuickSet {
    * rendering of the tab contents.
    */
   protected function prepare_contents() {
-
+    if (!count($this->contents))  {
+      throw new InvalidQuickSetException('There are no contents to render.');
+    }
     if ($this->options['hide_empty_tabs'] && !$this->options['ajax']) {
       // Check if any tabs need to be hidden because of empty content.
       foreach ($this->contents as $key => $tab) {
@@ -105,11 +116,15 @@ abstract class QuickSet {
         }
       }
       $this->contents = array_merge($this->contents);
+      if (!count($this->contents))  {
+        throw new InvalidQuickSetException('There are no contents to render.');
+      }
     }
     elseif ($this->options['ajax']) {
       // Make sure that there is at most 1 "custom" tab and it is the default tab.
       // Custom content cannot be rendered via ajax.
       $custom = FALSE; // keep track of whether we have found a custom tab.
+      $custom_ajax_error = FALSE; // Flag for if there is more than one custom tab.
       foreach ($this->contents as $key => &$tab) {
         $type = $tab['type'];
         // Instantiate a content builder object and add a reference to it
@@ -125,9 +140,18 @@ abstract class QuickSet {
             $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
           }
           else {
-            throw new InvalidQuickSetException('The contents specified cannot be rendered via ajax.');
+            // We are on a second custom tab and the ajax option is set, we cannot
+            // render custom tabs via ajax, so we skip out of the loop, set the
+            // ajax option to off, and call the method again.
+            $custom_ajax_error = TRUE;
+            break;
           }
         }
+      }
+      if ($custom_ajax_error) {
+        $this->options['ajax'] = 0;
+        $this->prepare_contents();
+        return;
       }
     }
     else {
@@ -144,6 +168,8 @@ abstract class QuickSet {
         }
       }
     }
+    // Set the default style if necessary.
+    if ($this->options['style'] == 'default') $this->options['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
   }
   
   /**
@@ -151,7 +177,7 @@ abstract class QuickSet {
    * from the URL or just from the settings for this instance. If neither, it
    * defaults to 0.
    */
-  protected function get_active_tab() {
+  public function get_active_tab() {
     $active_tab = isset($this->options['default_tab']) ? $this->options['default_tab'] : key($this->contents);
     $active_tab = isset($_GET['qt-' . $this->name]) ? $_GET['qt-' . $this->name] : $active_tab;
     $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : 0;
@@ -162,12 +188,35 @@ abstract class QuickSet {
    * Static method to retrieve content from an ajax call. This is called by the
    * quicktabs_ajax() callback in quicktabs.module.
    */
-  static function ajax_render_content_item($type, $args) {
+  public static function ajax_render_content_item($type, $args) {
     if ($builder = QuickContent::factory($type, array('type' => $type))) {
       return $builder->ajax_render_item($args);
     }
     return '';
   }
+}
+
+/**
+ * Interface that all renderer plugins must implement.
+ */
+abstract class QuickRenderer {
+  
+  protected $quickset;
+  
+  public function __construct($quickset) {
+    $this->quickset = $quickset;
+  }
+  
+  abstract public function render();
+  
+  protected function add_attached() {
+    return array();
+  }
+  
+  protected function build_tablinks() {
+    return array();
+  }
+  
 }
 
 /**

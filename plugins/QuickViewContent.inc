@@ -41,8 +41,8 @@ class QuickViewContent extends QuickContent {
   }
   
   public function __construct($item) {
-    //if ($this->options['ajax']) views_add_js('ajax_view');
-    views_add_js('ajax_view');
+    if (module_exists('views')) views_add_js('ajax_view');
+
     if (isset($item['args'])) {
       $url_args = arg();
       $args = $item['args'];

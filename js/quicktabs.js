@@ -111,7 +111,7 @@ if (Drupal.ajax) {
         if (!$(element).hasClass('quicktabs-loaded')) {
           ajax.beforeSerialize(ajax.element, ajax.options);
           $.ajax(ajax.options);
-          if ($(element).hasClass('qt-ajax-tab')) {
+          if ($(element).parents('ul').hasClass('quicktabs-tabs')) {
             $(element).addClass('quicktabs-loaded');
           }
         }

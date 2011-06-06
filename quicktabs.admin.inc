@@ -102,6 +102,8 @@ function quicktabs_form($form, $form_state, $formtype, $quickset = NULL) {
       $tab_titles[$delta] = $tab['title'];
     }
   }
+  // If there's only one tab, it shouldn't be removeable.
+  if (count($quickset->tabs) == 1) $form['qt_wrapper']['tabs'][$delta]['remove']['#access'] = FALSE;
 
   $form['default_tab'] = array(
     '#type' => 'select',
@@ -163,7 +165,7 @@ function _quicktabs_admin_main_form($form_state, &$quickset) {
     '#type' => 'select',
     '#title' => t('Renderer'),
     '#options' => $renderer_options,
-    '#default_value' => isset($quickset->renderer) ? $quickset->renderer : 'tabs',
+    '#default_value' => isset($quickset->renderer) ? $quickset->renderer : 'quicktabs',
     '#description' => t('Choose how to render the content.'),
     '#weight' => -7,
   );
@@ -277,6 +279,12 @@ function _quicktabs_form(array $tab) {
   ctools_include('plugins');
   $contents = ctools_get_plugins('quicktabs', 'contents');
   foreach ($contents as $name => $info) {
+    if (isset($info['dependencies'])) {
+      foreach ($info['dependencies'] as $dep) {
+        // Do not load the options form for any plugin that is missing dependencies.
+        if (!module_exists($dep)) continue 2;
+      }
+    }
     $tabtypes[$name] = $name;
     $content_builder = quick_content_factory($name, $tab);
     $form += $content_builder->options_form($delta);
@@ -296,7 +304,7 @@ function _quicktabs_form(array $tab) {
     '#attributes' => array('class' => array('delete-tab'), 'title' => t('Click here to delete this tab.')),
     '#submit' => array('quicktabs_remove_tab_submit'),
     '#ajax' => array(
-      'callback' => 'quicktabs_ajax',
+      'callback' => 'quicktabs_ajax_callback',
       'wrapper' => 'quicktab-tabs',
       'method' => 'replace',
       'effect' => 'fade',
