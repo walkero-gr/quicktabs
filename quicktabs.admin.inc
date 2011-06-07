@@ -337,19 +337,23 @@ function theme_quicktabs_admin_form_tabs($variables) {
   foreach (element_children($tabs) as $key) {
     $tab = &$tabs[$key];
     $tab['weight']['#attributes']['class'] = array('qt-tabs-weight');
+
+    // tab settings fields
+    $tab_fields = array(
+      array('data' => drupal_render($tab['title']), 'class' => array('qt-tab-title')),
+      array('data' => drupal_render($tab['weight']), 'class' => array('qt-tab-weight')),
+      array('data' => drupal_render($tab['type']), 'class' => array('qt-tab-type')),
+    );
+
+    // content plugins
+    $content_plugins = array();
+    foreach ($tab['type']['#options'] as $content_provider ) {
+      $content_plugins[] = array('data' => drupal_render($tab[$content_provider]), 'class' => array('qt-tab-content', "qt-tab-$content_provider-content"));
+    }
+
     // Build the table row.
     $row = array(
-      'data' => array(
-        array('data' => drupal_render($tab['title']), 'class' => array('qt-tab-title')),
-        array('data' => drupal_render($tab['weight']), 'class' => array('qt-tab-weight')),
-        array('data' => drupal_render($tab['type']), 'class' => array('qt-tab-type')),
-        // tab content (only 1 tab content (block, node or view) will be displayed. see: quicktabs_form.js)
-        array('data' => (module_exists('block') ? drupal_render($tab['block']) : ''), 'class' => array('qt-tab-content', 'qt-tab-block-content')),
-        array('data' => (module_exists('views') ? drupal_render($tab['view']) : ''), 'class' => array('qt-tab-content', 'qt-tab-view-content')),
-        array('data' => drupal_render($tab['node']), 'class' => array('qt-tab-content', 'qt-tab-node-content')),
-        array('data' => drupal_render($tab['qtabs']), 'class' => array('qt-tab-content', 'qt-tab-qtabs-content')),
-        array('data' => drupal_render($tab['remove']), 'class' => array('qt-tab-remove')),
-      ),
+      'data' => array_merge($tab_fields, $content_plugins, array(array('data' => drupal_render($tab['remove']), 'class' => array('qt-tab-remove')))),
       'class' => array('draggable'),
     );
 

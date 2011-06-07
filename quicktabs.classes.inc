@@ -104,15 +104,20 @@ class QuickSet {
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
         $builder = QuickContent::factory($tab['type'], $tab);
-        $this->contents[$key]['builder'] = $builder;
-        $contents = isset($tab['contents']) ? $tab['contents'] : $builder->render_item(TRUE);
-        if (empty($contents)) {
+        if (!$builder) {
           unset($this->contents[$key]);
         }
         else {
-          // Since we have rendered the contents already at this point, we should
-          // hold on to the rendered output so as not to have to render it again.
-          $this->contents[$key]['rendered'] = is_array($contents) ? $contents : array('#markup' => $contents);
+          $this->contents[$key]['builder'] = $builder;
+          $contents = isset($tab['contents']) ? $tab['contents'] : $builder->render_item(TRUE);
+          if (empty($contents)) {
+            unset($this->contents[$key]);
+          }
+          else {
+            // Since we have rendered the contents already at this point, we should
+            // hold on to the rendered output so as not to have to render it again.
+            $this->contents[$key]['rendered'] = is_array($contents) ? $contents : array('#markup' => $contents);
+          }
         }
       }
       $this->contents = array_merge($this->contents);
@@ -130,6 +135,10 @@ class QuickSet {
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
         $builder = QuickContent::factory($type, $tab);
+        if (!$builder) {
+          $custom_ajax_error = TRUE;
+          break;
+        }
         $this->contents[$key]['builder'] = $builder;
         if ($type == 'custom') {
           if (!$custom) {
@@ -155,13 +164,17 @@ class QuickSet {
       }
     }
     else {
-      // Copy "contents" into the "rendered" property for custom tabs.
       foreach ($this->contents as $key => &$tab) {
-        // Instantiate a content builder object and add a reference to it
-        // in the tab array.
-        $builder = QuickContent::factory($tab['type'], $tab);
-        $this->contents[$key]['builder'] = $builder;
-        if ($tab['type'] == 'custom') {
+        if ($tab['type'] != 'custom') {
+          // Instantiate a content builder object and add a reference to it
+          // in the tab array.
+          $builder = QuickContent::factory($tab['type'], $tab);
+          $this->contents[$key]['builder'] = $builder;
+          if (!$builder)  {
+            throw new InvalidQuickSetException(t('Content of type @type cannot be rendered in a tab. Please check that all plugin dependencies are enabled', array('@type' => $tab['type'])));
+          }
+        }
+        else {
           // Custom tabs already contain their rendered contents. We just need
           // to copy them into the 'rendered' property of the tab.
           $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
@@ -253,6 +266,16 @@ abstract class QuickContent {
   public static function factory($name, $item) {
     ctools_include('plugins');
     if ($class = ctools_plugin_load_class('quicktabs', 'contents', $name, 'handler')) {
+      // We now need to check the plugin's dependencies, to make sure they're installed.
+      // This info has already been statically cached at this point so there's no
+      // harm in making a call to ctools_get_plugins().
+      $plugin = ctools_get_plugins('quicktabs', 'contents', $name);
+      if (isset($plugin['dependencies'])) {
+        foreach ($plugin['dependencies'] as $dep) {
+          // Do not load the options form for any plugin that is missing dependencies.
+          if (!module_exists($dep)) return NULL;
+        }
+      }
       $content = new $class($item);
       return $content;
     }
@@ -280,7 +303,7 @@ abstract class QuickContent {
    *
    * @return A render array of the tab content.
    */
-  abstract public function render_item($hide_empty);
+  abstract public function render_item($hide_empty = FALSE);
 
   /**
    * Returns an ajax path to be used on ajax-enabled links that retrieve this
