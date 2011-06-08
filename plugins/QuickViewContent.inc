@@ -59,7 +59,24 @@ class QuickViewContent extends QuickContent {
     $this->item = $item;
   }
 
-  public function render_item($hide_empty = FALSE) {
+  public function render($hide_empty = FALSE, $args = array()) {
+    if (!empty($args)) {
+      // The args have been passed in from an ajax request. We use Views' own
+      // ajax functionality to get the view.
+      list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $view_args) = $args;
+      $_REQUEST['view_args'] = urldecode($view_args);
+      module_load_include('inc', 'views', 'includes/ajax');
+      $view = views_ajax();
+      foreach ($view['#commands'] as $command) {
+        if ($command['command'] == 'insert') {
+          return array('#markup' => trim($command['data']));
+        }
+      }
+      return array();
+    }
+
+    // Non-ajax rendering of a view.
+    if ($this->rendered_content) return $this->rendered_content;
     $item = $this->item;
     $output = array();
     if (isset($item['vid'])) {
@@ -83,25 +100,12 @@ class QuickViewContent extends QuickContent {
         $output['#markup'] = t('Views module is not enabled, cannot display content.');
       }
     }
+    $this->rendered_content = $output;
     return $output;
   }
-  
-  public function ajax_render_item($args) {
-    list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $view_args) = $args;
-    $_REQUEST['view_args'] = urldecode($view_args);
-    module_load_include('inc', 'views', 'includes/ajax');
-    $view = views_ajax();
-    foreach ($view['#commands'] as $command) {
-      if ($command['command'] == 'insert') {
-        return trim($command['data']);
-      }
-    }
-  }
-  
-  public function get_ajax_path($name, $index) {
-    $path = parent::get_ajax_path($name, $index);
+
+  public function getAjaxArgs() {
     $args = urlencode(implode('/', $this->item['actual_args']));
-    $path .= '/'. $this->item['vid'] . '/'. $this->item['display'] .'/'. $args;
-    return $path;
+    return array($this->item['vid'], $this->item['display'], $args);
   }
 }

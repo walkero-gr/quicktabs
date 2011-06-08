@@ -25,7 +25,7 @@ class QuickAccordion extends QuickRenderer {
       $render_array['content']['divs'][] = array(
         '#prefix' => '<h3><a href= "#">'. $item['title'] .'</a></h3><div>',
         '#suffix' => '</div>',
-        'content' => isset($item['rendered']) ? $item['rendered'] : $item['builder']->render_item(),
+        'content' => $item['renderer']->render(),
       );
     }
     return $render_array;

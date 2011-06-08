@@ -199,13 +199,17 @@ function quicktabs_build_quicktabs($name, $overrides = array(), $custom_tabs = a
   $renderer = isset($options['renderer']) ? $options['renderer'] : 'quicktabs';
   unset($options['renderer']);
   foreach($custom_tabs as &$tab) {
-    $tab = array_merge(array('weight' => 0, 'type' => 'custom'), $tab);
+    $tab['type'] = 'prerendered';
+    if (!isset($tab['weight'])) $tab['weight'] = 0;
   }
   $contents = array_merge($custom_tabs, $contents);
   $weight = array();
   foreach ($contents as $key => $item) {
-    // Load the plugin responsible for rendering this item
-    ctools_plugin_load_class('quicktabs', 'contents', $item['type'], 'handler');
+    // Load the plugin responsible for rendering this item, if it is not a
+    // prerendered tab.
+    if ($item['type'] != 'prerendered') {
+      ctools_plugin_load_class('quicktabs', 'contents', $item['type'], 'handler');
+    }
   
     // Add item's weight to our weights array so that we can then sort by weight.
     $weight[$key] = $item['weight'];

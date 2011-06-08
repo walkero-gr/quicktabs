@@ -1,7 +1,8 @@
 <?php
 
 /**
- * The class responsible for creating Quicktabs instances.
+ * A QuickSet object is an unrendered Quicktabs intance, as defined by a set of options
+ * and the contents it contains.
  */
 class QuickSet {
   
@@ -86,6 +87,19 @@ class QuickSet {
     $this->options = $options;
     $this->prepare_contents();
   }
+  
+
+  /**
+   * Returns an ajax path to be used on ajax-enabled links.
+   *
+   * @param $index The index of the tab, i.e where it fits into the QuickSet
+   * instance.
+   *
+   * @param $type The type of content we are providing an ajax path for.
+   */
+  public function getAjaxPath($index, $type) {
+    return 'quicktabs/ajax/'. $this->name .'/'. $index . '/'. $type;
+  }
 
   /**
    * This method does some initial set-up of the "tab" contents, such as hiding
@@ -103,20 +117,15 @@ class QuickSet {
       foreach ($this->contents as $key => $tab) {
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
-        $builder = QuickContent::factory($tab['type'], $tab);
-        if (!$builder) {
+        $renderer = self::content_renderer_factory($tab);
+        if (!$renderer) {
           unset($this->contents[$key]);
         }
         else {
-          $this->contents[$key]['builder'] = $builder;
-          $contents = isset($tab['contents']) ? $tab['contents'] : $builder->render_item(TRUE);
+          $this->contents[$key]['renderer'] = $renderer;
+          $contents = $renderer->render(TRUE);
           if (empty($contents)) {
             unset($this->contents[$key]);
-          }
-          else {
-            // Since we have rendered the contents already at this point, we should
-            // hold on to the rendered output so as not to have to render it again.
-            $this->contents[$key]['rendered'] = is_array($contents) ? $contents : array('#markup' => $contents);
           }
         }
       }
@@ -128,56 +137,48 @@ class QuickSet {
     elseif ($this->options['ajax']) {
       // Make sure that there is at most 1 "custom" tab and it is the default tab.
       // Custom content cannot be rendered via ajax.
-      $custom = FALSE; // keep track of whether we have found a custom tab.
-      $custom_ajax_error = FALSE; // Flag for if there is more than one custom tab.
-      foreach ($this->contents as $key => &$tab) {
+      $has_prerendered = FALSE; // keep track of whether we have found a custom tab.
+      $invalid = FALSE; // Flag for if there is more than one custom tab.
+      foreach ($this->contents as $key => $tab) {
         $type = $tab['type'];
         // Instantiate a content builder object and add a reference to it
         // in the tab array.
-        $builder = QuickContent::factory($type, $tab);
-        if (!$builder) {
-          $custom_ajax_error = TRUE;
+        $renderer = self::content_renderer_factory($tab);
+        if (!$renderer) {
+          $invalid = TRUE;
           break;
         }
-        $this->contents[$key]['builder'] = $builder;
-        if ($type == 'custom') {
-          if (!$custom) {
-            $custom = TRUE;
+        $this->contents[$key]['renderer'] = $renderer;
+        if ($type == 'prerendered') {
+          if (!$has_prerendered) {
+            $has_prerendered = TRUE;
             $this->options['default_tab'] = $key;
-            // Custom tabs already contain their rendered contents. We just need
-            // to copy them into the 'rendered' property of the tab.
-            $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
           }
           else {
             // We are on a second custom tab and the ajax option is set, we cannot
             // render custom tabs via ajax, so we skip out of the loop, set the
             // ajax option to off, and call the method again.
-            $custom_ajax_error = TRUE;
+            $invalid = TRUE;
             break;
           }
         }
       }
-      if ($custom_ajax_error) {
+      if ($invalid) {
+        // The contents are invalid for ajax mode, so we set the ajax option to
+        // false and prepare contents again.
         $this->options['ajax'] = 0;
         $this->prepare_contents();
         return;
       }
     }
     else {
-      foreach ($this->contents as $key => &$tab) {
-        if ($tab['type'] != 'custom') {
-          // Instantiate a content builder object and add a reference to it
-          // in the tab array.
-          $builder = QuickContent::factory($tab['type'], $tab);
-          $this->contents[$key]['builder'] = $builder;
-          if (!$builder)  {
-            throw new InvalidQuickSetException(t('Content of type @type cannot be rendered in a tab. Please check that all plugin dependencies are enabled', array('@type' => $tab['type'])));
-          }
-        }
-        else {
-          // Custom tabs already contain their rendered contents. We just need
-          // to copy them into the 'rendered' property of the tab.
-          $tab['rendered'] = is_array($tab['contents']) ? $tab['contents'] : array('#markup' => $tab['contents']);
+      foreach ($this->contents as $key => $tab) {
+        // Instantiate a content builder object and add a reference to it
+        // in the tab array.
+        $renderer = self::content_renderer_factory($tab);
+        $this->contents[$key]['renderer'] = $renderer;
+        if (!$renderer)  {
+          throw new InvalidQuickSetException(t('Content of type @type cannot be rendered in a tab. Please check that all plugin dependencies are enabled', array('@type' => $tab['type'])));
         }
       }
     }
@@ -197,13 +198,21 @@ class QuickSet {
     return $active_tab;
   }
   
+  public static function content_renderer_factory($tab) {
+    if ($tab['type'] == 'prerendered') {
+      return new QuickPreRenderedContent($tab);
+    }
+    return QuickContent::factory($tab['type'], $tab);
+  }
+  
   /**
    * Static method to retrieve content from an ajax call. This is called by the
    * quicktabs_ajax() callback in quicktabs.module.
    */
   public static function ajax_render_content_item($type, $args) {
-    if ($builder = QuickContent::factory($type, array('type' => $type))) {
-      return $builder->ajax_render_item($args);
+    if ($renderer = self::content_renderer_factory(array('type' => $type))) {
+      $output = $renderer->render(FALSE, $args);
+      return !empty($output) ? drupal_render($output) : '';
     }
     return '';
   }
@@ -232,10 +241,18 @@ abstract class QuickRenderer {
   
 }
 
+interface QuickContentRenderable {
+  
+  public function render($hide_empty = FALSE, $args = array());
+  
+  public function getAjaxArgs();
+  
+}
+
 /**
  * Abstract base class for individual content items.
  */
-abstract class QuickContent {
+abstract class QuickContent implements QuickContentRenderable {
 
   /**
    * An array containing the information that defines the tab content, e.g.
@@ -243,24 +260,21 @@ abstract class QuickContent {
    * @var array
    */
   protected $item;
+  
+  
+  /**
+   * A render array of the contents.
+   */
+  protected $rendered_content;
 
   /**
-   * Instantiate, populate and return a QuickSet object.
-   *
-   * @param $renderer
+   * Instantiate a content type object.
    *
    * @param $name
-   *   The unique name (machine name) of the QuickSet instance.
+   *   The type name of the plugin.
    *
-   * @param $contents
-   *   The array of content items, each one itself an array with at least a 'type'
-   *   key, a title key, and the other info necessary for that type.
-   *
-   * @param $renderer
-   *   The plugin key for this renderer plugin
-   *
-   * @param $options
-   *   An array of options determining the behaviour of this QuickSet instance.
+   * @param $item
+   *   An array containing the item definition
    *  
    */
   public static function factory($name, $item) {
@@ -303,34 +317,54 @@ abstract class QuickContent {
    *
    * @return A render array of the tab content.
    */
-  abstract public function render_item($hide_empty = FALSE);
-
-  /**
-   * Returns an ajax path to be used on ajax-enabled links that retrieve this
-   * type of content. The ajax_render_item method (below) essentially reacts to
-   * the args of this path.
-   *
-   * @param $name The machine name of the instance.
-   *
-   * @param $index The index of the tab, i.e where it fits into the QuickSet
-   * instance.
-   */
-  public function get_ajax_path($name, $index) {
-    return 'quicktabs/ajax/'. $name .'/'. $index . '/'. $this->item['type'];
+  public function render($hide_empty = FALSE, $args = array()) {
+    return array();
   }
   
   /**
-   * Method responsible for ajax rendering of tab content.
-   *
-   * @param $args An array of args that were passed to the ajax callback (based on
-   * the path returned in get_ajax_path).
-   *
-   * @return A string of rendered html.
+   * Returns an array of arguments that are used to construct the full ajax
+   * path that should be called to get the content via ajax.
    */
-  abstract public function ajax_render_item($args);
+  public function getAjaxArgs() {
+    return array();
+  }
   
 }
 
+class QuickPreRenderedContent implements QuickContentRenderable {
+
+  /**
+   * An array containing the information that defines the tab content, e.g.
+   * array('type' => 'view', 'vid' => 'myview', 'title' => 'My View').
+   * @var array
+   */
+  protected $item;
+  
+  /**
+   * A render array of the contents.
+   */
+  protected $rendered_content;
+
+  /**
+   * Constructor
+   */  
+  public function __construct($item) {
+    $this->item = $item;
+    $contents = isset($item['contents']) ? $item['contents'] : array();
+    if (!is_array($contents)) {
+      $contents = array('#markup' => $contents);
+    }
+    $this->rendered_content = $contents;
+  }
+  
+  public function render($hide_empty = FALSE, $args = array()) {
+    return $this->rendered_content;
+  }
+  
+  public function getAjaxArgs() {
+    return array();
+  }
+}
 
 /**
  * Create our own exception class.

@@ -30,7 +30,7 @@ class QuickUiTabs extends QuickRenderer {
       $render_array['content']['divs'][] = array(
 	'#prefix' => '<div '. drupal_attributes($attribs) .'>',
 	'#suffix' => '</div>',
-	'content' => $tab_content = isset($tab['rendered']) ? $tab['rendered'] : $tab['builder']->render_item(),
+	'content' => $tab['renderer']->render(),
       );
     }
     return $render_array;

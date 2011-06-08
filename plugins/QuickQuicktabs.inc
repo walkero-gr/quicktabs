@@ -44,7 +44,7 @@ class QuickQuicktabs extends QuickRenderer {
         $render_array['content']['container']['divs'][] = array(
           '#prefix' => '<div '. drupal_attributes($attribs) .'>',
           '#suffix' => '</div>',
-          'content' => isset($tab['rendered']) ? $tab['rendered'] : $tab['builder']->render_item(),
+          'content' => $tab['renderer']->render(),
         );
       }
     }
@@ -68,7 +68,9 @@ class QuickQuicktabs extends QuickRenderer {
         '#options' => $this->construct_link_options($i),
       );
       if ($options['ajax']) {
-        $ajax_href = $tab['builder']->get_ajax_path($quickset->getname(), $i);
+        $ajax_path = $quickset->getAjaxPath($i, $tab['type']);
+        $ajax_href = $ajax_path . '/'. implode('/', $tab['renderer']->getAjaxArgs());
+        //$ajax_href = $tab['renderer']->get_ajax_path($quickset->getname(), $i);
         $tablink['#ajax'] = array(
           'progress' => array('message' => '', 'type' => 'throbber'),
           'path' => $ajax_href,
@@ -103,7 +105,7 @@ class QuickQuicktabs extends QuickRenderer {
       $item = array();
       foreach ($content as $name => $element) {
         // Certain properties should not be included in the js settings array.
-        if (!in_array($name, array('contents', 'rendered', 'builder'))) {
+        if (!in_array($name, array('contents', 'renderer'))) {
           $item[$name] = $element;
         }
       }

@@ -23,8 +23,14 @@ class QuickBlockContent extends QuickContent {
     return $form;
   }
 
-  public function render_item($hide_empty = FALSE) {
+  public function render($hide_empty = FALSE, $args = array()) {
+    if ($this->rendered_content) return $this->rendered_content;
     $item = $this->item;
+    if (!empty($args)) {
+      // The args have been passed in from an ajax request.
+      list($item['bid'], $item['hide_title']) = $args;
+    }
+    
     $output = array();
     if (isset($item['bid'])) {
       if (module_exists('block')) {
@@ -49,20 +55,11 @@ class QuickBlockContent extends QuickContent {
         $output['#markup'] = t('Block module is not enabled, cannot display content.');
       }
     }
+    $this->rendered_content = $output;
     return $output;
   }
-  
-  public function ajax_render_item($args) {
-    $item = array();
-    list($item['bid'], $item['hide_title']) = $args;
-    $this->item = array_merge($this->item, $item);
-    $output = $this->render_item();
-    return !empty($output) ? drupal_render($output) : '';
-  }
 
-  public function get_ajax_path($name, $index) {
-    $path = parent::get_ajax_path($name, $index);
-    $path .= '/'. $this->item['bid'] . '/'. $this->item['hide_title'];
-    return $path;
+  public function getAjaxArgs() {
+    return array($this->item['bid'], $this->item['hide_title']);
   }
 }
