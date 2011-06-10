@@ -140,6 +140,12 @@ class QuickSet {
           if (!$has_prerendered) {
             $has_prerendered = TRUE;
             $this->options['default_tab'] = $key;
+            // In the case of a direct link to a different tab, the 'default_tab'
+            // will be overridden, so we need to make sure it does not attempt
+            // to load a pre-rendered tab via ajax. Turn ajax option off.
+            if ($this->getActiveTab() !== $key) {
+              $this->options['ajax'] = 0;
+            }
           }
           else {
             // We are on a second custom tab and the ajax option is set, we cannot
