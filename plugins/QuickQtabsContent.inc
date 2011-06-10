@@ -6,7 +6,9 @@
  */
 class QuickQtabsContent extends QuickContent {
   
-  public static $type = 'qtabs';
+  public static function getType() {
+    return 'qtabs';
+  }
   
   public function options_form($delta) {
     $tab = $this->settings;

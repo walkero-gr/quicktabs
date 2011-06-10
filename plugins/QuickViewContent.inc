@@ -6,7 +6,9 @@
  */
 class QuickViewContent extends QuickContent {
   
-  public static $type = 'view';
+  public static function getType() {
+    return 'view';
+  }
   
   public function options_form($delta) {
     $tab = $this->settings;

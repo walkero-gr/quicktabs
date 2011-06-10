@@ -6,7 +6,9 @@
  */
 class QuickNodeContent extends QuickContent {
   
-  public static $type = 'node';
+  public static function getType() {
+    return 'node';
+  }
 
   public function options_form($delta) {
     $tab = $this->settings;

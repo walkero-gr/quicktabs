@@ -135,7 +135,7 @@ class QuickSet {
       // Prerendered content cannot be rendered via ajax.
       $has_prerendered = FALSE; // keep track of whether we have found a prerendered tab.
       foreach ($this->contents as $key => $tab) {
-        $type = $tab::$type;
+        $type = $tab::getType();
         if ($type == 'prerendered') {
           if (!$has_prerendered) {
             $has_prerendered = TRUE;
@@ -221,11 +221,26 @@ abstract class QuickRenderer {
   
 }
 
+/*******************************************************
+ * The classes below relate to individual tab content  *
+ *******************************************************/
+
 /**
  * Each QuickSet object has a "contents" property which is an array of objects
  * that implement the QuickContentRenderable interface.
  */
 interface QuickContentRenderable {
+  
+  /**
+   * Returns the short type name of the content plugin, e.g.
+   * 'block', 'node', 'prerendered'.
+   */
+  public static function getType();
+  
+  /**
+   * Returns the tab title.
+   */
+  public function getTitle();
 
   /**
    * Returns an array of settings specific to the type of content.
@@ -253,8 +268,6 @@ interface QuickContentRenderable {
  * Abstract base class for content plugins.
  */
 abstract class QuickContent implements QuickContentRenderable {
-  
-  public static $type = 'content';
 
   /**
    * Used as the title of the tab.
@@ -272,6 +285,33 @@ abstract class QuickContent implements QuickContentRenderable {
    * A render array of the contents.
    */
   protected $rendered_content;
+  
+
+  /**
+   * Constructor
+   */
+  public function __construct($item) {
+    $this->title = $item['title'];
+    // We do not need to store title, type or weight in the settings array, which
+    // is for type-specific settings.
+    unset($item['title'], $item['type'], $item['weight']);
+    $this->settings = $item;
+  }
+  
+  
+  /**
+   * Accessor for the tab title.
+   */
+  public function getTitle() {
+    return $this->title;
+  }
+
+  /**
+   * Accessor for the tab settings.
+   */
+  public function getSettings() {
+    return $this->settings;
+  }
 
   /**
    * Instantiate a content type object.
@@ -302,55 +342,10 @@ abstract class QuickContent implements QuickContentRenderable {
   }
 
   /**
-   * Constructor
-   */
-  public function __construct($item) {
-    $this->title = $item['title'];
-    // We do not need to store title, type or weight in the settings array, which
-    // is for type-specific settings.
-    unset($item['title'], $item['type'], $item['weight']);
-    $this->settings = $item;
-  }
-  
-  /**
-   * Accessor for the tab title.
-   */
-  public function getTitle() {
-    return $this->title;
-  }
-
-  /**
-   * Accessor for the tab settings.
-   */
-  public function getSettings() {
-    return $this->settings;
-  }
-
-  /**
-   * Returns an array of keys to use for constructing the correct arguments for
-   * an ajax callback to retrieve content of this type.
-   */
-  public function getAjaxKeys() {
-    return array();
-  }
-
-  /**
    * Method for returning the form elements to display for this tab type on
    * the admin form.
    */  
   abstract public function options_form($delta);
-  
-  /**
-   * Method responsible for normal rendering of tab content.
-   *
-   * @param $hide_empty Used to decide whether, for example, an access denied
-   * response for content should be output as such or hidden.
-   *
-   * @return A render array of the tab content.
-   */
-  public function render($hide_empty = FALSE, $args = array()) {
-    return array();
-  }
   
 }
 
@@ -362,8 +357,10 @@ abstract class QuickContent implements QuickContentRenderable {
  */
 class QuickPreRenderedContent implements QuickContentRenderable {
   
-  public static $type = 'prerendered';
-
+  public static function getType() {
+    return 'prerendered';
+  }
+  
   /**
    * Used as the title of the tab.
    */
@@ -373,6 +370,7 @@ class QuickPreRenderedContent implements QuickContentRenderable {
    * A render array of the contents.
    */
   protected $rendered_content;
+
 
   /**
    * Constructor
@@ -389,17 +387,23 @@ class QuickPreRenderedContent implements QuickContentRenderable {
   }
   
   /**
+   * Accessor for the tab title.
+   */
+  public function getTitle() {
+    return $this->title;
+  }
+
+  /**
    * Accessor for the tab settings.
    */
   public function getSettings() {
     return array();
   }
-  
-  /**
-   * Accessor for the tab title.
-   */
-  public function getTitle() {
-    return $this->title;
+
+
+
+  public function render($hide_empty = FALSE, $args = array()) {
+    return $this->rendered_content;
   }
   
   /**
@@ -408,10 +412,6 @@ class QuickPreRenderedContent implements QuickContentRenderable {
    */
   public function getAjaxKeys() {
     return array();
-  }
-
-  public function render($hide_empty = FALSE, $args = array()) {
-    return $this->rendered_content;
   }
 
 }

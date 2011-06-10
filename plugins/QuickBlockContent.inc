@@ -6,7 +6,9 @@
  */
 class QuickBlockContent extends QuickContent {
   
-  public static $type = 'block';
+  public static function getType() {
+    return 'block';
+  }
 
   public function options_form($delta) {
     $tab = $this->settings;
