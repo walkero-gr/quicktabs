@@ -5,9 +5,11 @@
  * content.
  */
 class QuickNodeContent extends QuickContent {
+  
+  public static $type = 'node';
 
   public function options_form($delta) {
-    $tab = $this->item;
+    $tab = $this->settings;
     $form = array();
     $form['node']['nid'] = array(
       '#type' => 'textfield',
@@ -32,7 +34,7 @@ class QuickNodeContent extends QuickContent {
 
   public function render($hide_empty = FALSE, $args = array()) {
     if ($this->rendered_content) return $this->rendered_content;
-    $item = $this->item;
+    $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.
       list($item['nid'], $item['teaser'], $item['hide_title']) = $args;
@@ -57,7 +59,7 @@ class QuickNodeContent extends QuickContent {
     return $output;
   }
   
-  public function getAjaxArgs() {
-    return array($this->item['nid'], $this->item['teaser'], $this->item['hide_title']);
+  public function getAjaxKeys() {
+    return array('nid', 'teaser', 'hide_title');
   }
 }

@@ -246,7 +246,7 @@ function quicktabs_ajax($name, $index, $type) {
   $args = func_get_args();
   $variable_args = array_slice($args, 3);
 
-  $data = QuickSet::ajax_render_content_item($type, $variable_args);
+  $data = QuickSet::ajaxRenderContent($type, $variable_args);
   
   $commands = array();
   $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
@@ -394,7 +394,7 @@ function quicktabs_quicktabs_contents() {
  * Returns a QuickSet object.
  */
 function quick_set_factory($name, $contents, $renderer, $options) {
-  return QuickSet::rendered_quickset_factory($name, $contents, $renderer, $options);
+  return QuickSet::renderedQuickSetFactory($name, $contents, $renderer, $options);
 }
 
 /**

@@ -8,7 +8,7 @@ class QuickUiTabs extends QuickRenderer {
   public function render() {
     $quickset = $this->quickset;
 
-    $active_tab = $quickset->get_active_tab();
+    $active_tab = $quickset->getActiveTab();
     $tabs = $this->build_tablinks($active_tab);
     $qt_name = $quickset->getName();
     $render_array = array(
@@ -30,7 +30,7 @@ class QuickUiTabs extends QuickRenderer {
       $render_array['content']['divs'][] = array(
 	'#prefix' => '<div '. drupal_attributes($attribs) .'>',
 	'#suffix' => '</div>',
-	'content' => $tab['renderer']->render(),
+	'content' => $tab->render(),
       );
     }
     return $render_array;
@@ -50,7 +50,7 @@ class QuickUiTabs extends QuickRenderer {
       // be escaped. Sad panda is sad.
       $href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
       $tablink = array(
-	'#markup' => '<a href="'. $href .'">'. $tab['title'] .'</a>',
+	'#markup' => '<a href="'. $href .'">'. $tab->getTitle() .'</a>',
       );
       $tabs[] = $tablink;
     }
@@ -61,7 +61,7 @@ class QuickUiTabs extends QuickRenderer {
    * Add any necessary js, css and libraries for the render array.
    */
   protected function add_attached() {
-    $active_tab = $this->quickset->get_active_tab();
+    $active_tab = $this->quickset->getActiveTab();
     $attached = array(
       'js' => array(
 	array(

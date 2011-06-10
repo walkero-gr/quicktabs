@@ -23,9 +23,9 @@ class QuickAccordion extends QuickRenderer {
     // Render all tab content.
     foreach ($quickset->getContents() as $key => $item) {
       $render_array['content']['divs'][] = array(
-        '#prefix' => '<h3><a href= "#">'. $item['title'] .'</a></h3><div>',
+        '#prefix' => '<h3><a href= "#">'. $item->getTitle() .'</a></h3><div>',
         '#suffix' => '</div>',
-        'content' => $item['renderer']->render(),
+        'content' => $item->render(),
       );
     }
     return $render_array;
@@ -52,7 +52,7 @@ class QuickAccordion extends QuickRenderer {
     }
     $name = $this->quickset->getName();
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->get_active_tab());
+      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab());
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
     }
     return $attached;

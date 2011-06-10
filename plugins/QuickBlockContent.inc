@@ -5,9 +5,11 @@
  * content.
  */
 class QuickBlockContent extends QuickContent {
+  
+  public static $type = 'block';
 
   public function options_form($delta) {
-    $tab = $this->item;
+    $tab = $this->settings;
     $form = array();
     $form['block']['bid'] = array(
       '#type' => 'select',
@@ -25,7 +27,7 @@ class QuickBlockContent extends QuickContent {
 
   public function render($hide_empty = FALSE, $args = array()) {
     if ($this->rendered_content) return $this->rendered_content;
-    $item = $this->item;
+    $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.
       list($item['bid'], $item['hide_title']) = $args;
@@ -59,7 +61,7 @@ class QuickBlockContent extends QuickContent {
     return $output;
   }
 
-  public function getAjaxArgs() {
-    return array($this->item['bid'], $this->item['hide_title']);
+  public function getAjaxKeys() {
+    return array('bid', 'hide_title');
   }
 }

@@ -11,7 +11,7 @@ class QuickQuicktabs extends QuickRenderer {
     
     $render_array = array();
 
-    $active_tab = $quickset->get_active_tab();
+    $active_tab = $quickset->getActiveTab();
     if ($tabs = $this->build_tablinks($active_tab)) {
       $render_array['#attached'] = $this->add_attached();
 
@@ -44,7 +44,7 @@ class QuickQuicktabs extends QuickRenderer {
         $render_array['content']['container']['divs'][] = array(
           '#prefix' => '<div '. drupal_attributes($attribs) .'>',
           '#suffix' => '</div>',
-          'content' => $tab['renderer']->render(),
+          'content' => $tab->render(),
         );
       }
     }
@@ -63,14 +63,19 @@ class QuickQuicktabs extends QuickRenderer {
     foreach ($quickset->getContents() as $i => $tab) {
       $tablink = array(
         '#type' => 'link',
-        '#title' => $tab['title'],
+        '#title' => $tab->getTitle(),
         '#href' =>  $_GET['q'],
         '#options' => $this->construct_link_options($i),
       );
       if ($options['ajax']) {
-        $ajax_path = $quickset->getAjaxPath($i, $tab['type']);
-        $ajax_href = $ajax_path . '/'. implode('/', $tab['renderer']->getAjaxArgs());
-        //$ajax_href = $tab['renderer']->get_ajax_path($quickset->getname(), $i);
+        $settings = $tab->getSettings();
+        $ajax_keys = $tab->getAjaxKeys();
+        $ajax_args = array();
+        foreach ($ajax_keys as $key) {
+          $ajax_args[] = $settings[$key];
+        }
+        $ajax_path = $quickset->getAjaxPath($i, $tab::$type);
+        $ajax_href = $ajax_path . '/'. implode('/', $ajax_args);
         $tablink['#ajax'] = array(
           'progress' => array('message' => '', 'type' => 'throbber'),
           'path' => $ajax_href,
@@ -102,14 +107,7 @@ class QuickQuicktabs extends QuickRenderer {
     // assignment would create a reference to $this->quickset->contents, which is not what we want.
     $tab_settings = array();
     foreach ($this->quickset->getContents() as $content) {
-      $item = array();
-      foreach ($content as $name => $element) {
-        // Certain properties should not be included in the js settings array.
-        if (!in_array($name, array('contents', 'renderer'))) {
-          $item[$name] = $element;
-        }
-      }
-      $tab_settings[] = $item;
+      $tab_settings[] = $content->getSettings();
     }
     // Add our JS settings
     $javascript = drupal_add_js();

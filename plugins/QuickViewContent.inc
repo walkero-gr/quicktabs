@@ -5,8 +5,11 @@
  * content.
  */
 class QuickViewContent extends QuickContent {
+  
+  public static $type = 'view';
+  
   public function options_form($delta) {
-    $tab = $this->item;
+    $tab = $this->settings;
     $form = array();
     $views = quicktabs_get_views();
     $views_keys = array_keys($views);
@@ -41,6 +44,7 @@ class QuickViewContent extends QuickContent {
   }
   
   public function __construct($item) {
+    parent::__construct($item);
     if (module_exists('views')) views_add_js('ajax_view');
 
     if (isset($item['args'])) {
@@ -51,12 +55,16 @@ class QuickViewContent extends QuickContent {
         $args = str_replace("%$id", $arg, $args);
       }
       $args = preg_replace(',/?(%\d),', '', $args);
-      $args = $args ? explode('/', $args) : array();
-  
-      $item['actual_args'] = $args;
+      if (!empty($args)) {
+        $this->settings['ajax_args'] = urlencode($args);
+        $args_array = explode('/', $args);
+      }
+      else {
+        $this->settings['ajax_args'] = '';
+        $args_array = array();
+      }
+      $this->settings['actual_args'] = $args_array;
     }
-
-    $this->item = $item;
   }
 
   public function render($hide_empty = FALSE, $args = array()) {
@@ -77,7 +85,7 @@ class QuickViewContent extends QuickContent {
 
     // Non-ajax rendering of a view.
     if ($this->rendered_content) return $this->rendered_content;
-    $item = $this->item;
+    $item = $this->settings;
     $output = array();
     if (isset($item['vid'])) {
       if (module_exists('views')) {
@@ -104,8 +112,7 @@ class QuickViewContent extends QuickContent {
     return $output;
   }
 
-  public function getAjaxArgs() {
-    $args = urlencode(implode('/', $this->item['actual_args']));
-    return array($this->item['vid'], $this->item['display'], $args);
+  public function getAjaxKeys() {
+    return array('vid', 'display', 'ajax_args');
   }
 }
