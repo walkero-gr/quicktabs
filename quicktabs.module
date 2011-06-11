@@ -441,7 +441,7 @@ function quicktabs_get_css($style) {
     // Get the default style.
     $style = variable_get('quicktabs_tabstyle', 'nostyle');
   }
-
+  if ($style == 'nostyle') return array();
   $style_css = _quicktabs_get_style_css($style);
   return $style_css;
 }
@@ -449,21 +449,23 @@ function quicktabs_get_css($style) {
 /**
  * Helper function to get the css file for given style.
  */
-function _quicktabs_get_style_css($style = 'nostyle') {
-  static $tabstyles;
-
-  if ($style != 'nostyle') {
-    if (!isset($tabstyles)) {
+function _quicktabs_get_style_css($style) {
+  $tabstyles = &drupal_static(__FUNCTION__);
+  if (empty($tabstyles)) {
+    $cid = 'quicktabs_tabstyles';
+    $cache = cache_get($cid);
+    if (!$cache) {
       $tabstyles = module_invoke_all('quicktabs_tabstyles');
+      cache_set($cid, $tabstyles);
     }
-    foreach ($tabstyles as $css_file => $tabstyle) {
-      if ($style == $tabstyle) {
-        return $css_file;
-      }
+    else {
+      $tabstyles = $cache->data;
     }
   }
-
-  return 'nostyle';
+  if ($css_file = array_search($style, $tabstyles)) {
+    return array('data' => $css_file);
+  }
+  return array();
 }
 
 /**

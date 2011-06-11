@@ -90,21 +90,22 @@ class QuickQuicktabs extends QuickRenderer {
    * Add any necessary js, css and libraries for the render array.
    */
   protected function add_attached() {
-    $options = $this->quickset->getOptions();
     $attached = array(
       'css' => array(
         array('data' => drupal_get_path('module', 'quicktabs') .'/css/quicktabs.css'),
-        array('data' => quicktabs_get_css($options['style'])),
       ),
       'js' => array(
         array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
         array('data' => 'misc/progress.js', 'weight' => JS_LIBRARY),
       ),
     );
-    // All we really want to do here is copy $this->quickset->contents into a tab_settings array
-    // to pass into our js, but without the "contents" element because that would cause
-    // mad recursion; however, due to this php weirdness http://bugs.php.net/bug.php?id=20993,
-    // assignment would create a reference to $this->quickset->contents, which is not what we want.
+    $options = $this->quickset->getOptions();
+    // Add the custom style css if a custom style has been set.
+    $style_css = quicktabs_get_css($options['style']);
+    if (!empty($style_css)) {
+      $attached['css'][] = $style_css;
+    }
+    // Prepare a tab_settings array for passing the tab info to our JavaScript.
     $tab_settings = array();
     foreach ($this->quickset->getContents() as $content) {
       $tab_settings[] = $content->getSettings();
