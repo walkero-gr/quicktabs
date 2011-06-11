@@ -83,31 +83,28 @@ if (Drupal.ajax) {
    * We unfortunately need to override this function, which originally comes from
    * misc/ajax.js, in order to be able to cache loaded tabs, i.e. once a tab
    * content has loaded it should not need to be loaded again.
+   *
+   * I have removed all comments that were in the original core function, so that
+   * the only comments inside this function relate to the Quicktabs modification
+   * of it.
    */
   Drupal.ajax.prototype.eventResponse = function (element, event) {
-    // Create a synonym for this to reduce code confusion.
     var ajax = this;
-  
-    // Do not perform another ajax command if one is already in progress.
+
     if (ajax.ajaxing) {
       return false;
     }
   
     try {
       if (ajax.form) {
-        // If setClick is set, we must set this to ensure that the button's
-        // value is passed.
         if (ajax.setClick) {
-          // Mark the clicked button. 'form.clk' is a special variable for
-          // ajaxSubmit that tells the system which element got clicked to
-          // trigger the submit. Without it there would be no 'op' or
-          // equivalent.
           element.form.clk = element;
         }
   
         ajax.form.ajaxSubmit(ajax.options);
       }
       else {
+        // Do not perform an ajax request for already loaded Quicktabs content.
         if (!$(element).hasClass('quicktabs-loaded')) {
           ajax.beforeSerialize(ajax.element, ajax.options);
           $.ajax(ajax.options);
@@ -118,8 +115,6 @@ if (Drupal.ajax) {
       }
     }
     catch (e) {
-      // Unset the ajax.ajaxing flag here because it won't be unset during
-      // the complete response.
       ajax.ajaxing = false;
       alert("An error occurred while attempting to process " + ajax.options.url + ": " + e.message);
     }
