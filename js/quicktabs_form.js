@@ -1,7 +1,7 @@
 (function ($) {
 
 Drupal.quicktabsShowHide = function() {
-  $(this).parents('tr').find('td.qt-tab-' + this.value + '-content').show().siblings('td.qt-tab-content').hide();
+  $(this).parents('tr').find('div.qt-tab-' + this.value + '-options-form').show().siblings('div.qt-tab-options-form').hide();
 };
 
 Drupal.behaviors.quicktabsform = {

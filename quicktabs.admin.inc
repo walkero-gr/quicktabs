@@ -346,14 +346,18 @@ function theme_quicktabs_admin_form_tabs($variables) {
     );
 
     // content plugins
-    $content_plugins = array();
+    $content_plugins = '';
     foreach ($tab['type']['#options'] as $content_provider ) {
-      $content_plugins[] = array('data' => drupal_render($tab[$content_provider]), 'class' => array('qt-tab-content', "qt-tab-$content_provider-content"));
+      $tab[$content_provider]['#prefix'] = '<div class="qt-tab-options-form qt-tab-'. $content_provider .'-options-form">';
+      $tab[$content_provider]['#suffix'] = '</div>';
+      $content_plugins .= drupal_render($tab[$content_provider]);
     }
+    $tab_fields[] = array('data' => $content_plugins);
+    $tab_fields[] = array('data' => drupal_render($tab['remove']), 'class' => array('qt-tab-remove'));
 
     // Build the table row.
     $row = array(
-      'data' => array_merge($tab_fields, $content_plugins, array(array('data' => drupal_render($tab['remove']), 'class' => array('qt-tab-remove')))),
+      'data' => $tab_fields,
       'class' => array('draggable'),
     );
 

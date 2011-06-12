@@ -35,10 +35,15 @@
 #qt-tablist-table .qt-tab-content .form-item .form-text {
   width: 150px;
 }
-#qt-tablist-table .qt-tab-content {
-  display: none;
+#qt-tablist-table .qt-tab-options-form {
+  border-bottom: 1px solid #999;
+  padding: 5px;
 }
-
+html.js #qt-tablist-table .qt-tab-options-form {
+  display: none;
+  border-bottom: none;
+  padding: 0px;
+}
 #qt-tablist-table .qt-tab-remove label,
 #quicktabs-form #add-more-tabs-button label {
   font-weight: bold;
