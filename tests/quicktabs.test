@@ -126,7 +126,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     $this->drupalPost('admin/structure/quicktabs/manage/'. $quicktabs->machine_name .'/delete', array(), t('Delete'));
     // Reset static vars because ctools will have cached the original $quicktabs object
     drupal_static_reset();
-    // Check that the quicktabs object is in the database.
+    // Check that the quicktabs object is no longer in the database.
     $this->assertNull(quicktabs_load($quicktabs->machine_name), t('Quicktabs instance not found in database'));
   }
 

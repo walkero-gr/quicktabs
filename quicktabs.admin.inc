@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides the Quick Tabs' administrative interface.
+ * Provides the Quicktabs administrative interface.
  */
 
 /**
@@ -74,6 +74,7 @@ function quicktabs_form($form, $form_state, $formtype, $qt = NULL) {
   }
   $form = _quicktabs_admin_main_form($form_state, $qt);
 
+  // If creating a new Quicktabs instance, start off with 2 empty tabs.
   if (empty($qt->tabs)) {
     $qt->tabs = array(
       0 => array(),
@@ -81,12 +82,15 @@ function quicktabs_form($form, $form_state, $formtype, $qt = NULL) {
     );
   }
 
-  // Add or remove tabs.
+  // If the "Add another" button was clicked, we need to increment the number of
+  // tabs by one.
   if (isset($form_state['num_tabs']) && $form_state['num_tabs'] > count($qt->tabs)) {
     $qt->tabs[] = array();
   }
   $form_state['num_tabs'] = count($qt->tabs);
-
+  
+  // If the "Remove" button was clicked for a tab, we need to remove that tab
+  // from the form.
   if (isset($form_state['to_remove'])) {
     unset($qt->tabs[$form_state['to_remove']]);
     unset($form_state['to_remove']);
@@ -121,7 +125,6 @@ function quicktabs_form($form, $form_state, $formtype, $qt = NULL) {
  * The main section of admin page.
  */
 function _quicktabs_admin_main_form($form_state, &$qt) {
-  //$form['#cache'] = TRUE;
 
   // The contents of $qt will either come from the db or from $form_state.
   if (isset($form_state['values']['title'])) {
@@ -173,7 +176,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
   $styles = module_invoke_all('quicktabs_tabstyles');
   if (count($styles)) {
     $style_options = array();
-    // The keys used for options must be valid html id-s.
+    // The keys used for options must be valid html IDs.
     foreach ($styles as $style) {
       $style_options[$style] = $style;
     }
@@ -286,8 +289,8 @@ function _quicktabs_form(array $tab) {
       }
     }
     $tabtypes[$name] = $name;
-    $content_builder = quick_content_factory($name, $tab);
-    $form += $content_builder->options_form($delta);
+    $content_provider = quick_content_factory($name, $tab);
+    $form = array_merge_recursive($form, $content_provider->options_form($delta));
   }
 
   $form['type'] = array(
@@ -383,11 +386,10 @@ function theme_quicktabs_admin_form_tabs($variables) {
 }
 
 /**
- * ajax callback.
+ * Ajax callback for the add tab and remove tab buttons.
  */
 function quicktabs_ajax_callback($form, $form_state) {
   $form_tabs = $form['qt_wrapper']['tabs'];
-  //$output = drupal_render($form_tabs);
   return $form_tabs;
 }
 
@@ -414,34 +416,28 @@ function quicktabs_remove_tab_submit($form, &$form_state) {
  * Validation handler for quicktabs admin page.
  */
 function quicktabs_form_validate($form, &$form_state) {
-  // We don't want it to validate when we're just adding or removing tabs.
-  if ($form_state['clicked_button']['#id'] == 'edit-submit-form') {
-    if (empty($form_state['values']['machine_name'])) {
-      form_set_error('machine_name', t('The quicktabs machine name is required.'));
-    }
-    elseif (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['machine_name'])) {
-      form_set_error('machine_name', t('The quicktabs machine name must contain only lowercase letters, numbers, and underscores.'));
-    }
+  if (empty($form_state['values']['machine_name'])) {
+    form_set_error('machine_name', t('The quicktabs machine name is required.'));
+  }
+  elseif (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['machine_name'])) {
+    form_set_error('machine_name', t('The quicktabs machine name must contain only lowercase letters, numbers, and underscores.'));
+  }
 
-    if (!isset($form_state['values']['tabs'])) {
-      form_set_error('', t('At least one tab should be created.'));
-    }
-    else {
-      foreach ($form_state['values']['tabs'] as $j => $tab) {
-        if (empty($tab['title'])) {
-          form_set_error('tabs][' . $j . '][title', t('Title is required for each tab.'));
-        }
-        elseif ($tab['type'] == 'qtabs' && $tab['qtabs']['machine_name'] == $form_state['values']['machine_name']) {
-          form_set_error('tabs][' . $j . '][qtabs][machine_name', t('You cannot put a quicktab inside itself.'));
-        }
-        elseif ($tab['type'] == 'view') {
-          // Remove spaces from view arguments.
-          $form_state['values']['tabs'][$j]['view']['args'] = str_replace(' ', '', $form_state['values']['tabs'][$j]['view']['args']);
-        }
+  if (!isset($form_state['values']['tabs'])) {
+    form_set_error('', t('At least one tab should be created.'));
+  }
+  else {
+    foreach ($form_state['values']['tabs'] as $j => $tab) {
+      if (empty($tab['title'])) {
+        form_set_error('tabs][' . $j . '][title', t('Title is required for each tab.'));
+      }
+      elseif ($tab['type'] == 'qtabs' && $tab['qtabs']['machine_name'] == $form_state['values']['machine_name']) {
+        form_set_error('tabs][' . $j . '][qtabs][machine_name', t('You cannot put a quicktab inside itself.'));
       }
     }
   }
 }
+
 
 /**
  * Submit handler for quicktabs admin page.
@@ -454,13 +450,13 @@ function quicktabs_form_submit($form, &$form_state) {
     if ($exists && empty($exists->in_code_only)) {
       $ret = drupal_write_record('quicktabs', $qt, 'machine_name');
       if ($ret == SAVED_UPDATED) {
-        drupal_set_message(t('The quicktab block has been updated.'));
+        drupal_set_message(t('The Quicktabs instance has been updated.'));
       }
     }
     else {
       $ret = drupal_write_record('quicktabs', $qt);
       if ($ret == SAVED_NEW) {
-        drupal_set_message(t('The quicktab block has been created.'));
+        drupal_set_message(t('The Quicktabs instance has been created.'));
       }
     }
     drupal_goto('admin/structure/quicktabs');
@@ -481,7 +477,7 @@ function quicktabs_block_delete($form, $form_state, $qt) {
  */
 function quicktabs_block_delete_submit($form, &$form_state) {
   db_query('DELETE FROM {quicktabs} WHERE machine_name = :machine_name', array(':machine_name' => $form_state['values']['machine_name']));
-  drupal_set_message(t('The quicktab block %name has been removed.', array('%name' => $form_state['values']['title'])));
+  drupal_set_message(t('The Quicktabs instance %name has been removed.', array('%name' => $form_state['values']['title'])));
   cache_clear_all();
   $form_state['redirect'] = 'admin/structure/quicktabs';
 };

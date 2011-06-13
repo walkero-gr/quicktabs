@@ -38,7 +38,7 @@ class QuickQtabsContent extends QuickContent {
         $name = $quicktabs->machine_name;
         unset($quicktabs->tabs, $quicktabs->machine_name);
         $options = (array) $quicktabs;
-        if ($qt = QuickSet::renderedQuickSetFactory($name, $contents, $quicktabs->renderer, $options)) {
+        if ($qt = QuickSet::QuickSetRendererFactory($name, $contents, $quicktabs->renderer, $options)) {
           $output = $qt->render();
         }
       }

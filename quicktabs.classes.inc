@@ -16,16 +16,15 @@ class QuickSet {
   
   /**
    * The contents array.
-   * An array of objects that implement the QuickContentRenderer interface.
+   * An array of objects that implement the QuickContentRenderable interface.
    * @var array
    */
   protected $contents;
   
   /**
-   * The options array.
-   * An array of settings controlling the behaviour of the QuickSet object, e.g.
-   * "ajax" (whether to use ajax), "hide_empty_tabs", default_tabs.
-   * TODO: provide a full list of possible options somewhere!
+   * An array of settings controlling the behaviour of the QuickSet object. See
+   * the getDefaultOptions() static function of this class for the full list of
+   * options.
    * @var array
    */
   protected $options;
@@ -47,6 +46,10 @@ class QuickSet {
     return $this->options;
   }
 
+  public function getTitle() {
+    return isset($this->options['title']) ? $this->options['title'] : $this->name;
+  }
+
   /**
    * Instantiate, populate and return a QuickSet object wrapped in a renderer.
    *
@@ -64,7 +67,7 @@ class QuickSet {
    *   An array of options determining the behaviour of this QuickSet instance.
    *  
    */
-  public static function renderedQuickSetFactory($name, $contents, $renderer, $options) {
+  public static function QuickSetRendererFactory($name, $contents, $renderer, $options) {
     ctools_include('plugins');
     if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler')) {
       try {
@@ -79,6 +82,46 @@ class QuickSet {
   }
   
   /**
+   * Returns a reference to an object that implements the QuickContentRenderable
+   * interface.
+   */
+  public static function getContentRenderer($tab) {
+    if (!isset($tab['title'])) {
+      throw new InvalidQuickSetException('At least one tab is missing a title.');
+    }
+    if ($tab['type'] == 'prerendered') {
+      return new QuickPreRenderedContent($tab);
+    }
+    if ($content = QuickContent::factory($tab['type'], $tab)) return $content;
+    return NULL;
+  }
+  
+  /**
+   * Static method to retrieve content from an ajax call. This is called by the
+   * quicktabs_ajax() callback in quicktabs.module.
+   */
+  public static function ajaxRenderContent($type, $args) {
+    if ($renderer = self::getContentRenderer(array('type' => $type))) {
+      $output = $renderer->render(FALSE, $args);
+      return !empty($output) ? drupal_render($output) : '';
+    }
+    return '';
+  }
+  
+  /**
+   * Ensure sensible default options for each QuickSet object.
+   */
+  private static function getDefaultOptions() {
+    return array(
+      'title' => '<none>',
+      'style' => 'nostyle',
+      'hide_empty_tabs' => 0,
+      'ajax' => 0,
+      'default_tab' => 0
+    );
+  }
+  
+  /**
    * Constructor
    */
   public function __construct($name, $contents, $options) {
@@ -90,13 +133,15 @@ class QuickSet {
         $this->contents[$key] = $renderer;
       }
     }
-    $this->options = $options;
+    $default_options = $this::getDefaultOptions();
+    $this->options = array_merge($default_options, $options);
     $this->prepareContents();
+    // Set the default style if necessary.
+    if ($this->options['style'] == 'default') $this->options['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
   }
-  
 
   /**
-   * Returns an ajax path to be used on ajax-enabled links.
+   * Returns an ajax path to be used on ajax-enabled tab links.
    *
    * @param $index The index of the tab, i.e where it fits into the QuickSet
    * instance.
@@ -108,9 +153,11 @@ class QuickSet {
   }
 
   /**
-   * This method does some initial set-up of the "tab" contents, such as hiding
+   * This method does some initial set-up of the tab contents, such as hiding
    * tabs with no content if the hide_empty_tabs option is set. It also makes sure
-   * that if there's a custom tab and the ajax option
+   * that prerendered contents are never attempted to be loaded via ajax.
+   *
+   * @throws InvalidQuickSetException if there are no contents to render.
    */
   protected function prepareContents() {
     if (!count($this->contents))  {
@@ -158,8 +205,6 @@ class QuickSet {
         }
       }
     }
-    // Set the default style if necessary.
-    if ($this->options['style'] == 'default') $this->options['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
   }
   
   /**
@@ -173,29 +218,10 @@ class QuickSet {
     $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : 0;
     return $active_tab;
   }
-  
-  public static function getContentRenderer($tab) {
-    if ($tab['type'] == 'prerendered') {
-      return new QuickPreRenderedContent($tab);
-    }
-    return QuickContent::factory($tab['type'], $tab);
-  }
-  
-  /**
-   * Static method to retrieve content from an ajax call. This is called by the
-   * quicktabs_ajax() callback in quicktabs.module.
-   */
-  public static function ajaxRenderContent($type, $args) {
-    if ($renderer = self::getContentRenderer(array('type' => $type))) {
-      $output = $renderer->render(FALSE, $args);
-      return !empty($output) ? drupal_render($output) : '';
-    }
-    return '';
-  }
 }
 
 /**
- * Abstract base class for content plugins.
+ * Abstract base class for QuickSet Renderers.
  *
  * A renderer object contains a reference to a QuickSet object, which it can
  * then render.
@@ -215,6 +241,15 @@ abstract class QuickRenderer {
   }
   
   /**
+   * Accessor method for the title.
+   */
+  public function getTitle() {
+    return $this->quickset->getTitle();
+  }
+  
+  /**
+   * The only method that renderer plugins need to implement.
+   * 
    * @return A render array to be passed to drupal_render().
    */
   abstract public function render();
@@ -232,8 +267,8 @@ abstract class QuickRenderer {
 interface QuickContentRenderable {
   
   /**
-   * Returns the short type name of the content plugin, e.g.
-   * 'block', 'node', 'prerendered'.
+   * Returns the short type name of the content plugin, e.g. 'block', 'node', 
+   * 'prerendered'.
    */
   public static function getType();
   
@@ -251,14 +286,19 @@ interface QuickContentRenderable {
    * Renders the content.
    *
    * @param $hide_emtpy If set to true, then the renderer should return an empty
-   * array if there is no content to display, for example of the user does not
+   * array if there is no content to display, for example if the user does not
    * have access to the requested content.
+   *
+   * @param $args Used during an ajax call to pass in the settings necessary to
+   * render this type of content.
    */
   public function render($hide_empty = FALSE, $args = array());
 
   /**
    * Returns an array of keys to use for constructing the correct arguments for
-   * an ajax callback to retrieve content of this type.
+   * an ajax callback to retrieve content of this type. The order of the keys
+   * returned affects the order of the args passed in to the render method when
+   * called via ajax (see the render() method above).
    */
   public function getAjaxKeys();
   
@@ -271,6 +311,7 @@ abstract class QuickContent implements QuickContentRenderable {
 
   /**
    * Used as the title of the tab.
+   * @var string
    */
   protected $title;
 
@@ -283,6 +324,7 @@ abstract class QuickContent implements QuickContentRenderable {
   
   /**
    * A render array of the contents.
+   * @var array
    */
   protected $rendered_content;
   
@@ -291,7 +333,7 @@ abstract class QuickContent implements QuickContentRenderable {
    * Constructor
    */
   public function __construct($item) {
-    $this->title = $item['title'];
+    $this->title = isset($item['title']) ? $item['title'] : '';
     // We do not need to store title, type or weight in the settings array, which
     // is for type-specific settings.
     unset($item['title'], $item['type'], $item['weight']);
@@ -363,11 +405,13 @@ class QuickPreRenderedContent implements QuickContentRenderable {
   
   /**
    * Used as the title of the tab.
+   * @var title
    */
   protected $title;
   
   /**
    * A render array of the contents.
+   * @var array
    */
   protected $rendered_content;
 
@@ -383,7 +427,7 @@ class QuickPreRenderedContent implements QuickContentRenderable {
     }
     $this->rendered_content = $contents;
     
-    $this->title = $item['title'];
+    $this->title = isset($item['title']) ? $item['title'] : '';
   }
   
   /**
@@ -394,21 +438,23 @@ class QuickPreRenderedContent implements QuickContentRenderable {
   }
 
   /**
-   * Accessor for the tab settings.
+   * Prerendered content doesn't need any extra settings.
    */
   public function getSettings() {
     return array();
   }
 
 
-
+  /**
+   * The render method simply returns the contents that were passed in and
+   * stored during construction.
+   */
   public function render($hide_empty = FALSE, $args = array()) {
     return $this->rendered_content;
   }
   
   /**
-   * Returns an array of keys to use for constructing the correct arguments for
-   * an ajax callback to retrieve content of this type.
+   * This content cannot be rendered via ajax so we don't return any ajax keys.
    */
   public function getAjaxKeys() {
     return array();
