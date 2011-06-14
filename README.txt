@@ -36,8 +36,8 @@ programmatically, putting whatever you want into the Quicktabs instance. This fu
 takes 3 parameters:
 $name - the name of an existing Quicktabs instance (i.e. existing in the database or
 in code), or a new name if creating an instance from scratch
-$overrides - an array of options to override the settings for the existing instance, or the
-default settings if creating an instance from scratch
+$overrides - an array of options to override the settings for the existing instance, or
+to override the default settings if creating an instance from scratch
 $custom_tabs - an array of tab content arrays. A very basic tab content array would be
 array('title' => 'My Custom Tab', 'contents' => 'Some text').
 One example of where this might prove useful is in a hook_page_alter implementation,
@@ -47,9 +47,10 @@ a string of html.
 
 Another way to extend Quicktabs is to add a renderer plugin. Quicktabs comes with
 3 renderer plugins: jQuery UI Tabs, jQuery UI Accordion, and classic Quicktabs. A
-renderer plugin is a class that extends the QuickSet class and implements the render()
-method. See any of the existing renderer plugins for examples. Also see Quicktabs'
-implementation of hook_quicktabs_renderers().
+renderer plugin is a class that extends the QuickRenderer class and implements the 
+render() method, returning a render array that can be passed to drupal_render().
+See any of the existing renderer plugins for examples. Also see Quicktabs' implement-
+ation of hook_quicktabs_renderers().
 
 Lastly, Quicktabs can be extended by adding new types of entities that can be loaded
 as tab content. Quicktabs itself provides the node, block, view and qtabs tab content
