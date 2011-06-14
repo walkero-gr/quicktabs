@@ -101,7 +101,7 @@ function quicktabs_form($form, $form_state, $formtype, $qt = NULL) {
   // Add current tabs to the form.
   foreach ($qt->tabs as $delta => $tab) {
     $tab['delta'] = $delta;
-    $form['qt_wrapper']['tabs'][$delta] = _quicktabs_form($tab);
+    $form['qt_wrapper']['tabs'][$delta] = _quicktabs_form($tab, $qt);
     if (isset($tab['title'])) {
       $tab_titles[$delta] = $tab['title'];
     }
@@ -261,8 +261,15 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
 
 /*
  * Build one row (one tabpage) on the QT admin form.
+ * 
+ * @param array $tab
+ *  An array containing the details of this particular tabpage.
+ * 
+ * @param object $qt
+ *  An object representing the Quicktabs instance that the tabs are
+ *  being built for. 
  */
-function _quicktabs_form(array $tab) {
+function _quicktabs_form(array $tab, $qt) {
   $form['#tree'] = TRUE;
   $delta = $tab['delta'];
 
@@ -290,7 +297,7 @@ function _quicktabs_form(array $tab) {
     }
     $tabtypes[$name] = $name;
     $content_provider = quick_content_factory($name, $tab);
-    $form = array_merge_recursive($form, $content_provider->options_form($delta));
+    $form = array_merge_recursive($form, $content_provider->options_form($delta, $qt));
   }
 
   $form['type'] = array(
@@ -430,9 +437,6 @@ function quicktabs_form_validate($form, &$form_state) {
     foreach ($form_state['values']['tabs'] as $j => $tab) {
       if (empty($tab['title'])) {
         form_set_error('tabs][' . $j . '][title', t('Title is required for each tab.'));
-      }
-      elseif ($tab['type'] == 'qtabs' && $tab['qtabs']['machine_name'] == $form_state['values']['machine_name']) {
-        form_set_error('tabs][' . $j . '][qtabs][machine_name', t('You cannot put a quicktab inside itself.'));
       }
     }
   }

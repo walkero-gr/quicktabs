@@ -10,7 +10,7 @@ class QuickNodeContent extends QuickContent {
     return 'node';
   }
 
-  public function options_form($delta) {
+  public function options_form($delta, $qt) {
     $tab = $this->settings;
     $form = array();
     $form['node']['nid'] = array(

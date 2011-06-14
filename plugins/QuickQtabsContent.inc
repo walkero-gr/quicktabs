@@ -10,15 +10,21 @@ class QuickQtabsContent extends QuickContent {
     return 'qtabs';
   }
   
-  public function options_form($delta) {
+  public function options_form($delta, $qt) {
     $tab = $this->settings;
     $form = array();
+    $tab_options = array();
+    foreach (quicktabs_load_multiple() as $machine_name => $info) {
+      // Do not offer the option to put a tab inside itself.
+      if ($machine_name != $qt->machine_name) {
+        $tab_options[$machine_name] = $info->title;
+      }
+    }
     $form['qtabs']['machine_name'] = array(
-      '#type' => 'textfield',
+      '#type' => 'select',
       '#title' => t('Quicktabs instance'),
-      '#description' => t('The machine name of the existing Quicktabs instance.'),
-      '#maxlength' => 10,
-      '#size' => 20,
+      '#description' => t('The Quicktabs instance to put inside this tab.'),
+      '#options' => $tab_options,
       '#default_value' => isset($tab['machine_name']) ? $tab['machine_name'] : '',
     );
     return $form;

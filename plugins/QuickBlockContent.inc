@@ -10,7 +10,7 @@ class QuickBlockContent extends QuickContent {
     return 'block';
   }
 
-  public function options_form($delta) {
+  public function options_form($delta, $qt) {
     $tab = $this->settings;
     $form = array();
     $form['block']['bid'] = array(
