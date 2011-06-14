@@ -86,9 +86,6 @@ class QuickSet {
    * interface.
    */
   public static function getContentRenderer($tab) {
-    if (!isset($tab['title'])) {
-      throw new InvalidQuickSetException('At least one tab is missing a title.');
-    }
     if ($tab['type'] == 'prerendered') {
       return new QuickPreRenderedContent($tab);
     }
