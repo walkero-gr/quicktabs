@@ -130,7 +130,7 @@ class QuickSet {
         $this->contents[$key] = $renderer;
       }
     }
-    $default_options = $this::getDefaultOptions();
+    $default_options = self::getDefaultOptions();
     $this->options = array_merge($default_options, $options);
     $this->prepareContents();
     // Set the default style if necessary.
@@ -179,7 +179,7 @@ class QuickSet {
       // Prerendered content cannot be rendered via ajax.
       $has_prerendered = FALSE; // keep track of whether we have found a prerendered tab.
       foreach ($this->contents as $key => $tab) {
-        $type = $tab::getType();
+        $type = $tab->getType();
         if ($type == 'prerendered') {
           if (!$has_prerendered) {
             $has_prerendered = TRUE;

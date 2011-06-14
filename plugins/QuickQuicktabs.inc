@@ -74,7 +74,7 @@ class QuickQuicktabs extends QuickRenderer {
         foreach ($ajax_keys as $key) {
           $ajax_args[] = $settings[$key];
         }
-        $ajax_path = $quickset->getAjaxPath($i, $tab::getType());
+        $ajax_path = $quickset->getAjaxPath($i, $tab->getType());
         $ajax_href = $ajax_path . '/'. implode('/', $ajax_args);
         $tablink['#ajax'] = array(
           'progress' => array('message' => '', 'type' => 'throbber'),
