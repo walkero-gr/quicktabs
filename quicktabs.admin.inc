@@ -161,7 +161,15 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
   $renderers = ctools_get_plugins('quicktabs', 'renderers');
   $renderer_options = array();
   foreach ($renderers as $name => $info) {
-    $renderer_options[$name] = $name;
+    if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $name, 'handler')) {
+      // Add the renderer to the dropdown list of renderers
+      $renderer_options[$name] = $name;
+      // Get the renderer's options form elements
+      
+      // PHP 5.2 doesn't support $class::staticMethod() syntax, so we have to
+      // use call_user_func_array() until we can require PHP 5.3.
+      $renderer_form_options[$name] = call_user_func_array(array($class, 'optionsForm'), array($qt));
+    }
   }
   ksort($renderer_options);
   $form['renderer'] = array(
@@ -172,7 +180,16 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     '#description' => t('Choose how to render the content.'),
     '#weight' => -7,
   );
-
+  // Add the renderer options form elements to the form, to be shown only if the
+  // renderer in question is selected.
+  $form['options'] = array('#tree' => TRUE, '#weight' => -6);
+  foreach ($renderer_form_options as $renderer => $options) {
+    foreach ($options as &$option) {
+      $option['#states'] = array('visible' => array(':input[name="renderer"]' => array('value' => $renderer)));
+    }
+    $form['options'][$renderer] = $options;
+  }
+  
   $styles = module_invoke_all('quicktabs_tabstyles');
   if (count($styles)) {
     $style_options = array();
@@ -605,14 +622,16 @@ function _quicktabs_convert_form_to_quicktabs($form_state) {
     }
     array_multisort($weight, SORT_ASC, $formvalues_tabs);
   }
+  $renderer = $form_state['values']['renderer'];
   $qt = new stdClass();
   $qt->title = $form_state['values']['title'];
   $qt->ajax = $form_state['values']['ajax'];
   $qt->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
   $qt->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
-  $qt->renderer = $form_state['values']['renderer'];
+  $qt->renderer = $renderer;
   $qt->style = $form_state['values']['style'];
   $qt->tabs = $formvalues_tabs;
+  $qt->options = isset($form_state['values']['options'][$renderer]) ? $form_state['values']['options'][$renderer] : array();
 
   if (isset($form_state['values']['machine_name'])) {
     $qt->machine_name = $form_state['values']['machine_name'];

@@ -16,26 +16,26 @@ class QuickQuicktabs extends QuickRenderer {
       $render_array['#attached'] = $this->add_attached();
 
       $qt_name = $quickset->getName();
-      $options = $quickset->getOptions();
+      $settings = $quickset->getSettings();
       $contents = $quickset->getContents();
 
       $render_array['content'] = array(
         '#theme' => 'qt_quicktabs',
         '#options' => array('attributes' => array(
           'id' => 'quicktabs-' . $qt_name,
-          'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_strtolower($options['style']),
+          'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_strtolower($settings['style']),
         )),
-        'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_strtolower($options['style'])), 'tablinks' => $tabs),
+        'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_strtolower($settings['style'])), 'tablinks' => $tabs),
         // The main content area, each quicktab container needs a unique id.
         'container' => array(
-          '#prefix' => '<div id="quicktabs-container-' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_strtolower($options['style']) .'">',
+          '#prefix' => '<div id="quicktabs-container-' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_strtolower($settings['style']) .'">',
           '#suffix' => '</div>',
           'divs' => array(),
         ),
       );
 
       // If in ajax mode, we'll only be rendering one tab, otherwise all of them.
-      $tabs_to_render = $options['ajax'] ? array($active_tab => $contents[$active_tab]) : $contents;
+      $tabs_to_render = $settings['ajax'] ? array($active_tab => $contents[$active_tab]) : $contents;
       foreach ($tabs_to_render as $key => $tab) {
         $attribs = array(
           'id' => 'quicktabs-tabpage-'. $qt_name . '-'. $key,
@@ -58,7 +58,7 @@ class QuickQuicktabs extends QuickRenderer {
    */
   protected function build_tablinks($active_tab) {
     $quickset = $this->quickset;
-    $options = $quickset->getOptions();
+    $settings = $quickset->getSettings();
     $tabs = array();
     foreach ($quickset->getContents() as $i => $tab) {
       $tablink = array(
@@ -67,12 +67,12 @@ class QuickQuicktabs extends QuickRenderer {
         '#href' =>  $_GET['q'],
         '#options' => $this->construct_link_options($i),
       );
-      if ($options['ajax']) {
-        $settings = $tab->getSettings();
+      if ($settings['ajax']) {
+        $tab_settings = $tab->getSettings();
         $ajax_keys = $tab->getAjaxKeys();
         $ajax_args = array();
         foreach ($ajax_keys as $key) {
-          $ajax_args[] = $settings[$key];
+          $ajax_args[] = $tab_settings[$key];
         }
         $ajax_path = $quickset->getAjaxPath($i, $tab->getType());
         $ajax_href = $ajax_path . '/'. implode('/', $ajax_args);
@@ -99,9 +99,9 @@ class QuickQuicktabs extends QuickRenderer {
         array('data' => 'misc/progress.js', 'weight' => JS_LIBRARY),
       ),
     );
-    $options = $this->quickset->getOptions();
+    $settings = $this->quickset->getSettings();
     // Add the custom style css if a custom style has been set.
-    $style_css = quicktabs_get_css($options['style']);
+    $style_css = quicktabs_get_css($settings['style']);
     if (!empty($style_css)) {
       $attached['css'][] = $style_css;
     }
@@ -120,7 +120,7 @@ class QuickQuicktabs extends QuickRenderer {
     }
     $name = $this->quickset->getName();
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array_merge(array('name' => $name, 'tabs' => $tab_settings), $options);
+      $quicktabs_array = array_merge(array('name' => $name, 'tabs' => $tab_settings), $settings);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_' . $name => $quicktabs_array)), 'type' => 'setting');
     }
     return $attached;

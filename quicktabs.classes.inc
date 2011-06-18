@@ -2,7 +2,7 @@
 
 /**
  * A QuickSet object is an unrendered Quicktabs intance, as defined by a set of 
- * options and the contents it contains.
+ * settings and the contents it contains.
  */
 class QuickSet {
   
@@ -23,11 +23,11 @@ class QuickSet {
   
   /**
    * An array of settings controlling the behaviour of the QuickSet object. See
-   * the getDefaultOptions() static function of this class for the full list of
-   * options.
+   * the getDefaultSettings() static function of this class for the full list of
+   * settings.
    * @var array
    */
-  protected $options;
+  protected $settings;
   
 
   /**
@@ -42,12 +42,12 @@ class QuickSet {
     return $this->contents;
   }
   
-  public function getOptions() {
-    return $this->options;
+  public function getSettings() {
+    return $this->settings;
   }
 
   public function getTitle() {
-    return isset($this->options['title']) ? $this->options['title'] : $this->name;
+    return isset($this->settings['title']) ? $this->settings['title'] : $this->name;
   }
 
   /**
@@ -63,15 +63,15 @@ class QuickSet {
    * @param $renderer
    *   The plugin key for this renderer plugin
    *
-   * @param $options
-   *   An array of options determining the behaviour of this QuickSet instance.
+   * @param $settings
+   *   An array of settings determining the behaviour of this QuickSet instance.
    *  
    */
-  public static function QuickSetRendererFactory($name, $contents, $renderer, $options) {
+  public static function QuickSetRendererFactory($name, $contents, $renderer, $settings) {
     ctools_include('plugins');
     if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler')) {
       try {
-        $qs = new self($name, $contents, $options);
+        $qs = new self($name, $contents, $settings);
       }
       catch (InvalidQuickSetException $e) {
         watchdog('Quicktabs', $e->getMessage());
@@ -106,35 +106,37 @@ class QuickSet {
   }
   
   /**
-   * Ensure sensible default options for each QuickSet object.
+   * Ensure sensible default settings for each QuickSet object.
    */
-  private static function getDefaultOptions() {
+  private static function getDefaultSettings() {
     return array(
       'title' => '<none>',
       'style' => 'nostyle',
       'hide_empty_tabs' => 0,
       'ajax' => 0,
-      'default_tab' => 0
+      'default_tab' => 0,
+      'options' => array(),
     );
   }
   
   /**
    * Constructor
    */
-  public function __construct($name, $contents, $options) {
+  public function __construct($name, $contents, $settings) {
     $this->name = $name;
     $this->contents = array();
-    foreach ($contents as $key => $settings) {
+    foreach ($contents as $key => $item) {
       // Instantiate a content renderer object and add it to the contents array.
-      if ($renderer = self::getContentRenderer($settings)) {
+      if ($renderer = self::getContentRenderer($item)) {
         $this->contents[$key] = $renderer;
       }
     }
-    $default_options = self::getDefaultOptions();
-    $this->options = array_merge($default_options, $options);
+    $default_settings = self::getDefaultSettings();
+    $this->settings = array_merge($default_settings, $settings);
+
     $this->prepareContents();
     // Set the default style if necessary.
-    if ($this->options['style'] == 'default') $this->options['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
+    if ($this->settings['style'] == 'default') $this->settings['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
   }
 
   /**
@@ -160,7 +162,7 @@ class QuickSet {
     if (!count($this->contents))  {
       throw new InvalidQuickSetException('There are no contents to render.');
     }
-    if ($this->options['hide_empty_tabs'] && !$this->options['ajax']) {
+    if ($this->settings['hide_empty_tabs'] && !$this->settings['ajax']) {
       // Check if any tabs need to be hidden because of empty content.
       foreach ($this->contents as $key => $tab) {
         $contents = $tab->render(TRUE);
@@ -174,7 +176,7 @@ class QuickSet {
         throw new InvalidQuickSetException('There are no contents to render.');
       }
     }
-    elseif ($this->options['ajax']) {
+    elseif ($this->settings['ajax']) {
       // Make sure that there is at most 1 prerendered tab and it is the default tab.
       // Prerendered content cannot be rendered via ajax.
       $has_prerendered = FALSE; // keep track of whether we have found a prerendered tab.
@@ -183,19 +185,19 @@ class QuickSet {
         if ($type == 'prerendered') {
           if (!$has_prerendered) {
             $has_prerendered = TRUE;
-            $this->options['default_tab'] = $key;
+            $this->settings['default_tab'] = $key;
             // In the case of a direct link to a different tab, the 'default_tab'
             // will be overridden, so we need to make sure it does not attempt
             // to load a pre-rendered tab via ajax. Turn ajax option off.
             if ($this->getActiveTab() !== $key) {
-              $this->options['ajax'] = 0;
+              $this->settings['ajax'] = 0;
             }
           }
           else {
             // We are on a second custom tab and the ajax option is set, we cannot
             // render custom tabs via ajax, so we skip out of the loop, set the
             // ajax option to off, and call the method again.
-            $this->options['ajax'] = 0;
+            $this->settings['ajax'] = 0;
             $this->prepareContents();
             return;
           }
@@ -210,7 +212,7 @@ class QuickSet {
    * defaults to 0.
    */
   public function getActiveTab() {
-    $active_tab = isset($this->options['default_tab']) ? $this->options['default_tab'] : key($this->contents);
+    $active_tab = isset($this->settings['default_tab']) ? $this->settings['default_tab'] : key($this->contents);
     $active_tab = isset($_GET['qt-' . $this->name]) ? $_GET['qt-' . $this->name] : $active_tab;
     $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : 0;
     return $active_tab;
@@ -250,6 +252,18 @@ abstract class QuickRenderer {
    * @return A render array to be passed to drupal_render().
    */
   abstract public function render();
+  
+
+  /**
+   * Method for returning the form elements to display for this renderer type on
+   * the admin form.
+
+   * @param $qt An object representing the Quicktabs instance that the tabs are
+   * being built for.
+   */
+  public static function optionsForm($qt) {
+    return array();
+  }
   
 }
 
@@ -371,7 +385,7 @@ abstract class QuickContent implements QuickContentRenderable {
       $plugin = ctools_get_plugins('quicktabs', 'contents', $name);
       if (isset($plugin['dependencies'])) {
         foreach ($plugin['dependencies'] as $dep) {
-          // Do not load the options form for any plugin that is missing dependencies.
+          // If any dependency is missing we cannot instantiate our class.
           if (!module_exists($dep)) return NULL;
         }
       }

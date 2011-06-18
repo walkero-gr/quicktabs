@@ -5,6 +5,16 @@
  */
 class QuickAccordion extends QuickRenderer {
   
+  public static function optionsForm($qt) {
+    $form = array();
+    $form['autoHeight'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Autoheight',
+      '#default_value' => ($qt->renderer == 'accordion' && isset($qt->options['autoHeight']) && $qt->options['autoHeight']),
+    );
+    return $form;
+  }
+  
   public function render() {
     $quickset = $this->quickset;
 
@@ -51,8 +61,10 @@ class QuickAccordion extends QuickRenderer {
       }
     }
     $name = $this->quickset->getName();
+    $settings = $this->quickset->getSettings();
+    $options = $settings['options'];
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab());
+      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
     }
     return $attached;

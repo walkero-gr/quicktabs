@@ -16,8 +16,10 @@ Drupal.behaviors.quicktabs = {
     if ($.fn.accordion) {
       $('.quick-accordion').once(function(){
         var qtKey = 'qt_' + Drupal.quicktabs.getQTName(this);
+        var options = Drupal.settings.quicktabs[qtKey].options;
         var active_tab = parseInt(Drupal.settings.quicktabs[qtKey].active_tab);
-        $(this).accordion({active: active_tab});
+        options.active = active_tab;
+        $(this).accordion(options);
       });
     }
   }
