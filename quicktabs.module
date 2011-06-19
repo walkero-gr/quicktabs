@@ -181,7 +181,9 @@ function quicktabs_block_view($delta = '') {
  *  passed through drupal_render().
  */
 function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = array()) {
-  if ($info = (array)quicktabs_load($name)) {
+  if ($info = quicktabs_load($name)) {
+    drupal_alter('quicktabs', $info);
+    $info = (array) $info;
     $settings = array_merge($info, $settings);
     $contents = $settings['tabs'];
     unset($settings['tabs'], $settings['machine_name']);
@@ -276,11 +278,6 @@ function quicktabs_load($name) {
 function quicktabs_load_multiple($names = array()) {
   ctools_include('export');
   $defaults = empty($names) ? ctools_export_load_object('quicktabs', 'all') : ctools_export_load_object('quicktabs', 'names', $names);
-  foreach ($defaults as &$default) {
-    // Allow other modules to make changes to the Quicktabs instance before it
-    // is used.
-    drupal_alter('quicktabs', $default);
-  }
   return $defaults;
 }
 
