@@ -5,7 +5,8 @@
 #qt-tablist-table .form-type-textfield label {
   float: left;
   clear: left;
-  width: 120px;
+  min-width: 120px;
+  margin-right: 10px;
 }
 #qt-tablist-table .form-item {
   margin-bottom: 5px;
