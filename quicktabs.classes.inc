@@ -403,7 +403,7 @@ abstract class QuickContent implements QuickContentRenderable {
    * @param $qt An object representing the Quicktabs instance that the tabs are
    * being built for.
    */
-  abstract public function options_form($delta, $qt);
+  abstract public function optionsForm($delta, $qt);
   
 }
 

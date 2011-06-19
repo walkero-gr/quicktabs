@@ -167,7 +167,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
       // Get the renderer's options form elements
       
       // PHP 5.2 doesn't support $class::staticMethod() syntax, so we have to
-      // use call_user_func_array() until we can require PHP 5.3.
+      // use call_user_func_array() until PHP 5.3 is required.
       $renderer_form_options[$name] = call_user_func_array(array($class, 'optionsForm'), array($qt));
     }
   }
@@ -314,7 +314,7 @@ function _quicktabs_form(array $tab, $qt) {
     }
     $tabtypes[$name] = $name;
     $content_provider = quick_content_factory($name, $tab);
-    $form = array_merge_recursive($form, $content_provider->options_form($delta, $qt));
+    $form = array_merge_recursive($form, $content_provider->optionsForm($delta, $qt));
   }
 
   $form['type'] = array(

@@ -10,7 +10,7 @@ class QuickViewContent extends QuickContent {
     return 'view';
   }
   
-  public function options_form($delta, $qt) {
+  public function optionsForm($delta, $qt) {
     $tab = $this->settings;
     $form = array();
     $views = quicktabs_get_views();

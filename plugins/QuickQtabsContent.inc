@@ -10,7 +10,7 @@ class QuickQtabsContent extends QuickContent {
     return 'qtabs';
   }
   
-  public function options_form($delta, $qt) {
+  public function optionsForm($delta, $qt) {
     $tab = $this->settings;
     $form = array();
     $tab_options = array();

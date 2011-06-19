@@ -10,7 +10,7 @@ class QuickAccordion extends QuickRenderer {
     $form['autoHeight'] = array(
       '#type' => 'checkbox',
       '#title' => 'Autoheight',
-      '#default_value' => ($qt->renderer == 'accordion' && isset($qt->options['autoHeight']) && $qt->options['autoHeight']),
+      '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['autoHeight']) && $qt->options['autoHeight']),
     );
     return $form;
   }
