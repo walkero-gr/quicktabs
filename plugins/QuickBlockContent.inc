@@ -28,7 +28,9 @@ class QuickBlockContent extends QuickContent {
   }
 
   public function render($hide_empty = FALSE, $args = array()) {
-    if ($this->rendered_content) return $this->rendered_content;
+    if ($this->rendered_content) {
+      return $this->rendered_content;
+    }
     $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.

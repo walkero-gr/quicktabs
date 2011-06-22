@@ -86,7 +86,9 @@ class QuickViewContent extends QuickContent {
     }
 
     // Non-ajax rendering of a view.
-    if ($this->rendered_content) return $this->rendered_content;
+    if ($this->rendered_content) {
+      return $this->rendered_content;
+    }
     $item = $this->settings;
     $output = array();
     if (isset($item['vid'])) {
