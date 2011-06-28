@@ -407,7 +407,6 @@ function quicktabs_views_api() {
  * @ingroup themeable
  */
 function theme_quicktabs_tab_access_denied($variables) {
-  $tab = $variables['tab'];
   return t('You are not authorized to access this content.');
 }
 

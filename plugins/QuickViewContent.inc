@@ -103,7 +103,7 @@ class QuickViewContent extends QuickContent {
             }
           }
           elseif (!$hide_empty) {
-            $output = theme('quicktabs_tab_access_denied', array('tab' => $tab));
+            $output['#markup'] = theme('quicktabs_tab_access_denied', array('tab' => $item));
           }
           $view->destroy();
         }
