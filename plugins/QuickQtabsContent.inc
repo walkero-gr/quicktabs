@@ -16,7 +16,7 @@ class QuickQtabsContent extends QuickContent {
     $tab_options = array();
     foreach (quicktabs_load_multiple() as $machine_name => $info) {
       // Do not offer the option to put a tab inside itself.
-      if ($machine_name != $qt->machine_name) {
+      if (!isset($qt->machine_name) || $machine_name != $qt->machine_name) {
         $tab_options[$machine_name] = $info->title;
       }
     }
