@@ -308,23 +308,23 @@ function quicktabs_quicktabs_renderers() {
   $info = array();
   $path = drupal_get_path('module', 'quicktabs') . '/plugins';
   $info['quicktabs'] = array(
-    'file' => 'QuickQuicktabs.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickQuicktabs.inc',
       'class' => 'QuickQuicktabs',
     ),
   );
   $info['ui_tabs'] = array(
-    'file' => 'QuickUiTabs.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickUiTabs.inc',
       'class' => 'QuickUitabs',
     ),
   );
   $info['accordion'] = array(
-    'file' => 'QuickAccordion.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickAccordion.inc',
       'class' => 'QuickAccordion',
     ),
   );
@@ -338,32 +338,32 @@ function quicktabs_quicktabs_contents() {
   $info = array();
   $path = drupal_get_path('module', 'quicktabs') . '/plugins';
   $info['block'] = array(
-    'file' => 'QuickBlockContent.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickBlockContent.inc',
       'class' => 'QuickBlockContent',
     ),
     'dependencies' => array('block'),
   );
   $info['view'] = array(
-    'file' => 'QuickViewContent.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickViewContent.inc',
       'class' => 'QuickViewContent',
     ),
     'dependencies' => array('views'),
   );
   $info['node'] = array(
-    'file' => 'QuickNodeContent.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickNodeContent.inc',
       'class' => 'QuickNodeContent',
     ),
   );
   $info['qtabs'] = array(
-    'file' => 'QuickQtabsContent.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickQtabsContent.inc',
       'class' => 'QuickQtabsContent',
     ),
   );
