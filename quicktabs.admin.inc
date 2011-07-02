@@ -459,6 +459,22 @@ function quicktabs_form_validate($form, &$form_state) {
   }
 }
 
+function quicktabs_callback_element_validate($element, &$form_state, $form) {
+  // We can tell which tab delta the element is for from the element's #parents
+  // property, which is an array based on the tree structure.
+  $delta = $element['#parents'][1];
+  if ($form_state['values']['tabs'][$delta]['type'] == 'callback') {
+    if (empty($element['#value']) || url_is_external($element['#value'])) {
+      form_error($element, t('You must specify a valid path.'));
+    }
+    if (strpos($element['#value'], '%') === 0) {
+      form_error($element, t('"%" may not be used for the first segment of a path.'));
+    }
+    // automatically remove '/' from path.
+    $form_state['values']['tabs'][$delta]['callback']['path'] = trim($form_state['values']['tabs'][$delta]['callback']['path'], '/');
+  }
+}
+
 
 /**
  * Submit handler for quicktabs admin page.

@@ -14,7 +14,20 @@ class QuickCallbackContent extends QuickContent {
     parent::__construct($item);
 
     if (isset($item['path'])) {
-      $this->settings['ajax_path'] = urlencode($item['path']);
+      $url_args = arg();
+      $path = $item['path'];
+  
+      foreach ($url_args as $id => $arg) {
+        $path = str_replace("%$id", $arg, $path);
+      }
+      $path = preg_replace(',/?(%\d),', '', $path);
+      if (!empty($path)) {
+        $this->settings['ajax_path'] = urlencode($path);
+      }
+      else {
+        $this->settings['ajax_path'] = '';
+      }
+      $this->settings['actual_path'] = $path;
     }
   }
 
@@ -25,6 +38,7 @@ class QuickCallbackContent extends QuickContent {
       '#type' => 'textfield',
       '#default_value' => isset($tab['path']) ? $tab['path'] : '',
       '#title' => t('Path'),
+      '#element_validate' => array('quicktabs_callback_element_validate'),
     );
     return $form;
   }
@@ -36,13 +50,13 @@ class QuickCallbackContent extends QuickContent {
     $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.
-      $item['path'] = urldecode($args[0]);
-      $_GET['q'] = $item['path'];
+      $item['actual_path'] = urldecode($args[0]);
+      $_GET['q'] = $item['actual_path'];
     }
     
     $output = array();
-    if (isset($item['path'])) {
-      $response = menu_execute_active_handler($item['path'], FALSE);
+    if (isset($item['actual_path'])) {
+      $response = menu_execute_active_handler($item['actual_path'], FALSE);
       if (!is_array($response)) {
         if (is_int($response)) {
           if (MENU_ACCESS_DENIED == $response && !$hide_empty) {
