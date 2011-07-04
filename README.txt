@@ -1,15 +1,14 @@
 *******************************************************************************
 
-quicktabs
+Quicktabs
 
 Description:
 -------------------------------------------------------------------------------
 
-  This module provides a form for admins to create a block of tabbed content by
+This module provides a form for admins to create a block of tabbed content by
 selecting a view, a node, a block or an existing Quicktabs instance as the content
 of each tab.
 The module can be extended to display other types of content.
-
 
 
 Installation & Use:
@@ -27,6 +26,19 @@ Installation & Use:
 10. Edit the default style at admin/structure/quicktabs/styles
 11. Control the style of individual Quicktabs instances by editing the instance in
 question and selecting from the style dropdown.
+
+Note:
+-------------------------------------------------------------------------------
+Because Quicktabs allows your tabbed content to be pulled via ajax, it has its
+own menu callback for getting this content and returning it in JSON format. For
+node content, it uses the standard node_access check to make sure the user has
+access to this content. It is important to note that ANY node can be viewed
+from this menu callback; if you go to it directly at quicktabs/ajax/node/[nid]
+it will return a JSON text string of the node information. If there are certain 
+fields in ANY of your nodes that are supposed to be private, these MUST be 
+controlled at admin/content/node-type/MY_NODE_TYPE/display by setting them to 
+be excluded on teaser and node view. Setting them as private through some other 
+mechanism, e.g. Panels, will not affect their being displayed in an ajax Quicktab.
 
 For Developers:
 -------------------------------------------------------------------------------
@@ -61,7 +73,6 @@ plugins and the hook_quicktabs_contents implementation for guidance.
 
 Author:
 -------------------------------------------------------------------------------
-
 Katherine Bailey <katherine@katbailey.net>
 http://drupal.org/user/172987
 
