@@ -52,7 +52,7 @@ class QuickAccordion extends QuickRenderer {
         array('system', 'ui.accordion'),
       ),
       'js' => array(
-        array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs.js'),
+        array('data' => drupal_get_path('module', 'quicktabs') . '/js/qt_accordion.js'),
       ),
     );
     $javascript = drupal_add_js();
