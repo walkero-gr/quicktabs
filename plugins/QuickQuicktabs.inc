@@ -37,15 +37,17 @@ class QuickQuicktabs extends QuickRenderer {
       // If in ajax mode, we'll only be rendering one tab, otherwise all of them.
       $tabs_to_render = $settings['ajax'] ? array($active_tab => $contents[$active_tab]) : $contents;
       foreach ($tabs_to_render as $key => $tab) {
-        $attribs = array(
-          'id' => 'quicktabs-tabpage-'. $qt_name . '-'. $key,
-          'class' => array('quicktabs-tabpage', ($active_tab == $key ? '' : 'quicktabs-hide')),
-        );
-        $render_array['content']['container']['divs'][] = array(
-          '#prefix' => '<div '. drupal_attributes($attribs) .'>',
-          '#suffix' => '</div>',
-          'content' => $tab->render(),
-        );
+        if (!empty($tab)) {
+          $attribs = array(
+            'id' => 'quicktabs-tabpage-'. $qt_name . '-'. $key,
+            'class' => array('quicktabs-tabpage', ($active_tab == $key ? '' : 'quicktabs-hide')),
+          );
+          $render_array['content']['container']['divs'][] = array(
+            '#prefix' => '<div '. drupal_attributes($attribs) .'>',
+            '#suffix' => '</div>',
+            'content' => $tab->render(),
+          );
+        }
       }
     }
     return $render_array;
@@ -61,27 +63,29 @@ class QuickQuicktabs extends QuickRenderer {
     $settings = $quickset->getSettings();
     $tabs = array();
     foreach ($quickset->getContents() as $i => $tab) {
-      $tablink = array(
-        '#type' => 'link',
-        '#title' => $tab->getTitle(),
-        '#href' =>  $_GET['q'],
-        '#options' => $this->construct_link_options($i),
-      );
-      if ($settings['ajax']) {
-        $tab_settings = $tab->getSettings();
-        $ajax_keys = $tab->getAjaxKeys();
-        $ajax_args = array();
-        foreach ($ajax_keys as $key) {
-          $ajax_args[] = $tab_settings[$key];
-        }
-        $ajax_path = $quickset->getAjaxPath($i, $tab->getType());
-        $ajax_href = $ajax_path . '/'. implode('/', $ajax_args);
-        $tablink['#ajax'] = array(
-          'progress' => array('message' => '', 'type' => 'throbber'),
-          'path' => $ajax_href,
+      if (!empty($tab)) {
+        $tablink = array(
+          '#type' => 'link',
+          '#title' => $tab->getTitle(),
+          '#href' =>  $_GET['q'],
+          '#options' => $this->construct_link_options($i),
         );
+        if ($settings['ajax']) {
+          $tab_settings = $tab->getSettings();
+          $ajax_keys = $tab->getAjaxKeys();
+          $ajax_args = array();
+          foreach ($ajax_keys as $key) {
+            $ajax_args[] = $tab_settings[$key];
+          }
+          $ajax_path = $quickset->getAjaxPath($i, $tab->getType());
+          $ajax_href = $ajax_path . '/'. implode('/', $ajax_args);
+          $tablink['#ajax'] = array(
+            'progress' => array('message' => '', 'type' => 'throbber'),
+            'path' => $ajax_href,
+          );
+        }
+        $tabs[$i] = $tablink;
       }
-      $tabs[] = $tablink;
     }
     return $tabs;
   }
@@ -107,8 +111,10 @@ class QuickQuicktabs extends QuickRenderer {
     }
     // Prepare a tab_settings array for passing the tab info to our JavaScript.
     $tab_settings = array();
-    foreach ($this->quickset->getContents() as $content) {
-      $tab_settings[] = $content->getSettings();
+    foreach ($this->quickset->getContents() as $i => $content) {
+      if (!empty($content)) {
+        $tab_settings[$i] = $content->getSettings();
+      }
     }
     // Add our JS settings
     $javascript = drupal_add_js();

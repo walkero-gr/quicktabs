@@ -164,15 +164,17 @@ class QuickSet {
     }
     if ($this->settings['hide_empty_tabs'] && !$this->settings['ajax']) {
       // Check if any tabs need to be hidden because of empty content.
+      $renderable_contents = 0;
       foreach ($this->contents as $key => $tab) {
         $contents = $tab->render(TRUE);
         if (empty($contents)) {
-          unset($this->contents[$key]);
+          $this->contents[$key] = NULL;
+        }
+        else {
+          $renderable_contents++;
         }
       }
-      // Update the array keys in case we removed some tabs.
-      $this->contents = array_merge($this->contents);
-      if (!count($this->contents))  {
+      if (!$renderable_contents)  {
         throw new InvalidQuickSetException('There are no contents to render.');
       }
     }

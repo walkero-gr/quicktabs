@@ -24,14 +24,16 @@ class QuickUiTabs extends QuickRenderer {
       ),
     );
     foreach ($quickset->getContents() as $key => $tab) {
-      $attribs = array(
-	'id' => 'qt-'. $qt_name .'-ui-tabs' . ($key+1),
-      );
-      $render_array['content']['divs'][] = array(
-	'#prefix' => '<div '. drupal_attributes($attribs) .'>',
-	'#suffix' => '</div>',
-	'content' => $tab->render(),
-      );
+      if (!empty($tab)) {
+	$attribs = array(
+	  'id' => 'qt-'. $qt_name .'-ui-tabs' . ($key+1),
+	);
+	$render_array['content']['divs'][] = array(
+	  '#prefix' => '<div '. drupal_attributes($attribs) .'>',
+	  '#suffix' => '</div>',
+	  'content' => $tab->render(),
+	);
+      }
     }
     return $render_array;
   }
@@ -46,13 +48,15 @@ class QuickUiTabs extends QuickRenderer {
     $tabs = array();
     $qt_name = $this->quickset->getName();
     foreach ($this->quickset->getContents() as $i => $tab) {
-      // If we use l() here or a render array of type 'link', the '#' symbol will
-      // be escaped. Sad panda is sad.
-      $href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
-      $tablink = array(
-	'#markup' => '<a href="'. $href .'">'. $tab->getTitle() .'</a>',
-      );
-      $tabs[] = $tablink;
+      if (!empty($tab)) {
+	// If we use l() here or a render array of type 'link', the '#' symbol will
+	// be escaped. Sad panda is sad.
+	$href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
+	$tablink = array(
+	  '#markup' => '<a href="'. $href .'">'. $tab->getTitle() .'</a>',
+	);
+	$tabs[$i] = $tablink;
+      }
     }
     return $tabs;
   }

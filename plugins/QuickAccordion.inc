@@ -32,11 +32,13 @@ class QuickAccordion extends QuickRenderer {
 
     // Render all tab content.
     foreach ($quickset->getContents() as $key => $item) {
-      $render_array['content']['divs'][] = array(
-        '#prefix' => '<h3><a href= "#">'. $item->getTitle() .'</a></h3><div>',
-        '#suffix' => '</div>',
-        'content' => $item->render(),
-      );
+      if (!empty($item)) {
+        $render_array['content']['divs'][] = array(
+          '#prefix' => '<h3><a href= "#">'. $item->getTitle() .'</a></h3><div>',
+          '#suffix' => '</div>',
+          'content' => $item->render(),
+        );
+      }
     }
     return $render_array;
   }
