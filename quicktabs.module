@@ -368,9 +368,9 @@ function quicktabs_quicktabs_contents() {
     ),
   );
   $info['callback'] = array(
-    'file' => 'QuickCallbackContent.inc',
     'path' => $path,
     'handler' => array(
+      'file' => 'QuickCallbackContent.inc',
       'class' => 'QuickCallbackContent',
     ),
   );
