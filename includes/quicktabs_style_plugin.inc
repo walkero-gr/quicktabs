@@ -12,7 +12,6 @@ class quicktabs_style_plugin extends views_plugin_style {
 
   // Allow some options for the style.
   function option_definition() {
-    watchdog('qt style', 'ohai');
     $options = parent::option_definition();
     $options['tab_style'] = array('default' => 'default');
     $options['tab_title_field'] = array('default' => NULL);
