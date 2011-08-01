@@ -254,6 +254,8 @@ function quicktabs_ajax($name, $index, $type) {
 
   $args = func_get_args();
   $variable_args = array_slice($args, 3);
+  // Add the Quicktabs machine name to the args we pass to the content renderer
+  array_unshift($variable_args, $name);
 
   $data = QuickSet::ajaxRenderContent($type, $variable_args);
   

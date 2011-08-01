@@ -73,8 +73,16 @@ class QuickViewContent extends QuickContent {
     if (!empty($args)) {
       // The args have been passed in from an ajax request. We use Views' own
       // ajax functionality to get the view.
-      list($_REQUEST['view_name'], $_REQUEST['view_display_id'], $view_args) = $args;
-      $_REQUEST['view_args'] = urldecode($view_args);
+      // The first element of the args array is the qt_name, which we don't need
+      // for this content type.
+      array_shift($args);
+      $_REQUEST['view_name'] = array_shift($args);
+      $_REQUEST['view_display_id'] = array_shift($args);
+      if (!empty($args)) {
+        $view_args = array_shift($args);
+        $_REQUEST['view_args'] = urldecode($view_args);
+      }
+
       module_load_include('inc', 'views', 'includes/ajax');
       $view = views_ajax();
       foreach ($view['#commands'] as $command) {

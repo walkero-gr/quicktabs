@@ -37,6 +37,9 @@ class QuickQtabsContent extends QuickContent {
     $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.
+      // The first element of the args array is the qt_name, which we don't need
+      // for this content type.
+      array_shift($args);
       $item['machine_name'] = $args[0];
     }
 

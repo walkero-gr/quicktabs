@@ -31,13 +31,35 @@ class QuickBlockContent extends QuickContent {
     if ($this->rendered_content) {
       return $this->rendered_content;
     }
+    $output = array();
     $item = $this->settings;
     if (!empty($args)) {
       // The args have been passed in from an ajax request.
+      $qt_name = array_shift($args);
       list($item['bid'], $item['hide_title']) = $args;
+
+      // Ensure the block is assigned to the requested quicktabs block. This test prevents
+      // AJAX access to blocks that have not been added to an AJAX-enabled quicktabs block.
+      $break = TRUE;
+      $quicktabs = quicktabs_load($qt_name);
+      // Ensure AJAX is enabled for the quicktabs block.
+      if (!empty($quicktabs) && $quicktabs->ajax == 1) {
+        // Ensure the requested tab has been added to the quicktabs block.
+        foreach ($quicktabs->tabs as $quicktab) {
+          if (isset($quicktab['bid']) && ($quicktab['bid'] == $item['bid'])) {
+            $break = FALSE;
+            break;
+          }
+        }
+      }
+      if ($break == TRUE) {
+        if (!$hide_empty) {
+          $output['#markup'] = theme('quicktabs_tab_access_denied', $item);
+        }
+        return $output;
+      }
     }
-    
-    $output = array();
+
     if (isset($item['bid'])) {
       if (module_exists('block')) {
         $pos = strpos($item['bid'], '_delta_');
