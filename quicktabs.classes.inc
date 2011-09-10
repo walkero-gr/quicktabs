@@ -169,6 +169,9 @@ class QuickSet {
         $contents = $tab->render(TRUE);
         if (empty($contents)) {
           $this->contents[$key] = NULL;
+          if ($this->settings['default_tab'] == $key) {
+            $this->settings['default_tab']++;
+          }
         }
         else {
           $renderable_contents++;
