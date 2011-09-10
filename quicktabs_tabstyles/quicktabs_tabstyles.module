@@ -26,7 +26,7 @@ function quicktabs_tabstyles_menu() {
 }
 
 /**
- * Callback function for admin/settings/quicktabs. Display the settings form.
+ * Callback function for admin/structure/quicktabs/styles. The style chooser form.
  */
 function quicktabs_tabstyles_styles() {
   $options = array();
@@ -98,14 +98,6 @@ function theme_quicktabs_style_options($variables) {
 
 /**
  * Implements hook_quicktabs_tabstyles().
- *
- * This hook allows other modules to create additional tab styles for
- * the quicktabs module.
- *
- * @return array
- *   An array of key => value pairs suitable for inclusion as the #options in a
- *   select or radios form element. Each key must be the location of a css
- *   file for a quick tabs style. Each value should be the name of the style.
  */
 function quicktabs_tabstyles_quicktabs_tabstyles() {
   $tabstyles_directory = drupal_get_path('module', 'quicktabs_tabstyles') . '/tabstyles';

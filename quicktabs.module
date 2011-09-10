@@ -182,6 +182,7 @@ function quicktabs_block_view($delta = '') {
  */
 function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = array()) {
   if ($info = quicktabs_load($name)) {
+    // Allow other modules to alter the Quicktabs instance before it gets output.
     drupal_alter('quicktabs', $info);
     $info = (array) $info;
     $settings = array_merge($info, $settings);
