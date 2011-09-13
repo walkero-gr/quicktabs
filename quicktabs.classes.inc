@@ -47,7 +47,7 @@ class QuickSet {
   }
 
   public function getTitle() {
-    return isset($this->settings['title']) ? $this->settings['title'] : $this->name;
+    return isset($this->settings['title']) ? $this->translateString($this->settings['title'], 'title') : $this->name;
   }
 
   /**
@@ -149,6 +149,22 @@ class QuickSet {
    */
   public function getAjaxPath($index, $type) {
     return 'quicktabs/ajax/'. $this->name .'/'. $index . '/'. $type;
+  }
+
+  /**
+   * Translates Quicktabs user-defined strings if the i18n module is
+   * enabled.
+   */
+  public function translateString($string, $type = 'tab', $index = 0) {
+    switch ($type) {
+      case 'tab':
+        $name = "tab:{$this->name}-{$index}:title";
+        break;
+      case 'title':
+        $name = "title:{$this->name}";
+        break;
+    }
+    return quicktabs_translate($name, $string);
   }
 
   /**
@@ -447,7 +463,7 @@ class QuickPreRenderedContent implements QuickContentRenderable {
       $contents = array('#markup' => $contents);
     }
     $this->rendered_content = $contents;
-    
+
     $this->title = isset($item['title']) ? $item['title'] : '';
   }
   

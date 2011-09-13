@@ -285,6 +285,78 @@ function quicktabs_load_multiple($names = array()) {
 }
 
 /**
+ * Exports the specified Quicktabs instance with translatable strings.
+ */
+function quicktabs_export($qt, $indent = '') {
+  $output = ctools_export_object('quicktabs', $qt, $indent);
+  $translatables = array();
+  if (!empty($qt->title)) {
+    $translatables[] = $qt->title;
+  }
+  foreach ($qt->tabs as $tab) {
+    $translatables[] = $tab['title'];
+  }
+  $translatables = array_filter(array_unique($translatables));
+  if (!empty($translatables)) {
+    $output .= "\n";
+    $output .= "{$indent}// Translatables\n";
+    $output .= "{$indent}// Included for use with string extractors like potx.\n";
+    sort($translatables);
+    foreach ($translatables as $string) {
+      $output .= "{$indent}t(" . ctools_var_export($string) . ");\n";
+    }
+    $output .= "\n";
+  }
+  return $output;
+}
+
+/**
+* Implements hook_i18n_string_info()
+*/
+function quicktabs_i18n_string_info() {
+  $groups['quicktabs'] = array(
+    'title' => t('Quicktabs'),
+    'description' => t('Vocabulary titles and term names for localizable quicktabs.'),
+    'format' => FALSE, // This group doesn't have strings with format
+    'list' => TRUE, // This group can list all strings
+  );
+  return $groups;
+}
+
+function quicktabs_translate($name, $string, $langcode = NULL, $textgroup = 'quicktabs') {
+  return function_exists('i18n_string') ? i18n_string($textgroup . ':' . $name, $string, array('langcode' => $langcode)) : $string; 
+}
+
+/**
+ * Update translatable strings.
+ */
+function quicktabs_i18n_update_strings($names = array()) {
+  if (!function_exists('i18n_string_update')) return;
+  $qts = quicktabs_load_multiple($names);
+  foreach ($qts as $name => $quicktabs) {
+    i18n_string_update("quicktabs:title:$name", $quicktabs->title);
+    foreach ($quicktabs->tabs as $tabkey => $tab) {
+      i18n_string_update("quicktabs:tab:$name-$tabkey:title", $tab['title']);
+    }
+  }
+}
+
+/**
+ * Implements hook_i18n_string_refresh().
+ *
+ * Refresh translations for all user-generated strings managed by quicktabs.
+ * This will load all strings inputted via the quicktabs user interface and
+ * register them (and their translations, if there are any) with the
+ * i18n_strings system.
+ */
+function quicktabs_i18n_string_refresh($group) {
+  if ($group === 'quicktabs') {
+    quicktabs_i18n_update_strings();
+  }
+  return TRUE;
+}
+
+/**
  * Implements hook_ctools_plugin_type().
  */
 function quicktabs_ctools_plugin_type() {

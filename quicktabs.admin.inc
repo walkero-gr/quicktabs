@@ -496,6 +496,7 @@ function quicktabs_form_submit($form, &$form_state) {
         drupal_set_message(t('The Quicktabs instance has been created.'));
       }
     }
+    quicktabs_i18n_update_strings(array($qt->machine_name));
     drupal_goto('admin/structure/quicktabs');
   }
 }

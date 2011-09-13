@@ -66,7 +66,7 @@ class QuickQuicktabs extends QuickRenderer {
       if (!empty($tab)) {
         $tablink = array(
           '#type' => 'link',
-          '#title' => $tab->getTitle(),
+          '#title' => $quickset->translateString($tab->getTitle(), 'tab', $i),
           '#href' =>  $_GET['q'],
           '#options' => $this->construct_link_options($i),
         );
@@ -89,7 +89,7 @@ class QuickQuicktabs extends QuickRenderer {
     }
     return $tabs;
   }
-  
+
   /**
    * Add any necessary js, css and libraries for the render array.
    */

@@ -21,6 +21,7 @@ function quicktabs_schema() {
         'minimum_version' => 1,
         'current_version' => 1,
       ),
+      'export callback' => 'quicktabs_export',
     ),
     'fields' => array(
       'machine_name' => array(
