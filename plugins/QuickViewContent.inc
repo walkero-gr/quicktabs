@@ -48,7 +48,7 @@ class QuickViewContent extends QuickContent {
   public function __construct($item) {
     parent::__construct($item);
     if (module_exists('views')) views_add_js('ajax_view');
-
+    $this->settings['view_path'] = rawurlencode($_GET['q']);
     if (isset($item['args'])) {
       $url_args = arg();
       $args = $item['args'];
@@ -58,7 +58,7 @@ class QuickViewContent extends QuickContent {
       }
       $args = preg_replace(',/?(%\d),', '', $args);
       if (!empty($args)) {
-        $this->settings['ajax_args'] = urlencode($args);
+        $this->settings['ajax_args'] = rawurlencode($args);
         $args_array = explode('/', $args);
       }
       else {
@@ -78,9 +78,11 @@ class QuickViewContent extends QuickContent {
       array_shift($args);
       $_REQUEST['view_name'] = array_shift($args);
       $_REQUEST['view_display_id'] = array_shift($args);
+      $view_path = array_shift($args);
+      $_REQUEST['view_path'] = rawurldecode($view_path);
       if (!empty($args)) {
         $view_args = array_shift($args);
-        $_REQUEST['view_args'] = urldecode($view_args);
+        $_REQUEST['view_args'] = rawurldecode($view_args);
       }
 
       module_load_include('inc', 'views', 'includes/ajax');
@@ -125,6 +127,6 @@ class QuickViewContent extends QuickContent {
   }
 
   public function getAjaxKeys() {
-    return array('vid', 'display', 'ajax_args');
+    return array('vid', 'display', 'view_path', 'ajax_args');
   }
 }

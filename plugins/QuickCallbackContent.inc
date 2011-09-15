@@ -22,7 +22,7 @@ class QuickCallbackContent extends QuickContent {
       }
       $path = preg_replace(',/?(%\d),', '', $path);
       if (!empty($path)) {
-        $this->settings['ajax_path'] = urlencode($path);
+        $this->settings['ajax_path'] = rawurlencode($path);
       }
       else {
         $this->settings['ajax_path'] = '';
@@ -53,7 +53,7 @@ class QuickCallbackContent extends QuickContent {
       // The first element of the args array is the qt_name, which we don't need
       // for this content type.
       array_shift($args);
-      $item['actual_path'] = urldecode($args[0]);
+      $item['actual_path'] = rawurldecode($args[0]);
       $_GET['q'] = $item['actual_path'];
     }
     
