@@ -5,6 +5,11 @@
  * content.
  */
 class QuickViewContent extends QuickContent {
+
+  // Each view that we render, whether via ajax or not, will need a unique DOM
+  // id. Unfortunately we can only control the ones that Quicktabs is responsible
+  // for, so if there are other views on the page, there may be duplicate ids.
+  static $view_dom_id = 1;
   
   public static function getType() {
     return 'view';
@@ -49,6 +54,7 @@ class QuickViewContent extends QuickContent {
     parent::__construct($item);
     if (module_exists('views')) views_add_js('ajax_view');
     $this->settings['view_path'] = rawurlencode($_GET['q']);
+    $this->settings['view_dom_id'] = self::$view_dom_id++;
     if (isset($item['args'])) {
       $url_args = arg();
       $args = $item['args'];
@@ -76,8 +82,11 @@ class QuickViewContent extends QuickContent {
       // The first element of the args array is the qt_name, which we don't need
       // for this content type.
       array_shift($args);
+      // The order of these arguments corresponds to the array returned in
+      // $this->getAjaxKeys().
       $_REQUEST['view_name'] = array_shift($args);
       $_REQUEST['view_display_id'] = array_shift($args);
+      $_REQUEST['view_dom_id'] = array_shift($args);
       $view_path = array_shift($args);
       $_REQUEST['view_path'] = rawurldecode($view_path);
       if (!empty($args)) {
@@ -127,6 +136,6 @@ class QuickViewContent extends QuickContent {
   }
 
   public function getAjaxKeys() {
-    return array('vid', 'display', 'view_path', 'ajax_args');
+    return array('vid', 'display', 'view_dom_id', 'view_path', 'ajax_args');
   }
 }
