@@ -12,6 +12,12 @@ class QuickAccordion extends QuickRenderer {
       '#title' => 'Autoheight',
       '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['autoHeight']) && $qt->options['autoHeight']),
     );
+    $form['history'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'History',
+      '#description' => t('Store tab state in the URL allowing for browser back / forward and bookmarks.'),
+      '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['history']) && $qt->options['history']),
+    );
     return $form;
   }
   
@@ -66,7 +72,7 @@ class QuickAccordion extends QuickRenderer {
     $settings = $this->quickset->getSettings();
     $options = $settings['options'];
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options);
+      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options, 'history' => $options['history']);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
     }
     return $attached;
