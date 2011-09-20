@@ -13,7 +13,7 @@
       // This selector will be reused when selecting actual tab widget A elements.
       tab_a_selector = 'ul.ui-tabs-nav a';
 
-      var tabs = $('.quicktabs-wrapper').tabs({
+      var tabs = $('.quicktabs-ui-wrapper').tabs({
         event: 'change'
       }).addClass("init");
 
@@ -22,7 +22,7 @@
         var state = {},
           
           // Get the id of this tab widget.
-          id = $(this).closest( '.quicktabs-wrapper' ).attr( 'id' ),
+          id = $(this).closest( '.quicktabs-ui-wrapper' ).attr( 'id' ),
           
           // Get the index of this tab.
           idx = $(this).parent().prevAll().length;

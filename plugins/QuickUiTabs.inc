@@ -28,7 +28,7 @@ class QuickUiTabs extends QuickRenderer {
         '#theme' => 'qt_ui_tabs',
         '#options' => array('attributes' => array(
           'id' => 'quicktabs-' . $qt_name,
-          'class' => 'quicktabs-wrapper',
+          'class' => 'quicktabs-ui-wrapper',
         )),
         'tabs' => array('#theme' => 'qt_ui_tabs_tabset', '#options' => array('active' => $active_tab), 'tablinks' => $tabs),
         'divs' => array(),
