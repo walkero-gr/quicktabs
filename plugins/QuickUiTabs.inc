@@ -82,6 +82,7 @@ class QuickUiTabs extends QuickRenderer {
     $attached = array(
       'library' => array(
         array('system', 'ui.tabs'),
+	array('system', 'jquery.bbq'),
       ),
       'js' => array(
         array('data' => drupal_get_path('module', 'quicktabs') . '/js/qt_ui_tabs.js'),
