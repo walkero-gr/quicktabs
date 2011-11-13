@@ -59,7 +59,13 @@ class QuickCallbackContent extends QuickContent {
     
     $output = array();
     if (isset($item['actual_path'])) {
+      // Retain the current page title as we'll need to set it back after
+      // calling menu_execute_active_handler().
+      $page_title = drupal_get_title();
       $response = menu_execute_active_handler($item['actual_path'], FALSE);
+      // Revert the page title.
+      drupal_set_title($page_title);
+
       if (!is_array($response)) {
         if (is_int($response)) {
           if (MENU_ACCESS_DENIED == $response && !$hide_empty) {
