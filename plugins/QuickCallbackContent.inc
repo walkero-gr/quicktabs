@@ -69,7 +69,7 @@ class QuickCallbackContent extends QuickContent {
           // return an empty array.
         }
         else {
-          $output = array('#markup' => $output);
+          $output = array('#markup' => $response);
         }
       }
       else {
