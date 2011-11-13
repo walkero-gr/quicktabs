@@ -574,16 +574,23 @@ function theme_qt_ui_tabs($variables) {
  * @ingroup themeable
  */
 function theme_qt_quicktabs_tabset($vars) {
-
-  $output = '<ul class="quicktabs-tabs quicktabs-style-'. $vars['tabset']['#options']['style'] .'">';
+  $variables = array(
+    'attributes' => array(
+      'class' => 'quicktabs-tabs quicktabs-style-' . $vars['tabset']['#options']['style'],
+    ),
+    'items' => array(),
+  );
   foreach ($vars['tabset']['tablinks'] as $i => $tab) {
+    $item = array();
     if (is_array($tab)) {
-      $active = $i == $vars['tabset']['#options']['active'] ? ' class="active"' : '';
-      $output .= '<li'. $active .'>'. drupal_render($tab) .'</li>';
+      if ($i == $vars['tabset']['#options']['active']) {
+        $item['class'] = array('active');
+      }
+      $item['data'] = drupal_render($tab);
+      $variables['items'][] = $item;
     }
   }
-  $output .= '</ul>';
-  return $output;
+  return theme('item_list', $variables);
 }
 
 /**
