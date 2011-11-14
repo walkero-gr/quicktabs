@@ -65,9 +65,9 @@ See any of the existing renderer plugins for examples. Also see Quicktabs' imple
 ation of hook_quicktabs_renderers().
 
 Lastly, Quicktabs can be extended by adding new types of entities that can be loaded
-as tab content. Quicktabs itself provides the node, block, view and qtabs tab content
-types. Your contents plugins should extend the QuickContent class. See the existing
-plugins and the hook_quicktabs_contents implementation for guidance.
+as tab content. Quicktabs itself provides the node, block, view, qtabs and callback
+tab content types. Your contents plugins should extend the QuickContent class. See
+the existing plugins and the hook_quicktabs_contents implementation for guidance.
 
 
 

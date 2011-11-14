@@ -1,8 +1,9 @@
 <?php
 
 /**
- * A QuickSet object is an unrendered Quicktabs intance, as defined by a set of 
- * settings and the contents it contains.
+ * A QuickSet object is an unrendered Quicktabs instance, essentially just a
+ * container of content items, as defined by its configuration settings and the
+ * array of content items it contains.
  */
 class QuickSet {
   
@@ -58,7 +59,7 @@ class QuickSet {
    *
    * @param $contents
    *   The array of content items, each one itself an array with at least a 'type'
-   *   key, a title key, and the other info necessary for that type.
+   *   key, a 'title' key, and the other info necessary for that type.
    *
    * @param $renderer
    *   The plugin key for this renderer plugin
@@ -89,7 +90,9 @@ class QuickSet {
     if ($tab['type'] == 'prerendered') {
       return new QuickPreRenderedContent($tab);
     }
-    if ($content = QuickContent::factory($tab['type'], $tab)) return $content;
+    if ($content = QuickContent::factory($tab['type'], $tab)) {
+      return $content;
+    }
     return NULL;
   }
   
@@ -136,7 +139,9 @@ class QuickSet {
 
     $this->prepareContents();
     // Set the default style if necessary.
-    if ($this->settings['style'] == 'default') $this->settings['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
+    if ($this->settings['style'] == 'default') {
+      $this->settings['style'] = variable_get('quicktabs_tabstyle', 'nostyle');
+    }
   }
 
   /**
@@ -184,9 +189,13 @@ class QuickSet {
       foreach ($this->contents as $key => $tab) {
         $contents = $tab->render(TRUE);
         if (empty($contents)) {
+          // Rather than removing the item, we set it to NULL. This way we retain
+          // the same indices across tabs, so that permanent links to particular
+          // tabs can be relied upon.
           $this->contents[$key] = NULL;
+          // The default tab must not be a hidden tab.
           if ($this->settings['default_tab'] == $key) {
-            $this->settings['default_tab']++;
+            $this->settings['default_tab'] = ($key + 1) % count($this->contents);
           }
         }
         else {
@@ -268,7 +277,7 @@ abstract class QuickRenderer {
   }
   
   /**
-   * The only method that renderer plugins need to implement.
+   * The only method that renderer plugins must implement.
    * 
    * @return A render array to be passed to drupal_render().
    */
@@ -455,9 +464,9 @@ class QuickPreRenderedContent implements QuickContentRenderable {
 
   /**
    * Constructor
-   */  
+   */
   public function __construct($item) {
-    
+
     $contents = isset($item['contents']) ? $item['contents'] : array();
     if (!is_array($contents)) {
       $contents = array('#markup' => $contents);
