@@ -580,10 +580,11 @@ function theme_qt_quicktabs_tabset($vars) {
     ),
     'items' => array(),
   );
-  foreach ($vars['tabset']['tablinks'] as $i => $tab) {
+  foreach (element_children($vars['tabset']['tablinks']) as $key) {
     $item = array();
-    if (is_array($tab)) {
-      if ($i == $vars['tabset']['#options']['active']) {
+    if (is_array($vars['tabset']['tablinks'][$key])) {
+      $tab = $vars['tabset']['tablinks'][$key];
+      if ($key == $vars['tabset']['#options']['active']) {
         $item['class'] = array('active');
       }
       $item['data'] = drupal_render($tab);
