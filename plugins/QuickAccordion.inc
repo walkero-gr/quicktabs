@@ -7,16 +7,25 @@ class QuickAccordion extends QuickRenderer {
   
   public static function optionsForm($qt) {
     $form = array();
-    $form['autoHeight'] = array(
-      '#type' => 'checkbox',
-      '#title' => 'Autoheight',
-      '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['autoHeight']) && $qt->options['autoHeight']),
-    );
     $form['history'] = array(
       '#type' => 'checkbox',
       '#title' => 'History',
       '#description' => t('Store tab state in the URL allowing for browser back / forward and bookmarks.'),
       '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['history']) && $qt->options['history']),
+    );
+    $form['jquery_ui'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('JQuery UI options'),
+    );
+    $form['jquery_ui']['autoHeight'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Autoheight',
+      '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['jquery_ui']['autoHeight']) && $qt->options['jquery_ui']['autoHeight']),
+    );
+    $form['jquery_ui']['collapsible'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Collapsible'),
+      '#default_value' => (isset($qt->renderer) && $qt->renderer == 'accordion' && isset($qt->options['jquery_ui']['collapsible']) && $qt->options['jquery_ui']['collapsible']),
     );
     return $form;
   }
@@ -72,7 +81,7 @@ class QuickAccordion extends QuickRenderer {
     $settings = $this->quickset->getSettings();
     $options = $settings['options'];
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
-      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options, 'history' => $options['history']);
+      $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options['jquery_ui'], 'history' => $options['history']);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
     }
     return $attached;
