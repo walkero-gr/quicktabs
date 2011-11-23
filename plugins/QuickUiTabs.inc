@@ -79,15 +79,30 @@ class QuickUiTabs extends QuickRenderer {
     $active_tab = $this->quickset->getActiveTab();
     $settings = $this->quickset->getSettings();
     $options = $settings['options'];
+
     $attached = array(
       'library' => array(
         array('system', 'ui.tabs'),
 	array('system', 'jquery.bbq'),
       ),
       'js' => array(
-        array('data' => drupal_get_path('module', 'quicktabs') . '/js/qt_ui_tabs.js'),
+        array('data' => drupal_get_path('module', 'quicktabs') . '/js/qt_ui_tabs.js', 'weight' => JS_DEFAULT + 1),
       ),
     );
+
+    $javascript = drupal_add_js();
+    foreach ($javascript['settings']['data'] as $key => $settings) {
+      if (key($settings) == 'quicktabs') {
+        $qtkey = $key;
+        break;
+      }
+    }
+
+    if ($options['history']) {
+      $attached['library'][] = array('system', 'jquery.bbq');
+      $attached['js'][] = array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs_bbq.js', 'weight' => JS_DEFAULT);
+    }
+
     $name = $this->quickset->getName();
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
       $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'history' => $options['history']);
