@@ -43,7 +43,7 @@ class QuickBlockContent extends QuickContent {
       $break = TRUE;
       $quicktabs = quicktabs_load($qt_name);
       // Ensure AJAX is enabled for the quicktabs block.
-      if (!empty($quicktabs) && $quicktabs->ajax == 1) {
+      if (!empty($quicktabs) && $quicktabs->options['ajax'] == 1) {
         // Ensure the requested tab has been added to the quicktabs block.
         foreach ($quicktabs->tabs as $quicktab) {
           if (isset($quicktab['bid']) && ($quicktab['bid'] == $item['bid'])) {
@@ -125,4 +125,3 @@ class QuickBlockContent extends QuickContent {
       || (count(array_intersect($authorized_rids, $rids)) != 0);
   }
 }
-

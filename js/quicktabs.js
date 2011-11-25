@@ -20,6 +20,12 @@ Drupal.behaviors.quicktabs = {
 Drupal.quicktabs.prepare = function(el) {
   // el.id format: "quicktabs-$name"
   var qt_name = Drupal.quicktabs.getQTName(el);
+  var options = {};
+  var bbq = false;
+  if (Drupal.settings.quicktabs['qt_' + qt_name].options.history) {
+    options.event = 'change';
+    bbq = true;
+  }
   var $ul = $(el).find('ul.quicktabs-tabs:first');
 
   $("ul.quicktabs-tabs li a span#active-quicktabs-tab").remove();
@@ -34,8 +40,12 @@ Drupal.quicktabs.prepare = function(el) {
       $(element).addClass('quicktabs-loaded');
       $(element).append('<span id="active-quicktabs-tab" class="element-invisible">' + Drupal.t('(active tab)') + '</span>');
     }
-    $(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
+    var event = options.event || 'click';
+    $(element).once(function() {$(this).bind(event, {tab: tab}, Drupal.quicktabs.clickHandler);});
   });
+  if (bbq) {
+    Drupal.quicktabsBbq($(el), 'ul.quicktabs-tabs li a');
+  }
 }
 
 Drupal.quicktabs.clickHandler = function(event) {

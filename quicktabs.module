@@ -168,8 +168,9 @@ function quicktabs_block_view($delta = '') {
  *
  * @param settings. An array of settings that will override the options of the Quicktabs
  *  instance from the database, or if no existing instance is being used, these
- *  will override the default settings. Possible keys are 'style', 'hide_empty_tabs',
- *  ajax', 'default_tab', 'renderer', 'title' and 'options'.
+ *  will override the default settings. Possible keys are 'hide_empty_tabs',
+ *  'default_tab', 'renderer', 'title' and 'options'. The options array can
+ *  contain keys such as 'ajax', 'style' and other renderer-specific settings.
  *
  * @param custom_tabs. An array representing custom tab contents, which will be
  *  appended to the Quicktabs instance from the database, or if no existing instance
@@ -177,7 +178,7 @@ function quicktabs_block_view($delta = '') {
  *  array would be array(array('title' => 'custom', 'contents' => array('#markup' =>
  *  t('Some markup'), 'weight' => 5));
  *
- * @return A render array that can be used as block content in hook_block_view 
+ * @return A render array that can be used as block content in hook_block_view
  *  (see quicktabs_block_view()), but can also just be added to the page array
  *  during hook_page_alter, or output anywhere else where it's sure to get
  *  passed through drupal_render().
@@ -221,10 +222,10 @@ function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = ar
     if ($item['type'] != 'prerendered') {
       ctools_plugin_load_class('quicktabs', 'contents', $item['type'], 'handler');
     }
-  
+
     // Add item's weight to our weights array so that we can then sort by weight.
     $weight[$key] = $item['weight'];
-    
+
     // Make sure we're not going to try to load the same QuickSet instance
     // inside itself.
     if ($item['type'] == 'qtabs' && $item['machine_name'] == $name) {
@@ -267,7 +268,7 @@ function quicktabs_ajax($name, $index, $type) {
   array_unshift($variable_args, $name);
 
   $data = QuickSet::ajaxRenderContent($type, $variable_args);
-  
+
   $commands = array();
   $tabpage_id = 'quicktabs-tabpage-'. $name .'-' . $index;
   $commands[] = ajax_command_append('#quicktabs-container-'. $name, '<div id="' . $tabpage_id .'" class="quicktabs-tabpage">'. $data .'</div>');
@@ -379,7 +380,7 @@ function quicktabs_i18n_string_info() {
 }
 
 function quicktabs_translate($name, $string, $langcode = NULL, $textgroup = 'quicktabs') {
-  return function_exists('i18n_string') ? i18n_string($textgroup . ':' . $name, $string, array('langcode' => $langcode)) : $string; 
+  return function_exists('i18n_string') ? i18n_string($textgroup . ':' . $name, $string, array('langcode' => $langcode)) : $string;
 }
 
 /**
@@ -547,6 +548,21 @@ function theme_quicktabs_tab_access_denied($variables) {
   return t('You are not authorized to access this content.');
 }
 
+/**
+ * Returns an array of available tab styles for use in the style dropdown.
+ */
+function quicktabs_get_style_options() {
+  $styles = module_invoke_all('quicktabs_tabstyles');
+  $style_options = array();
+  if (count($styles)) {
+    // The keys used for options must be valid html IDs.
+    foreach ($styles as $style) {
+      $style_options[$style] = $style;
+    }
+    ksort($style_options);
+  }
+  return $style_options;
+}
 
 /**
  * Fetch the necessary CSS files for the tab style.
@@ -581,6 +597,48 @@ function _quicktabs_get_style_css($style) {
     return array('data' => $css_file);
   }
   return array();
+}
+
+/**
+ * Helper function to get the definitions of renderer features.
+ *
+ * @todo Make this hookable.
+ */
+function quicktabs_get_renderer_features() {
+  return array(
+    'ajax' => array(
+      'form_element' => array(
+        '#type' => 'radios',
+        '#title' => t('Ajax'),
+        '#options' => array(
+          TRUE => t('Yes') . ': ' . t('Load only the first tab on page view'),
+          FALSE => t('No') . ': ' . t('Load all tabs on page view.'),
+        ),
+        '#default_value' => 0,
+        '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p><p>Warning: if you enable Ajax, any block you add to this quicktabs block will be accessible to anonymous users, even if you place role restrictions on the quicktabs block. Do not enable Ajax if the quicktabs block includes any blocks with potentially sensitive information.</p>'),
+        '#weight' => -5,
+      )
+    ),
+    'style' => array(
+      'form_element' => array(
+        '#type' => 'select',
+        '#title' => t('Style'),
+        '#options' => array('nostyle' => t('No style')) + array('default' => t('Default style')) + quicktabs_get_style_options(),
+        '#default_value' => 'default',
+        '#description' => t('Choose the quicktab style.'),
+        '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
+        '#weight' => -6,
+      )
+    ),
+    'history' => array(
+      'form_element' => array(
+        '#type' => 'checkbox',
+        '#title' => 'History',
+        '#description' => t('Store tab state in the URL allowing for browser back / forward and bookmarks.'),
+        '#default_value' => 0,
+      ),
+    ),
+  );
 }
 
 /**
@@ -658,7 +716,7 @@ function theme_qt_quicktabs($variables) {
   $element = $variables['element'];
   $output = '<div '. drupal_attributes($element['#options']['attributes']) .'>';
   $output .= drupal_render($element['tabs']);
-  
+
   $output .= drupal_render($element['container']);
 
   $output .= '</div>';

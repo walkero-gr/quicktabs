@@ -42,7 +42,6 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     $edit = array(
       'machine_name' => strtolower($this->randomName()),
       'title' => $this->randomName(),
-      'ajax' => 0,
       'hide_empty_tabs' => FALSE,
       'renderer' => 'quicktabs',
     );
@@ -54,6 +53,9 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     $tab_title_first = $this->randomName();
     $tab_title_second = $this->randomName();
     $edit += array(
+      'options[ajax]' => 1,
+      'options[style]' => 'default',
+      'options[history]' => 1,
       'tabs[0][type]' => 'node',
       'tabs[0][node][nid]' => 1,
       'tabs[0][node][view_mode]' => 'full',
@@ -65,9 +67,10 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
       'tabs[1][title]' => $tab_title_second,
       'tabs[1][weight]' => 1,
     );
-    // Now add on the tabs info to the $saved array - it's the same as what we
-    // put in the edit form but we need it in proper array format.
-    $saved['tabs'] = array(0 => array('type' => 'node', 'nid' => 1, 'view_mode' => 'full', 'title' => $tab_title_first, 'weight' => 0), 1 => array('type' => 'node', 'nid' => 2, 'view_mode' => 'full', 'title' => $tab_title_second, 'weight' => 1));
+    // Now add on the hierarchical info to the $saved array - it's the same as
+    // what we put in the edit form but we need it in proper array format.
+    $saved['tabs'] = array(0 => array('type' => 'node', 'nid' => 1, 'view_mode' => 'full', 'title' => $tab_title_first, 'weight' => 0), 1 => array('type' => 'node', 'nid' => 2,'view_mode' => 'full',  'title' => $tab_title_second, 'weight' => 1));
+    $saved['options'] = array('ajax' => 1, 'style' => 'default', 'history' => 1);
     $this->drupalPost('admin/structure/quicktabs/add', $edit, t('Save'));
 
     // Check that the quicktabs object is in the database.
@@ -78,7 +81,8 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     foreach ($saved as $property => $value) {
       if ($property == 'tabs') {
         // Add some extra default values that we didn't include on the form, for
-        // the sake of comparing the two tabs arrays.
+        // the sake of comparing the two tabs arrays. (The form fields are not
+        // available when the form first loads).
         foreach ($value as &$val) {
           $val += array('hide_title' => 1);
         }
@@ -89,7 +93,6 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     // Edit the Quicktabs instance through the UI.
     $edit = array(
       'title' => $this->randomName(),
-      'ajax' => 1,
       'hide_empty_tabs' => TRUE,
       'renderer' => 'ui_tabs',
       'default_tab' => 1,
