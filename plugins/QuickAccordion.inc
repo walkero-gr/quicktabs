@@ -32,14 +32,14 @@ class QuickAccordion extends QuickRenderer {
   
   public function render() {
     $quickset = $this->quickset;
-
+    $qsid = 'quickset-' . $quickset->getName();
     // Build our render array...
     $render_array = array();
     $render_array['#attached'] = $this->add_attached();
     $render_array['content'] = array(
       '#theme' => 'qt_accordion',
       '#options' => array('attributes' => array(
-        'id' => 'quickset-' . $quickset->getName(),
+        'id' => $qsid,
         'class' => array('quick-accordion'),
       )),
       'divs' => array(),
@@ -49,7 +49,7 @@ class QuickAccordion extends QuickRenderer {
     foreach ($quickset->getContents() as $key => $item) {
       if (!empty($item)) {
         $render_array['content']['divs'][] = array(
-          '#prefix' => '<h3><a href= "#">'. $quickset->translateString($item->getTitle(), 'tab', $key) .'</a></h3><div>',
+          '#prefix' => '<h3><a href= "#'. $qsid . '_' . $key .'">'. $quickset->translateString($item->getTitle(), 'tab', $key) .'</a></h3><div>',
           '#suffix' => '</div>',
           'content' => $item->render(),
         );
@@ -62,6 +62,9 @@ class QuickAccordion extends QuickRenderer {
    * Add any necessary js, css and libraries for the render array.
    */
   protected function add_attached() {
+    $settings = $this->quickset->getSettings();
+    $options = $settings['options'];
+
     $attached = array(
       'library' => array(
         array('system', 'ui.accordion'),
@@ -70,6 +73,7 @@ class QuickAccordion extends QuickRenderer {
         array('data' => drupal_get_path('module', 'quicktabs') . '/js/qt_accordion.js'),
       ),
     );
+
     $javascript = drupal_add_js();
     foreach ($javascript['settings']['data'] as $key => $settings) {
       if (key($settings) == 'quicktabs') {
@@ -77,9 +81,13 @@ class QuickAccordion extends QuickRenderer {
         break;
       }
     }
+
+    if ($options['history']) {
+      $attached['library'][] = array('system', 'jquery.bbq');
+      $attached['js'][] = array('data' => drupal_get_path('module', 'quicktabs') . '/js/quicktabs_bbq.js');
+    }
+
     $name = $this->quickset->getName();
-    $settings = $this->quickset->getSettings();
-    $options = $settings['options'];
     if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
       $quicktabs_array = array('name' => $name, 'active_tab' => $this->quickset->getActiveTab(), 'options' => $options['jquery_ui'], 'history' => $options['history']);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_'. $name => $quicktabs_array)), 'type' => 'setting');
