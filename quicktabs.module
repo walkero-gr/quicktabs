@@ -147,7 +147,7 @@ function quicktabs_block_view($delta = '') {
     if (isset($qt['content']) && !empty($qt['content'])) {
       $block['content'] = $qt['content'];
       $block['content']['#contextual_links']['quicktabs'] = array('admin/structure/quicktabs/manage', array($delta));
-      $block['subject'] = $qt['#title'];
+      $block['subject'] = check_plain($qt['#title']);
     }
   }
   return $block;

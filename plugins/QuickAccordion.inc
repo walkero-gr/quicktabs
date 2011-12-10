@@ -49,7 +49,7 @@ class QuickAccordion extends QuickRenderer {
     foreach ($quickset->getContents() as $key => $item) {
       if (!empty($item)) {
         $render_array['content']['divs'][] = array(
-          '#prefix' => '<h3><a href= "#'. $qsid . '_' . $key .'">'. $quickset->translateString($item->getTitle(), 'tab', $key) .'</a></h3><div>',
+          '#prefix' => '<h3><a href= "#'. $qsid . '_' . $key .'">'. check_plain($quickset->translateString($item->getTitle(), 'tab', $key)) .'</a></h3><div>',
           '#suffix' => '</div>',
           'content' => $item->render(),
         );

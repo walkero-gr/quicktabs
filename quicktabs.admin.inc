@@ -33,7 +33,7 @@ function quicktabs_list() {
     }
 
     $tablerow = array(
-      array('data' => $qt->title),
+      array('data' => check_plain($qt->title)),
       array('data' => $storage),
       array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/edit')),
       array('data' => l(t('Export'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/export')),

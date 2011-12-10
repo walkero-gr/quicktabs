@@ -64,7 +64,7 @@ class QuickUiTabs extends QuickRenderer {
 	// be escaped. Sad panda is sad.
 	$href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
 	$tablink = array(
-	  '#markup' => '<a href="'. $href .'">'. $this->quickset->translateString($tab->getTitle(), 'tab', $i) .'</a>',
+	  '#markup' => '<a href="'. $href .'">'. check_plain($this->quickset->translateString($tab->getTitle(), 'tab', $i)) .'</a>',
 	);
 	$tabs[$i] = $tablink;
       }
