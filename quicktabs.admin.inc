@@ -528,7 +528,7 @@ function quicktabs_export_form($form, &$form_state, $qt) {
   // Generate export code
   $code = '$items = array();' ."\n";
   $code .= ctools_export_object('quicktabs', $qt, '');
-  $code .= '$items["'. $qt->machine_name .'"] = $qt;' ."\n";
+  $code .= '$items["'. $qt->machine_name .'"] = $quicktabs;' ."\n";
   $code .= 'return $items;';
 
   // Create form
