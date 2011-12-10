@@ -202,9 +202,11 @@ function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = ar
   }
   $renderer = isset($settings['renderer']) ? $settings['renderer'] : 'quicktabs';
   unset($settings['renderer']);
-  foreach($custom_tabs as &$tab) {
-    $tab['type'] = 'prerendered';
-    if (!isset($tab['weight'])) $tab['weight'] = 0;
+  foreach ($custom_tabs as &$tab) {
+    $tab += array(
+      'type' => 'prerendered',
+      'weight' => 0,
+    );
   }
   $contents = array_merge($custom_tabs, $contents);
   $weight = array();
