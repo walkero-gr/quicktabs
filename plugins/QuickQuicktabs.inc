@@ -125,7 +125,8 @@ class QuickQuicktabs extends QuickRenderer {
       }
     }
     $name = $this->quickset->getName();
-    if (!isset($qtkey) || !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs'])) {
+    if (!isset($qtkey) || (isset($javascript['settings']['data'][$qtkey]['quicktabs'])
+      && !array_key_exists('qt_' . $name, $javascript['settings']['data'][$qtkey]['quicktabs']))) {
       $quicktabs_array = array_merge(array('name' => $name, 'tabs' => $tab_settings), $settings);
       $attached['js'][] = array('data' => array('quicktabs' => array('qt_' . $name => $quicktabs_array)), 'type' => 'setting');
     }
