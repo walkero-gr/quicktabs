@@ -5,10 +5,10 @@
  * Includes support for ajax rendered content.
  */
 class QuickQuicktabs extends QuickRenderer {
-  
+
   public function render() {
     $quickset = $this->quickset;
-    
+
     $render_array = array();
 
     $active_tab = $quickset->getActiveTab();
@@ -55,7 +55,7 @@ class QuickQuicktabs extends QuickRenderer {
 
   /**
    * Build the actual tab links, with appropriate href, title and attributes.
-   * 
+   *
    * @param $active_tab The index of the active tab.
    */
   protected function build_tablinks($active_tab) {
@@ -132,24 +132,27 @@ class QuickQuicktabs extends QuickRenderer {
     }
     return $attached;
   }
-  
+
   /**
    * Helper function to construct link options for tab links.
    */
   protected function construct_link_options($tabkey) {
     $qt_name = $this->quickset->getName();
+    $settings = $this->quickset->getSettings();
+
     $id = 'quicktabs-tab-' . implode('-', array($qt_name, $tabkey));
-  
+
     // Need to construct the correct querystring for the tab links.
     $query = drupal_get_query_parameters(NULL, array("qt-$qt_name", 'q', 'page'));
     $query["qt-{$qt_name}"] = $tabkey;
-  
+
     $link_options = array(
       'attributes' => array(
         'id' => $id,
       ),
       'query' => $query,
       'fragment' => 'qt-' . $qt_name,
+      'html' => isset($settings['html']) ? $settings['html'] : FALSE,
     );
     return $link_options;
   }
