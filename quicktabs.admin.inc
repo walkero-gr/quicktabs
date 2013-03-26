@@ -497,7 +497,7 @@ function quicktabs_form_submit($form, &$form_state) {
       }
     }
     quicktabs_i18n_update_strings(array($qt->machine_name));
-    drupal_goto('admin/structure/quicktabs');
+    $form_state['redirect'] = 'admin/structure/quicktabs';
   }
 }
 
