@@ -139,7 +139,7 @@ function quicktabs_update_7300() {
       }
       $row['machine_name'] = $used[] = $i == 0 ? $qt_name : "{$qt_name}_{$i}";
       unset($row['qtid']);
-      unset($row['style']);
+      $row['style'] = '';
       $row['renderer'] = 'tabs';
       $placeholders = implode(', ', array_keys($row));
       $values = array();
