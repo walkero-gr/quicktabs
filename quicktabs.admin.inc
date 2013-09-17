@@ -97,7 +97,10 @@ function quicktabs_form($form, &$form_state, $formtype, $qt = NULL) {
     $form_state['num_tabs']--;
   }
 
-  $tab_titles = array();
+  $tab_titles = array(
+    QUICKTABS_DELTA_NONE => t('- None -'),
+  );
+
   // Add current tabs to the form.
   foreach ($qt->tabs as $delta => $tab) {
     $tab['delta'] = $delta;

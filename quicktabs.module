@@ -1,4 +1,5 @@
 <?php
+define('QUICKTABS_DELTA_NONE', 999999);
 
 /**
  * Implements hook_help().
