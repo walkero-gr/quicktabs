@@ -135,6 +135,7 @@ function quicktabs_block_info() {
   $blocks = array();
   foreach (quicktabs_load_multiple() as $qt_name => $quicktabs) {
     $blocks[$qt_name]['info'] = $quicktabs->title;
+    $blocks[$qt_name]['cache'] = DRUPAL_NO_CACHE;
   }
   return $blocks;
 }
