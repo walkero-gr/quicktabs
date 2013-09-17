@@ -202,10 +202,13 @@ function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = ar
   }
   $renderer = isset($settings['renderer']) ? $settings['renderer'] : 'quicktabs';
   unset($settings['renderer']);
+  $needs_sorting = FALSE;
+  $weight = 0;
   foreach ($custom_tabs as &$tab) {
+    $needs_sorting = $needs_sorting || isset($tab['weight']);
     $tab += array(
       'type' => 'prerendered',
-      'weight' => 0,
+      'weight' => $weight++,
     );
   }
   $contents = array_merge($custom_tabs, $contents);
@@ -228,8 +231,9 @@ function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = ar
     }
   }
   // Only sort by weight if the tabs haven't already been sorted by some other
-  // mechanism, e.g. Views in the case of the Views style plugin.
-  if (!isset($settings['sorted']) || !$settings['sorted']) {
+  // mechanism, e.g. Views in the case of the Views style plugin and there was
+  // a weight given for one of the tabs.
+  if ($needs_sorting && (!isset($settings['sorted']) || !$settings['sorted'])) {
     array_multisort($weight, SORT_ASC, $contents);
   }
   else {
