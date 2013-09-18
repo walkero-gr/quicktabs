@@ -5,7 +5,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  static function getInfo() {
     return array(
       'name' => t('Quicktabs tests'),
       'description' => t('Add, edit and delete quicktabs.'),
@@ -22,7 +22,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     // Create and login user
     $admin_user = $this->drupalCreateUser(array('access administration pages', 'administer quicktabs', 'administer nodes'));
     $this->drupalLogin($admin_user);
-    
+
     // Create some nodes that we can populate our tabs with.
     for ($i = 0; $i < 5; $i++) {
       $node = new stdClass();
@@ -46,7 +46,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
       'hide_empty_tabs' => FALSE,
       'renderer' => 'quicktabs',
     );
-    
+
     $saved = $edit;
     // We'll be using the $saved array to compare against the Quicktabs instance
     // that gets created. However, hierarchical form elements are dealt with
@@ -73,7 +73,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     // Check that the quicktabs object is in the database.
     $quicktabs = quicktabs_load($edit['machine_name']);
     $this->assertTrue($quicktabs != FALSE, t('Quicktabs instance found in database'));
-  
+
     // Check each individual property of the quicktabs and make sure it was set.
     foreach ($saved as $property => $value) {
       if ($property == 'tabs') {
@@ -85,7 +85,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
       }
       $this->assertEqual($quicktabs->$property, $value, t('Quicktabs property %property properly saved.', array('%property' => $property)));
     }
-    
+
     // Edit the Quicktabs instance through the UI.
     $edit = array(
       'title' => $this->randomName(),
@@ -94,7 +94,7 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
       'renderer' => 'ui_tabs',
       'default_tab' => 1,
     );
-    
+
     $saved = $edit;
     $tab_title_first = $this->randomName();
     $tab_title_second = $this->randomName();
@@ -112,13 +112,13 @@ class QuicktabsAdminTestCase extends DrupalWebTestCase {
     );
     $saved['tabs'] = array(0 => array('type' => 'node', 'nid' => 4, 'title' => $tab_title_second, 'weight' => 0, 'view_mode' => 'teaser', 'hide_title' => 1), 1 => array('type' => 'node', 'nid' => 3, 'title' => $tab_title_first, 'weight' => 1, 'view_mode' => 'teaser', 'hide_title' => 0));
     $this->drupalPost('admin/structure/quicktabs/manage/'. $quicktabs->machine_name .'/edit', $edit, t('Save'));
-    
+
     // Reset static vars because ctools will have cached the original $quicktabs object
     drupal_static_reset();
     // Check that the quicktabs object is in the database.
     $edited_qt = quicktabs_load($quicktabs->machine_name);
     $this->assertTrue($edited_qt != FALSE, t('Quicktabs instance found in database'));
-  
+
     // Check each individual property of the quicktabs and make sure it was set.
     foreach ($saved as $property => $value) {
       $this->assertEqual($edited_qt->$property, $value, t('Quicktabs property %property properly saved.', array('%property' => $property)));
