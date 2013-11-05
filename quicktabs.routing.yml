@@ -1,0 +1,48 @@
+quicktabs_list:
+  pattern: '/admin/structure/quicktabs'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::listing'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_add:
+  pattern: '/admin/structure/quicktabs/add'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::add'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_edit:
+  pattern: '/admin/structure/quicktabs/manage/{quicktabs}/edit'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::edit'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_delete:
+  pattern: '/admin/structure/quicktabs/manage/{quicktabs}/delete'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::delete'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_clone:
+  pattern: '/admin/structure/quicktabs/manage/{quicktabs}/clone'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::clone'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_export:
+  pattern: '/admin/structure/quicktabs/manage/{quicktabs}/export'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsAdminController::export'
+  requirements:
+    _permission: 'administer quicktabs'
+
+quicktabs_ajax:
+  pattern: '/quicktabs/ajax'
+  defaults:
+    _controller: '\Drupal\quicktabs\Routing\QuicktabsController::quicktabsAjax'
+  requirements:
+    _permission: 'access content'

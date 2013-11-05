@@ -23,11 +23,8 @@ function quicktabs_menu() {
   $items['admin/structure/quicktabs'] = array(
     'title' => 'Quicktabs',
     'description' => 'Create blocks of tabbed content.',
-    'page callback' => 'quicktabs_list',
-    'access callback' => 'user_access',
-    'access arguments' => array('administer quicktabs'),
+    'route_name' => 'quicktabs_list',
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'quicktabs.admin.inc',
   );
   $items['admin/structure/quicktabs/list'] = array(
     'title' => 'List quicktabs',
@@ -35,18 +32,12 @@ function quicktabs_menu() {
   );
   $items['admin/structure/quicktabs/add'] = array(
     'title' => 'Add Quicktabs Instance',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('quicktabs_form', 'add'),
-    'access arguments' => array('administer quicktabs'),
+    'route_name' => 'quicktabs_add',
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'quicktabs.admin.inc',
   );
   $items['admin/structure/quicktabs/manage/%quicktabs'] = array(
     'title' => 'Edit quicktab',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('quicktabs_form', 'edit', 4),
-    'access arguments' => array('administer quicktabs'),
-    'file' => 'quicktabs.admin.inc',
+    'route_name' => 'quicktabs_edit',
   );
   $items['admin/structure/quicktabs/manage/%quicktabs/edit'] = array(
     'title' => 'Edit quicktab',
@@ -55,33 +46,18 @@ function quicktabs_menu() {
   );
   $items['admin/structure/quicktabs/manage/%quicktabs/delete'] = array(
     'title' => 'Delete quicktab',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('quicktabs_block_delete', 4),
-    'access arguments' => array('administer quicktabs'),
+    'route_name' => 'quicktabs_delete',
     'type' => MENU_LOCAL_TASK,
-    'file' => 'quicktabs.admin.inc',
   );
   $items['admin/structure/quicktabs/manage/%quicktabs/clone'] = array(
     'title' => 'Clone quicktab',
-    'page callback' => 'quicktabs_clone',
-    'page arguments' => array(4),
-    'access arguments' => array('administer quicktabs'),
+    'route_name' => 'quicktabs_clone',
     'type' => MENU_LOCAL_TASK,
-    'file' => 'quicktabs.admin.inc',
   );
   $items['admin/structure/quicktabs/manage/%quicktabs/export'] = array(
     'title' => 'Export',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('quicktabs_export_form', 4),
-    'access arguments' => array('administer quicktabs'),
+    'route_name' => 'quicktabs_export',
     'type' => MENU_LOCAL_TASK,
-    'file' => 'quicktabs.admin.inc',
-  );
-  $items['quicktabs/ajax'] = array(
-    'page callback' => 'quicktabs_ajax',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
   );
   return $items;
 }
@@ -276,94 +252,12 @@ function quicktabs_ajax($name, $index, $type) {
   ajax_deliver($page);
 }
 
-/**
- * Load the quicktabs data for a particular instance.
- */
-function quicktabs_load($name) {
-  $qts = quicktabs_load_multiple(array($name));
-  return isset($qts[$name]) ? $qts[$name] : NULL;
-}
 
 /**
- * Load the quicktabs data.
+ * Returns an array of all views as fully loaded $view objects.
  */
-function quicktabs_load_multiple($names = array()) {
-  ctools_include('export');
-  $defaults = empty($names) ? ctools_export_load_object('quicktabs', 'all') : ctools_export_load_object('quicktabs', 'names', $names);
-  return $defaults;
-}
-
-/**
- * Creates a new quicktab instance.
- */
-function quicktabs_save($quicktab) {
-  module_invoke_all('quicktabs_presave', $quicktab);
-
-  $exists = quicktabs_load($quicktab->machine_name);
-  if ($exists && empty($exists->in_code_only)) {
-    $ret = drupal_write_record('quicktabs', $quicktab, 'machine_name');
-    if ($ret == SAVED_UPDATED) {
-      quicktabs_i18n_update_strings(array($quicktab->machine_name));
-    }
-    else {
-      return FALSE;
-    }
-  }
-  else {
-    $ret = drupal_write_record('quicktabs', $quicktab);
-    if ($ret == SAVED_NEW) {
-      quicktabs_i18n_update_strings(array($quicktab->machine_name));
-      module_invoke_all('quicktabs_insert', $quicktab);
-    }
-    else {
-      return FALSE;
-    }
-  }
-  module_invoke_all('quicktabs_save', $quicktab);
-  return $quicktab;
-}
-
-/**
- * Updates an existing quicktab instance.
- */
-function quicktabs_update($quicktab) {
-  quicktabs_save($quicktab);
-  module_invoke_all('quicktabs_update', $quicktab);
-  return $quicktab;
-}
-
-/**
- * Deletes a quicktab instance.
- */
-function quicktabs_delete($machine_name) {
-  db_query('DELETE FROM {quicktabs} WHERE machine_name = :machine_name', array(':machine_name' => $machine_name));
-  module_invoke_all('quicktabs_delete', $machine_name);
-}
-
-/**
- * Exports the specified Quicktabs instance with translatable strings.
- */
-function quicktabs_export($qt, $indent = '') {
-  $output = ctools_export_object('quicktabs', $qt, $indent);
-  $translatables = array();
-  if (!empty($qt->title)) {
-    $translatables[] = $qt->title;
-  }
-  foreach ($qt->tabs as $tab) {
-    $translatables[] = $tab['title'];
-  }
-  $translatables = array_filter(array_unique($translatables));
-  if (!empty($translatables)) {
-    $output .= "\n";
-    $output .= "{$indent}// Translatables\n";
-    $output .= "{$indent}// Included for use with string extractors like potx.\n";
-    sort($translatables);
-    foreach ($translatables as $string) {
-      $output .= "{$indent}t(" . ctools_var_export($string) . ");\n";
-    }
-    $output .= "\n";
-  }
-  return $output;
+function quicktabs_get_all_quicktabs() {
+  return Drupal::service('plugin.manager.entity')->getStorageController('quicktabs')->load();
 }
 
 /**
