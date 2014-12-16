@@ -99,4 +99,8 @@ class QuickCallbackContent extends QuickContent {
   public function getAjaxKeys() {
     return array('ajax_path');
   }
+
+  public function getUniqueKeys() {
+    return array('ajax_path');
+  }
 }

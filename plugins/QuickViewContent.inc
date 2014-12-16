@@ -147,4 +147,8 @@ class QuickViewContent extends QuickContent {
   public function getAjaxKeys() {
     return array('vid', 'display', 'view_dom_id', 'view_path', 'ajax_args');
   }
+
+  public function getUniqueKeys() {
+    return array('vid', 'display');
+  }
 }
