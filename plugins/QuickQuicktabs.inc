@@ -33,9 +33,17 @@ class QuickQuicktabs extends QuickRenderer {
           'divs' => array(),
         ),
       );
+      
 
+    
       // If in ajax mode, we'll only be rendering one tab, otherwise all of them.
-      $tabs_to_render = $settings['ajax'] ? array($active_tab => $contents[$active_tab]) : $contents;
+      if ($settings['ajax']){
+        // check in case of $active_tab=QUICKTABS_DELTA_NONE
+        $tabs_to_render = isset ($contents[$active_tab]) ? array($active_tab => $contents[$active_tab]) : array ();
+      }else{
+        $tabs_to_render = $contents;
+      }
+    
       foreach ($tabs_to_render as $key => $tab) {
         if (!empty($tab)) {
           $attribs = array(
