@@ -1,0 +1,3 @@
+administer quicktabs:
+  title: 'Administer Quicktabs'
+  restrict access: TRUE

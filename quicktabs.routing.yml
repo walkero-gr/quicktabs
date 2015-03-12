@@ -1,0 +1,7 @@
+quicktabs.list_tabs:
+  path: '/admin/structure/quicktabs'
+  default:
+    _title: 'Quicktabs'
+    _controller: '\Drupal\quicktabs\Controller\QuickTabsList::'
+  requirements:
+    _access: 'administer quicktabs'
