@@ -1,19 +1,17 @@
 <?php
 define('QUICKTABS_DELTA_NONE', 999999);
 
-use Drupal\Core\Routing\RouteMatchInterface;
-
 /**
  * Implements hook_help().
  */
-function quicktabs_help($route_name, RouteMatchInterface $route_match) {
-  switch ($route_name) {
-    case 'help.page.quicktabs':
+function quicktabs_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#quicktabs':
       $output = '<p>' . t('The Quicktabs module allows you to create blocks of tabbed content. Clicking on the tabs makes the corresponding content display instantly (it uses jQuery). The content for each tabbed section can be a node, view, block or another Quicktabs instance. You can create an unlimited number of Quicktabs instances, each of which will automatically have an associated block.') . '</p>';
-      $output .= '<p>' . t('The <a href="!quicktabs">quicktabs page</a> displays all quicktabs currently available on your site. Create new quicktabs using the <a href="!add-quicktab">add quicktab page</a> (the block containing a new quicktab must also be enabled on the <a href="!blocks">blocks administration page</a>).', array('!quicktabs' => \Drupal::url('admin/structure/quicktabs'), '!add-quicktab' => \Drupal::url('admin/structure/quicktab/add'), '!blocks' => \Drupal::url('admin/structure/block'))) . '</p>';
+      $output .= '<p>' . t('The <a href="@quicktabs">quicktabs page</a> displays all quicktabs currently available on your site. Create new quicktabs using the <a href="@add-quicktab">add quicktab page</a> (the block containing a new quicktab must also be enabled on the <a href="@blocks">blocks administration page</a>).', array('@quicktabs' => url('admin/structure/quicktabs'), '@add-quicktab' => url('admin/structure/quicktab/add'), '@blocks' => url('admin/structure/block'))) . '</p>';
       return $output;
   }
-  if ($route_name == 'admin/structure/quicktabs' && module_exists('block')) {
+  if ($path == 'admin/structure/quicktabs' && module_exists('block')) {
     return '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="@blocks">blocks administration page</a>.', array('@blocks' => url('admin/structure/block'))) . '</p>';
   }
 }

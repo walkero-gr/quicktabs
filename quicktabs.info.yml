@@ -2,4 +2,4 @@ name: Quicktabs
 description: Render content with tabs and other display styles
 core: 8.x
 type: module
-configure: quicktabs.list_tabs
+configure: quicktabs.admin
