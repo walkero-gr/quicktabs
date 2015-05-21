@@ -14,7 +14,10 @@ class QuickTabsList extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public function content(){
-    return array('#type' => 'markup', '#markup' => t('Hi all?'),);
+  public function content() {
+    $build = array(
+      '#type' => 'markup',
+      '#markup' => t('Hello World'),
+    );
   }
 }

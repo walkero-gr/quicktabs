@@ -10,11 +10,15 @@ use Drupal\Core\Controller\ControllerBase;
 /**
  * Class QuickTabs
  */
-class QuickTabsList extends ControllerBase {
+class QuickTabs extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public function content(){
-    return array('#type' => 'markup', '#markup' => t('Hi all?'),);
+  public function content() {
+    $build = array(
+      '#type' => 'markup',
+      '#markup' => t('Hello World'),
+    );
+    return $build;
   }
 }
