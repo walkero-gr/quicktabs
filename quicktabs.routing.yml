@@ -2,6 +2,20 @@ quicktabs.admin:
   path: '/admin/structure/quicktabs'
   default:
     _title: 'Quicktabs'
-    _controller: '\Drupal\quicktabs\Controller\QuickTabsList::description'
+    _controller: '\Drupal\quicktabs\Controller\QuickTabs::content'
   requirements:
     _permission: 'administer quicktabs'
+quicktabs.list_tabs:
+  path: '/admin/structure/quicktabs/list'
+  default:
+    _title: 'List Quicktabs'
+    _controller: '\Drupal\quicktabs\Controller\QuickTabsList::content'
+  requirements:
+    _permission: 'administer quicktabs'
+quicktabs.add:
+  path: 'admin/structure/quicktabs/add'
+  default:
+    _title: 'Add Quicktabs Instance'
+    _form: '\Drupal\quicktabs\Form\QuicktabsAddForm'
+  requirements:
+    _permission: 'Access Content'

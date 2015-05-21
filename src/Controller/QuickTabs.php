@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * Contains \Drupal\quicktabs\Controller\QuickTabsList.
+ * Contains \Drupal\quicktabs\Controller\QuickTabs.
  */
 
 namespace Drupal\quicktabs\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-  /**
- * Class QuickTabsList
+/**
+ * Class QuickTabs
  */
 class QuickTabsList extends ControllerBase {
   /**
