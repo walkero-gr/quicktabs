@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\quicktabs\Form\QuicktabAddForm.php
+ * Contains \Drupal\quicktabs\Form\QuicktabDeleteForm.php
  */
 namespace Drupal\quicktabs\Form;
 
@@ -12,13 +12,13 @@ use Drupal\Core\Form\FormStateInterface;
  * Class QuicktabAddForm
  *
  */
-class QuicktabAddForm extends FormBase {
+class QuicktabDeleteForm extends FormBase {
 
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'quicktab add';
+    return 'quicktab delete';
   }
 
   /**
