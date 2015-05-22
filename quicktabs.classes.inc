@@ -421,7 +421,7 @@ abstract class QuickContent implements QuickContentRenderable {
       if (isset($plugin['dependencies'])) {
         foreach ($plugin['dependencies'] as $dep) {
           // If any dependency is missing we cannot instantiate our class.
-          if (!module_exists($dep)) return NULL;
+          if (!Drupal::moduleHandler()->moduleExists($dep)) return NULL;
         }
       }
       return new $class($item);

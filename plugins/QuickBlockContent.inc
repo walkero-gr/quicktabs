@@ -61,7 +61,7 @@ class QuickBlockContent extends QuickContent {
     }
 
     if (isset($item['bid'])) {
-      if (module_exists('block')) {
+      if (Drupal::moduleHandler()->moduleExists('block')) {
         $pos = strpos($item['bid'], '_delta_');
         $module = drupal_substr($item['bid'], 0, $pos);
         $delta = drupal_substr($item['bid'], $pos + 7);

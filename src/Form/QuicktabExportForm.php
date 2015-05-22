@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class QuicktabExportForm
- * 
+ *
  */
 class QuicktabExportForm extends FormBase {
 

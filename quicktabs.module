@@ -10,11 +10,11 @@ function quicktabs_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.quicktabs':
       $output = '<p>' . t('The Quicktabs module allows you to create blocks of tabbed content. Clicking on the tabs makes the corresponding content display instantly (it uses jQuery). The content for each tabbed section can be a node, view, block or another Quicktabs instance. You can create an unlimited number of Quicktabs instances, each of which will automatically have an associated block.') . '</p>';
-      $output .= '<p>' . t('The <a href="!quicktabs">quicktabs page</a> displays all quicktabs currently available on your site.', array('!quicktabs' => \Drupal::url('quicktabs.admin'),)) . '</p>';
+      $output .= '<p>' . t('The <a href="!quicktabs">quicktabs page</a> displays all quicktabs currently available on your site. Create new quicktabs using the <a href="!add-quicktab">add quicktab page</a> (the block containing a new quicktab must also be enabled on the <a href="!blocks">blocks administration page</a>).', array('!quicktabs' => \Drupal::url('quicktabs.admin'), '!add-quicktab' => \Drupal::url('quicktabs.add'), '!blocks' => \Drupal::url('block.admin_display'))) . '</p>';
       return $output;
   }
-  if ($route_name == 'admin/structure/quicktabs' && module_exists('block')) {
-    return '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="@blocks">blocks administration page</a>.', array('@blocks' => url('admin/structure/block'))) . '</p>';
+  if ($route_name == 'quicktabs.admins' && Drupal::moduleHandler()->moduleExists('block')) {
+    return '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="!blocks">blocks administration page</a>.', array('!blocks' => \Drupal::Url('block.admin_display'))) . '</p>';
   }
 }
 

@@ -59,7 +59,7 @@ class QuickViewContent extends QuickContent {
   
   public function __construct($item) {
     parent::__construct($item);
-    if (module_exists('views')) views_add_js('ajax_view');
+    if (Drupal::moduleHandler()->moduleExists('views')) views_add_js('ajax_view');
     $this->settings['view_path'] = rawurlencode($_GET['q']);
     $this->settings['view_dom_id'] = self::$view_dom_id++;
     $args_array = array();
@@ -117,7 +117,7 @@ class QuickViewContent extends QuickContent {
     $item = $this->settings;
     $output = array();
     if (isset($item['vid'])) {
-      if (module_exists('views')) {
+      if (Drupal::moduleHandler()->moduleExists('views')) {
         if ($view = views_get_view($item['vid'])) {
           if ($view->access($item['display'])) {
             $view->set_display($item['display']);

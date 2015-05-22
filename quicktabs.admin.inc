@@ -312,7 +312,7 @@ function _quicktabs_form(array $tab, $qt) {
     if (isset($info['dependencies'])) {
       foreach ($info['dependencies'] as $dep) {
         // Do not load the options form for any plugin that is missing dependencies.
-        if (!module_exists($dep)) continue 2;
+        if (!Drupal::moduleHandler()->moduleExists($dep)) continue 2;
       }
     }
     $tabtypes[$name] = $name;
