@@ -16,6 +16,39 @@ quicktabs.add:
   path: 'admin/structure/quicktabs/add'
   defaults:
     _title: 'Add Quicktabs Instance'
-    _form: '\Drupal\quicktabs\Form\QuicktabsAddForm'
+    _form: '\Drupal\quicktabs\Form\QuicktabAddForm'
+  requirements:
+    _permission: 'Access Content'
+quicktabs.delete:
+ path: '/admin/structure/quicktabs/manage/{quicktabs}/delete'
+ defaults:
+   _title: 'Delete quicktab'
+   _form: '\Drupal\quicktabs\Form\QuicktabDeleteForm'
+ requirements:
+   _permission: 'Access Content'
+quicktabs.edit:
+  path: '/admin/structure/quicktabs/manage/{quicktabs}/edit'
+  defaults:
+    _title: 'Edit quicktab'
+    _form: '\Drupal\quicktabs\Form\QuicktabEditForm'
+  requirements:
+    _permission: 'administer quicktab' #need to recheck!!
+quicktabs.clone:
+  path: '/admin/structure/quicktabs/manage/{quicktabs}/clone'
+  defaults:
+    _title: 'Clone quicktab'
+    _form: '\Drupal\quicktabs\Form\QuicktabCloneForm'
+  requirements:
+    _permission: 'administer quicktab'
+quicktabs.export:
+  path: '/admin/structure/quicktabs/manage/{quicktabs}/export'
+  defaults:
+    _title: 'Export quicktab'
+    _form: '\Drupal\quicktabs\Form\QuicktabExportForm'
+  requirements:
+    _permission: 'administer quicktab'
+quicktabs.ajax:
+  path: '/quicktabs/ajax'
+#  _controller: '\Drupal\quicktabs\Ajax\quicktabAjax::' Ask!!!
   requirements:
     _permission: 'Access Content'
