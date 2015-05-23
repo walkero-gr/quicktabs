@@ -1,12 +1,15 @@
 <?php
 
+namespace Drupal\quicktabs;
+
+
 /**
  * A QuickSet object is an unrendered Quicktabs instance, essentially just a
  * container of content items, as defined by its configuration settings and the
  * array of content items it contains.
  */
 class QuickSet {
-  
+
   /**
    * The unique name of the QuickSet object.
    * This corresponds to the machine name as stored in the database or as defined
@@ -14,14 +17,14 @@ class QuickSet {
    * @var string
    */
   protected $name;
-  
+
   /**
    * The contents array.
    * An array of objects that implement the QuickContentRenderable interface.
    * @var array
    */
   protected $contents;
-  
+
   /**
    * An array of settings controlling the behaviour of the QuickSet object. See
    * the getDefaultSettings() static function of this class for the full list of
@@ -29,20 +32,24 @@ class QuickSet {
    * @var array
    */
   protected $settings;
-  
+
 
   /**
    * Accessors.
    */
-  
+
   public function getName() {
     return $this->name;
   }
-  
+
+  /**
+   * @return array
+   */
+
   public function getContents() {
     return $this->contents;
   }
-  
+
   public function getSettings() {
     return $this->settings;
   }
@@ -66,7 +73,7 @@ class QuickSet {
    *
    * @param $settings
    *   An array of settings determining the behaviour of this QuickSet instance.
-   *  
+   *
    */
   public static function QuickSetRendererFactory($name, $contents, $renderer, $settings) {
     ctools_include('plugins');
@@ -81,7 +88,7 @@ class QuickSet {
       return new $class($qs);
     }
   }
-  
+
   /**
    * Returns a reference to an object that implements the QuickContentRenderable
    * interface.
@@ -95,7 +102,7 @@ class QuickSet {
     }
     return NULL;
   }
-  
+
   /**
    * Static method to retrieve content from an ajax call. This is called by the
    * quicktabs_ajax() callback in quicktabs.module.
@@ -107,7 +114,7 @@ class QuickSet {
     }
     return '';
   }
-  
+
   /**
    * Ensure sensible default settings for each QuickSet object.
    */
@@ -121,7 +128,7 @@ class QuickSet {
       'options' => array(),
     );
   }
-  
+
   /**
    * Constructor
    */
@@ -235,7 +242,7 @@ class QuickSet {
       }
     }
   }
-  
+
   /**
    * Returns the active tab for a given Quicktabs instance. This could be coming
    * from the URL or just from the settings for this instance. If neither, it
@@ -247,289 +254,4 @@ class QuickSet {
     $active_tab = (isset($active_tab) && isset($this->contents[$active_tab])) ? $active_tab : QUICKTABS_DELTA_NONE;
     return $active_tab;
   }
-}
-
-/**
- * Abstract base class for QuickSet Renderers.
- *
- * A renderer object contains a reference to a QuickSet object, which it can
- * then render.
- */
-abstract class QuickRenderer {
-  
-  /**
-   * @var QuickSet
-   */
-  protected $quickset;
-
-  /**
-   * Constructor
-   */
-  public function __construct($quickset) {
-    $this->quickset = $quickset;
-  }
-  
-  /**
-   * Accessor method for the title.
-   */
-  public function getTitle() {
-    return $this->quickset->getTitle();
-  }
-  
-  /**
-   * The only method that renderer plugins must implement.
-   * 
-   * @return A render array to be passed to drupal_render().
-   */
-  abstract public function render();
-  
-
-  /**
-   * Method for returning the form elements to display for this renderer type on
-   * the admin form.
-
-   * @param $qt An object representing the Quicktabs instance that the tabs are
-   * being built for.
-   */
-  public static function optionsForm($qt) {
-    return array();
-  }
-  
-}
-
-/*******************************************************
- * The classes below relate to individual tab content  *
- *******************************************************/
-
-/**
- * Each QuickSet object has a "contents" property which is an array of objects
- * that implement the QuickContentRenderable interface.
- */
-interface QuickContentRenderable {
-  
-  /**
-   * Returns the short type name of the content plugin, e.g. 'block', 'node', 
-   * 'prerendered'.
-   */
-  public static function getType();
-  
-  /**
-   * Returns the tab title.
-   */
-  public function getTitle();
-
-  /**
-   * Returns an array of settings specific to the type of content.
-   */
-  public function getSettings();
-  
-  /**
-   * Renders the content.
-   *
-   * @param $hide_emtpy If set to true, then the renderer should return an empty
-   * array if there is no content to display, for example if the user does not
-   * have access to the requested content.
-   *
-   * @param $args Used during an ajax call to pass in the settings necessary to
-   * render this type of content.
-   */
-  public function render($hide_empty = FALSE, $args = array());
-
-  /**
-   * Returns an array of keys to use for constructing the correct arguments for
-   * an ajax callback to retrieve content of this type. The order of the keys
-   * returned affects the order of the args passed in to the render method when
-   * called via ajax (see the render() method above).
-   */
-  public function getAjaxKeys();
-  
-  /**
-   * Returns an array of keys, sufficient to represent the content uniquely.
-   */
-  public function getUniqueKeys();
-
-}
-
-/**
- * Abstract base class for content plugins.
- */
-abstract class QuickContent implements QuickContentRenderable {
-
-  /**
-   * Used as the title of the tab.
-   * @var string
-   */
-  protected $title;
-
-  /**
-   * An array containing the information that defines the tab content, specific
-   * to its type.
-   * @var array
-   */
-  protected $settings;
-  
-  /**
-   * A render array of the contents.
-   * @var array
-   */
-  protected $rendered_content;
-  
-
-  /**
-   * Constructor
-   */
-  public function __construct($item) {
-    $this->title = isset($item['title']) ? $item['title'] : '';
-    // We do not need to store title, type or weight in the settings array, which
-    // is for type-specific settings.
-    unset($item['title'], $item['type'], $item['weight']);
-    $this->settings = $item;
-  }
-  
-  
-  /**
-   * Accessor for the tab title.
-   */
-  public function getTitle() {
-    return $this->title;
-  }
-
-  /**
-   * Accessor for the tab settings.
-   */
-  public function getSettings() {
-    return $this->settings;
-  }
-
-  /**
-   * Instantiate a content type object.
-   *
-   * @param $name
-   *   The type name of the plugin.
-   *
-   * @param $item
-   *   An array containing the item definition
-   *  
-   */
-  public static function factory($name, $item) {
-    ctools_include('plugins');
-    if ($class = ctools_plugin_load_class('quicktabs', 'contents', $name, 'handler')) {
-      // We now need to check the plugin's dependencies, to make sure they're installed.
-      // This info has already been statically cached at this point so there's no
-      // harm in making a call to ctools_get_plugins().
-      $plugin = ctools_get_plugins('quicktabs', 'contents', $name);
-      if (isset($plugin['dependencies'])) {
-        foreach ($plugin['dependencies'] as $dep) {
-          // If any dependency is missing we cannot instantiate our class.
-          if (!Drupal::moduleHandler()->moduleExists($dep)) return NULL;
-        }
-      }
-      return new $class($item);
-    }
-    return NULL;
-  }
-
-  /**
-   * Method for returning the form elements to display for this tab type on
-   * the admin form.
-   *
-   * @param $delta Integer representing this tab's position in the tabs array.
-   *
-   * @param $qt An object representing the Quicktabs instance that the tabs are
-   * being built for.
-   */
-  abstract public function optionsForm($delta, $qt);
-  
-}
-
-/**
- * This class implements the same interface that content plugins do but it is not
- * a content plugin. It is a special class for pre-rendered content which is used
- * when "custom" tabs are added to existing Quicktabs instances in a call to
- * quicktabs_build_quicktabs().
- */
-class QuickPreRenderedContent implements QuickContentRenderable {
-  
-  public static function getType() {
-    return 'prerendered';
-  }
-  
-  /**
-   * Used as the title of the tab.
-   * @var title
-   */
-  protected $title;
-  
-  /**
-   * A render array of the contents.
-   * @var array
-   */
-  protected $rendered_content;
-
-  /**
-   * An array containing the information that defines the tab content, specific
-   * to its type.
-   * @var array
-   */
-  protected $settings;
-
-
-  /**
-   * Constructor
-   */
-  public function __construct($item) {
-
-    $contents = isset($item['contents']) ? $item['contents'] : array();
-    if (!is_array($contents)) {
-      $contents = array('#markup' => $contents);
-    }
-    $this->rendered_content = $contents;
-
-    $this->title = isset($item['title']) ? $item['title'] : '';
-
-    unset($item['title'], $item['contents']);
-    $this->settings = $item;
-  }
-  
-  /**
-   * Accessor for the tab title.
-   */
-  public function getTitle() {
-    return $this->title;
-  }
-
-  /**
-   * Accessor for the tab settings.
-   */
-  public function getSettings() {
-    return $this->settings;
-  }
-
-
-  /**
-   * The render method simply returns the contents that were passed in and
-   * stored during construction.
-   */
-  public function render($hide_empty = FALSE, $args = array()) {
-    return $this->rendered_content;
-  }
-  
-  /**
-   * This content cannot be rendered via ajax so we don't return any ajax keys.
-   */
-  public function getAjaxKeys() {
-    return array();
-  }
-
-  public function getUniqueKeys() {
-    return array('class_suffix');
-  }
-
-}
-
-/**
- * Create our own exception class.
- */
-class InvalidQuickSetException extends Exception {
-  
 }
