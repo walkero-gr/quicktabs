@@ -6,7 +6,7 @@ namespace Drupal\quicktabs;
 /**
  * Abstract base class for content plugins.
  */
-abstract class QuickContent implements QuickContentRenderable {
+abstract class QuickContent implements QuickContentRenderableInterface {
 
   /**
    * Used as the title of the tab.

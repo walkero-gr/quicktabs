@@ -9,7 +9,7 @@ namespace Drupal\quicktabs;
  * when "custom" tabs are added to existing Quicktabs instances in a call to
  * quicktabs_build_quicktabs().
  */
-class QuickPreRenderedContent implements QuickContentRenderable {
+class QuickPreRenderedContent implements QuickContentRenderableInterface {
 
   public static function getType() {
     return 'prerendered';

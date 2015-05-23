@@ -2,14 +2,14 @@ quicktabs.admin:
   path: '/admin/structure/quicktabs'
   defaults:
     _title: 'Quicktabs'
-    _controller: '\Drupal\quicktabs\Controller\QuickTabs::content'
+    _controller: '\Drupal\quicktabs\Controller\QuickTabsController::content'
   requirements:
     _permission: 'administer quicktabs'
 quicktabs.list_tabs:
   path: '/admin/structure/quicktabs/list'
   defaults:
     _title: 'List Quicktabs'
-    _controller: '\Drupal\quicktabs\Controller\QuickTabsList::content'
+    _controller: '\Drupal\quicktabs\Controller\QuickTabsListController::content'
   requirements:
     _permission: 'administer quicktabs'
 quicktabs.add:

@@ -4,9 +4,9 @@ namespace Drupal\quicktabs;
 
 /**
  * Each QuickSet object has a "contents" property which is an array of objects
- * that implement the QuickContentRenderable interface.
+ * that implement the QuickContentRenderableInterface.
  */
-interface QuickContentRenderable {
+interface QuickContentRenderableInterface {
 
   /**
    * Returns the short type name of the content plugin, e.g. 'block', 'node',

@@ -20,7 +20,7 @@ class QuickSet {
 
   /**
    * The contents array.
-   * An array of objects that implement the QuickContentRenderable interface.
+   * An array of objects that implement the QuickContentRenderableInterface.
    * @var array
    */
   protected $contents;
@@ -41,10 +41,6 @@ class QuickSet {
   public function getName() {
     return $this->name;
   }
-
-  /**
-   * @return array
-   */
 
   public function getContents() {
     return $this->contents;
@@ -90,8 +86,7 @@ class QuickSet {
   }
 
   /**
-   * Returns a reference to an object that implements the QuickContentRenderable
-   * interface.
+   * Returns a reference to an object that implements the QuickContentRenderableInterface.
    */
   public static function getContentRenderer($tab) {
     if ($tab['type'] == 'prerendered') {
