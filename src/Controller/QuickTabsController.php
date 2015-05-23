@@ -10,7 +10,7 @@ use Drupal\Core\Controller\ControllerBase;
 /**
  * Class QuickTabs
  */
-class QuickTabs extends ControllerBase {
+class QuickTabsController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
