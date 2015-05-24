@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * Contains \Drupal\quicktabs\Controller\QuickTabsList.
+ * Contains \Drupal\quicktabs\Controller\QuickTabsListController.
  */
 
 namespace Drupal\quicktabs\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-  /**
- * Class QuickTabsList
+/**
+ * Class QuickTabsListController
  */
 class QuickTabsListController extends ControllerBase {
   /**
@@ -19,5 +19,6 @@ class QuickTabsListController extends ControllerBase {
       '#type' => 'markup',
       '#markup' => t('Hello World'),
     );
+    return $build;
   }
 }

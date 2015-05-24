@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickRenderer;
+
 /**
  * Renders the content using the jQuery UI Tabs widget.
  */

@@ -13,7 +13,7 @@ quicktabs.list_tabs:
   requirements:
     _permission: 'administer quicktabs'
 quicktabs.add:
-  path: 'admin/structure/quicktabs/add'
+  path: '/admin/structure/quicktabs/add'
   defaults:
     _title: 'Add Quicktabs Instance'
     _form: '\Drupal\quicktabs\Form\QuicktabAddForm'

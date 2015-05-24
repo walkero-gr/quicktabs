@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickContent;
+
 /**
  * Class for tab content of type "callback" - this is for rendering the contents
  * of some menu callback function as tab content.

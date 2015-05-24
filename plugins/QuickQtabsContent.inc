@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickContent;
+
 /**
  * Class for tab content of type "qtabs" - this is for rendering a QuickSet instance
  * as the tab content of another QuickSet instance.

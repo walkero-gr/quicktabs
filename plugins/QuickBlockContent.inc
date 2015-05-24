@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickContent;
+
 /**
  * Class for tab content of type "block" - this is for rendering a block as tab
  * content.
@@ -125,4 +127,3 @@ class QuickBlockContent extends QuickContent {
       || (count(array_intersect($authorized_rids, $rids)) != 0);
   }
 }
-

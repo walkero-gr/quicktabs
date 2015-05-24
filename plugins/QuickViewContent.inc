@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickContent;
+
 /**
  * Class for tab content of type "view" - this is for rendering a view as tab
  * content.

@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\quicktabs\QuickContent;
+
 /**
  * Class for tab content of type "node" - this is for rendering a node as tab
  * content.
