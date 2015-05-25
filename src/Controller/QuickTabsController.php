@@ -17,7 +17,7 @@ class QuickTabsController extends ControllerBase {
   public function content() {
     $build = array(
       '#type' => 'markup',
-      '#markup' => t('Hello World'),
+      //'#markup' => '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="!blocks">blocks administration page</a>.', array('!blocks' => \Drupal::Url('block.admin_display'))). '</p>',
     );
     return $build;
   }

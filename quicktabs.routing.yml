@@ -5,6 +5,8 @@ quicktabs.admin:
     _controller: '\Drupal\quicktabs\Controller\QuickTabsController::content'
   requirements:
     _permission: 'administer quicktabs'
+  options:
+    _admin_route: TRUE
 quicktabs.list_tabs:
   path: '/admin/structure/quicktabs/list'
   defaults:
