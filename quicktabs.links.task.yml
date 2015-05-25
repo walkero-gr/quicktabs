@@ -1,0 +1,22 @@
+quicktabs.edit:
+  route_name: quicktabs.edit
+  title: 'Edit'
+  base_route: quicktabs.edit
+
+quicktabs.delete:
+  route_name: quicktabs.delete
+  title: 'Delete'
+  base_route: quicktabs.edit
+  weight: 100
+
+quicktabs.clone:
+  route_name: quicktabs.clone
+  title: 'Clone'
+  base_route: quicktabs.edit
+  weight: 101
+
+quicktabs.export:
+  route_name: quicktabs.export
+  title: 'Export'
+  base_route: quicktabs.edit
+  weight: 102
