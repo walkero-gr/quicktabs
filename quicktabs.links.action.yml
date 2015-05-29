@@ -1,0 +1,5 @@
+quicktabs.add:
+  route_name: quicktabs.add
+  title: 'Add quicktab Instance'
+  appears_on:
+    - quicktabs.admin

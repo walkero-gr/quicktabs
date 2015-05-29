@@ -16,7 +16,7 @@ function quicktabs_help($route_name, RouteMatchInterface $route_match) {
       $output = '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="!blocks">blocks administration page</a>.', array('!blocks' => \Drupal::Url('block.admin_display'))). '</p>';
       return $output;
   }
-  if ($route_name == 'quicktabs.admins' && Drupal::moduleHandler()->moduleExists('block')) {
+  if ($route_name == 'quicktabs.admin' && Drupal::moduleHandler()->moduleExists('block')) {
     return '<p>' . t('Each Quicktabs instance has a corresponding block that is managed on the <a href="!blocks">blocks administration page</a>.', array('!blocks' => \Drupal::Url('block.admin_display'))) . '</p>';
   }
 }
