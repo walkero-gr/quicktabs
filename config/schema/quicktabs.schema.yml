@@ -1,1 +1,22 @@
-    
+quicktabs.settings.*:
+  type: config_entity
+  label: 'Quicktabs'
+  mapping:
+    title:
+      type: string
+      label: 'Title'
+    machine_name:
+      type: string
+      label: 'Machine name'
+    renderer:
+      type: string
+      label: 'Renderer'
+    style:
+      type: string
+      label: 'Style'
+    ajax:
+      type: boolean
+      label: 'Ajax'
+    hide_empty_tabs:
+      type: boolean
+      label: 'Hide empty tabs'
