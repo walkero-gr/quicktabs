@@ -25,6 +25,12 @@ class QuicktabAddForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state ){
+/*  $config = \Drupal::config('quicktabs.add');
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->t('title'),
+      '#default_value' => $config->get('title'),
+    ); */
     return $form;
   }
 
