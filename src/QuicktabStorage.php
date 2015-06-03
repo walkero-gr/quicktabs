@@ -6,7 +6,8 @@
 
 namespace Drupal\quicktabs;
 
+use Drupal\Core\Config\Entity\ConfigEntityStorage;
 
-class QuicktabStorage {
+class QuicktabStorage extends ConfigEntityStorage {
 
 }

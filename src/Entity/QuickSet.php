@@ -53,4 +53,35 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  */
 class QuickSet extends ConfigEntityBase {
 
+  protected $title;
+
+  protected $machine_name;
+
+  protected $renderer;
+
+  protected $style;
+
+  protected $ajax;
+
+  protected $hide_empty_tabs;
+
+  public function getTitle() {
+    return $this->title;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
+  }
+
+  public function getStyle() {
+    return $this->style;
+  }
+
+  public function isAjax() {
+    return $this->ajax;
+  }
+
+  public function getHideEmptyTabs() {
+    return $this->getHideEmptyTabs;
+  }
 }
