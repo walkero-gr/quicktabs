@@ -142,7 +142,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     '#weight' => -9,
     '#required' => TRUE,
   );
-  
+
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 32,
