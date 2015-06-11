@@ -94,6 +94,23 @@ class QuicktabAddForm extends FormBase {
       '#suffix' => '</div>',
       '#theme' => 'quicktabs_admin_form_tabs',
     );
+
+    $form['qt_wrapper']['tabs_more'] = array(
+      '#type' => 'submit',
+      '#prefix' => '<div id="add-more-tabs-button">',
+      '#suffix' => '<label for="edit-tabs-more">' . t('Add tab') . '</label></div>',
+      '#value' => t('More tabs'),
+      '#attributes' => array('class' => array('add-tab'), 'title' => t('Click here to add more tabs.')),
+      '#weight' => 1,
+      '#submit' => array('quicktabs_more_tabs_submit'),
+      '#ajax' => array(
+        'callback' => 'quicktabs_ajax_callback',
+        'wrapper' => 'quicktab-tabs',
+        'effect' => 'fade',
+      ),
+      '#limit_validation_errors' => array(),
+    );
+
     return $form;
   }
 
@@ -101,6 +118,6 @@ class QuicktabAddForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
+      parent::submitForm($form,$form_state);
   }
 }
