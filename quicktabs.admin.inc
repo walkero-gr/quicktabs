@@ -360,19 +360,19 @@ function template_preprocess_quicktabs_admin_form_tabs(&$variables) {
 
 //  drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
 
-  $form['qt-tablist-table']['#tabledrag'][]= array(
+ /* $form['qt-tablist-table']['#tabledrag'][]= array(
     'action' => 'order',
     'relationship' => 'sibling',
     'group' => 'qt-tabs-weight',
-  );
+  );*/
   $rows = array();
-  $header = array(
+ /* $header = array(
     t('Tab title'),
     t('Tab weight'),
     t('Tab type'),
     t('Tab content'),
     t('Operations'),
-  );
+  );*/
 
   foreach (Element::children($tabs) as $key) {
     $tab = &$tabs[$key];

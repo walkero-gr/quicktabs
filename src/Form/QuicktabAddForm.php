@@ -89,10 +89,25 @@ class QuicktabAddForm extends FormBase {
     );
 
     $form['qt_wrapper']['tabs'] = array(
+      '#type' => 'table',
+      '#header' => array(
+        t('Tab title'),
+        t('Tab weight'),
+        t('Tab type'),
+        t('Tab content'),
+        t('Operations'),
+      ),
+      '#tabledrag' => array(
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'qt-tabs-weight',
+        ),
+      ),
       '#tree' => TRUE,
       '#prefix' => '<div id="quicktab-tabs">',
       '#suffix' => '</div>',
-      '#theme' => 'quicktabs_admin_form_tabs',
+     // '#theme' => 'quicktabs_admin_form_tabs',
     );
 
     $form['qt_wrapper']['tabs_more'] = array(
