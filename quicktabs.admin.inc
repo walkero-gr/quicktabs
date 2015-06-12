@@ -4,6 +4,8 @@
  * Provides the Quicktabs administrative interface.
  */
 
+use Drupal\Core\Render\Element;
+
 /**
  * Page callback to list quicktabs in the system.
  */
@@ -353,10 +355,16 @@ function _quicktabs_form(array $tab, $qt) {
  *
  * @ingroup themeable
  */
-function theme_quicktabs_admin_form_tabs($variables) {
+function template_preprocess_quicktabs_admin_form_tabs(&$variables) {
   $tabs = $variables['tabs'];
 
-  drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
+//  drupal_add_tabledrag('qt-tablist-table', 'order', 'sibling', 'qt-tabs-weight');
+
+  $form['qt-tablist-table']['#tabledrag'][]= array(
+    'action' => 'order',
+    'relationship' => 'sibling',
+    'group' => 'qt-tabs-weight',
+  );
   $rows = array();
   $header = array(
     t('Tab title'),
@@ -366,7 +374,7 @@ function theme_quicktabs_admin_form_tabs($variables) {
     t('Operations'),
   );
 
-  foreach (element_children($tabs) as $key) {
+  foreach (Element::children($tabs) as $key) {
     $tab = &$tabs[$key];
     $tab['weight']['#attributes']['class'] = array('qt-tabs-weight');
 
@@ -407,8 +415,8 @@ function theme_quicktabs_admin_form_tabs($variables) {
     '#attributes' => array('id' => 'qt-tablist-table'),
     '#weight' => -1,
   );
-  $build['#attached']['css'][] = drupal_get_path('module', 'quicktabs') . '/css/quicktabs-admin.css';
-  $build['#attached']['js'][] = drupal_get_path('module', 'quicktabs') . '/js/quicktabs_form.js';
+  //$build['#attached']['css'][] = drupal_get_path('module', 'quicktabs') . '/css/quicktabs-admin.css';
+  //$build['#attached']['js'][] = drupal_get_path('module', 'quicktabs') . '/js/quicktabs_form.js';
 
   $output = drupal_render($build);
   return $output;
