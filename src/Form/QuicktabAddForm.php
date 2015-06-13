@@ -76,7 +76,7 @@ class QuicktabAddForm extends FormBase {
     $form['hide_empty_tabs'] = array(
       '#type' => 'checkbox',
       '#title' => t('Hide empty tabs'),
-      '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
+  //    '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
       '#description' => t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
       '#weight' => -4,
     );
@@ -126,6 +126,12 @@ class QuicktabAddForm extends FormBase {
       '#limit_validation_errors' => array(),
     );
 
+    $form['actions'] = array('#type' => 'actions');
+
+    $form['actions']['submit_form'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    );
     return $form;
   }
 
