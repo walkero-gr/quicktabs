@@ -132,9 +132,9 @@ class QuicktabAddForm extends FormBase {
       '#limit_validation_errors' => array(),
     );
 
-    $form['actions'] = array('#type' => 'actions');
+    //$form['actions'] = array('#type' => 'actions');
 
-    $form['actions']['submit_form'] = array(
+    $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
     );
@@ -145,6 +145,10 @@ class QuicktabAddForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-      drupal_set_message($this->t('Quicktab Instance has been created.'));
+    $title = $form_state->getValue('title');
+    $config = \Drupal::service('config.factory')->getEditable('quicktabs.add')->set('title',$title)->save();
+    //parent::submitForm($form,$form_state);
+    $form_state->setRedirect('quicktabs.list');
+    drupal_set_message($this->t($title));
   }
 }
