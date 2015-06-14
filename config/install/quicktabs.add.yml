@@ -2,5 +2,5 @@ title: ''
 machine_name: ''
 renderer: 'quicktabs'
 style: 'nostyle'
-ajax: '0'
+ajax: FALSE
 hide_empty_tabs: '0'
