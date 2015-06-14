@@ -146,9 +146,19 @@ class QuicktabAddForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $title = $form_state->getValue('title');
-    $config = \Drupal::service('config.factory')->getEditable('quicktabs.add')->set('title',$title)->save();
+    $machine_name = $form_state->getValue('machine_name');
+    $renderer = $form_state->getValue('renderer');
+    $ajax = $form_state->getValue('ajax');
+    $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
+    $config = \Drupal::service('config.factory')->getEditable('quicktabs.add')->set('title',$title)
+      ->set('machine_name',$machine_name)
+      ->set('renderer',$renderer)
+      ->set('ajax',$ajax)
+      ->set('hide_empty_tabs',$hide_empty_tabs)
+      ->save();
     //parent::submitForm($form,$form_state);
-    $form_state->setRedirect('quicktabs.list');
-    drupal_set_message($this->t($title));
+   // $form_state->setRedirect('quicktabs.list');
+    $new_array = array($title,$machine_name,$renderer,$ajax,$hide_empty_tabs);
+    drupal_set_message($this->t($new_array));
   }
 }
