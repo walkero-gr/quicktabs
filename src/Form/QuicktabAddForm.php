@@ -7,7 +7,8 @@ namespace Drupal\quicktabs\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-
+use Drupal\Core\Render\Element;
+use Drupal\Core\Url;
 /**
  * Class QuicktabAddForm
  *
@@ -24,14 +25,15 @@ class QuicktabAddForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state ){
-    $renderer_options = array('accordian','quicktabs','ui_tabs');
-    $config = $this->config('quicktabs.add');
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $renderer_options = array('accordian', 'quicktabs', 'ui_tabs');
+    $qt_title = \Drupal::service('config.factory')->get('quicktabs.settings')->get('title');
+    $config = $this->config('quicktabs.settings');
     $form['title'] = array(
       '#title' => $this->t('Title'),
       '#description' => $this->t('This will appear as the block title.'),
       '#type' => 'textfield',
-     // '#default_value' => isset($qt->title) ? $qt->title : '',
+      '#default_value' => isset($qt_title) ? $qt_title : '',
       '#weight' => -9,
       '#required' => TRUE,
       '#placeholder' => $this->t('Enter title'),
@@ -41,7 +43,7 @@ class QuicktabAddForm extends FormBase {
       '#type' => 'machine_name',
       '#maxlength' => 32,
       '#machine_name' => array(
-      //  'exists' => 'quicktabs_machine_name_exists',
+        //  'exists' => 'quicktabs_machine_name_exists',
         'source' => array('title'),
       ),
       '#description' => $this->t('A unique machine-readable name for this Quicktabs instance. It must only contain lowercase letters, numbers, and underscores. The machine name will be used internally by Quicktabs and will be used in the CSS ID of your Quicktabs block.'),
@@ -52,9 +54,11 @@ class QuicktabAddForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Renderer'),
       '#options' => array(
-        'accordian','quicktabs','ui_tabs'
+        'accordian',
+        'quicktabs',
+        'ui_tabs'
       ),
-      '#default_value' => $this->config('quicktabs.add')->get('renderer'),
+      '#default_value' => $this->config('quicktabs.settings')->get('renderer'),
       '#description' => $this->t('Choose how to render the content.'),
       '#weight' => -7,
     );
@@ -78,11 +82,10 @@ class QuicktabAddForm extends FormBase {
     );
 
 
-
     $form['hide_empty_tabs'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Hide empty tabs'),
-  //    '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
+      //    '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
       '#description' => $this->t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
       '#weight' => -4,
     );
@@ -113,52 +116,72 @@ class QuicktabAddForm extends FormBase {
       '#tree' => TRUE,
       '#prefix' => '<div id="quicktab-tabs">',
       '#suffix' => '</div>',
-     // '#theme' => 'quicktabs_admin_form_tabs',
+      //'#theme' => 'quicktabs_admin_form_tabs',
     );
 
+    $form['qt_wrapper']['tabs']['operations'] = array(
+      '#type' => 'operations',
+      '#links' => array()
+    );
+    $form['qt_wrapper']['tabs']['operations']['#links']['edit'] = array(
+      'title' => $this->t('Edit'),
+      'url' => Url::fromRoute('quicktabs.add'),
+    );
     $form['qt_wrapper']['tabs_more'] = array(
-      '#type' => 'submit',
-      '#prefix' => '<div id="add-more-tabs-button">',
-      '#suffix' => '<label for="edit-tabs-more">' . t('Add tab') . '</label></div>',
-      '#value' => t('More tabs'),
-      '#attributes' => array('class' => array('add-tab'), 'title' => t('Click here to add more tabs.')),
-      '#weight' => 1,
-      '#submit' => array('quicktabs_more_tabs_submit'),
-      '#ajax' => array(
-        'callback' => 'quicktabs_ajax_callback',
-        'wrapper' => 'quicktab-tabs',
-        'effect' => 'fade',
-      ),
-      '#limit_validation_errors' => array(),
+        '#type' => 'submit',
+        '#prefix' => '<div id="add-more-tabs-button">',
+        '#suffix' => '<label for="edit-tabs-more">' . t('Add tab') . '</label></div>',
+        '#value' => t('More tabs'),
+        '#attributes' => array(
+          'class' => array('add-tab'),
+          'title' => t('Click here to add more tabs.')
+        ),
+        '#weight' => 1,
+        '#submit' => array('quicktabs_more_tabs_submit'),
+        '#ajax' => array(
+          'callback' => 'quicktabs_ajax_callback',
+          'wrapper' => 'quicktab-tabs',
+          'effect' => 'fade',
+        ),
+        '#limit_validation_errors' => array(),
     );
 
-    //$form['actions'] = array('#type' => 'actions');
+      //$form['actions'] = array('#type' => 'actions');
 
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    );
-    return $form;
-  }
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
+      );
+      return $form;
+    }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $title = $form_state->getValue('title');
-    $machine_name = $form_state->getValue('machine_name');
-    $renderer = $form_state->getValue('renderer');
-    $ajax = $form_state->getValue('ajax');
-    $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
-    $config = \Drupal::service('config.factory')->getEditable('quicktabs.add')->set('title',$title)
-      ->set('machine_name',$machine_name)
-      ->set('renderer',$renderer)
-      ->set('ajax',$ajax)
-      ->set('hide_empty_tabs',$hide_empty_tabs)
-      ->save();
-    //parent::submitForm($form,$form_state);
-   // $form_state->setRedirect('quicktabs.list');
-    $new_array = array($title,$machine_name,$renderer,$ajax,$hide_empty_tabs);
-    drupal_set_message($this->t($new_array));
-  }
+    /**
+     * {@inheritdoc}
+     */
+    public function submitForm(array &$form, FormStateInterface $form_state) {
+      $title = $form_state->getValue('title');
+      $machine_name = $form_state->getValue('machine_name');
+      $renderer = $form_state->getValue('renderer');
+      $ajax = $form_state->getValue('ajax');
+      $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
+      $config = \Drupal::service('config.factory')
+        ->getEditable('quicktabs.settings')
+        ->set('title', $title)
+        ->set('machine_name', $machine_name)
+        ->set('renderer', $renderer)
+        ->set('ajax', $ajax)
+        ->set('hide_empty_tabs', $hide_empty_tabs)
+        ->save();
+      //parent::submitForm($form,$form_state);
+      // $form_state->setRedirect('quicktabs.list');
+      $new_array = array(
+        $title,
+        $machine_name,
+        $renderer,
+        $ajax,
+        $hide_empty_tabs
+      );
+      //drupal_set_message($this->t($new_array));
+      drupal_set_message(\Drupal::service('config.factory')->get('quicktabs.settings')->get('title'));
+    }
 }
