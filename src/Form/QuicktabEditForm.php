@@ -8,11 +8,13 @@ namespace Drupal\quicktabs\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityForm;
+
 /**
  * Class QuicktabEditForm
  *
  */
-class QuicktabEditForm extends FormBase {
+class QuicktabEditForm extends EntityForm {
 
   /**
    * {@inheritdoc}
@@ -24,7 +26,7 @@ class QuicktabEditForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $renderer_options = array('accordian', 'quicktabs', 'ui_tabs');
     $config = $this->config('quicktabs.add');
     $form['title'] = array(
@@ -156,7 +158,7 @@ class QuicktabEditForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $title = $form_state->getValue('title');
     $machine_name = $form_state->getValue('machine_name');
     $renderer = $form_state->getValue('renderer');

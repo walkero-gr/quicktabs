@@ -9,11 +9,13 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityForm;
+
 /**
  * Class QuicktabAddForm
  *
  */
-class QuicktabAddForm extends FormBase {
+class QuicktabAddForm extends EntityForm {
 
   /**
    * {@inheritdoc}
@@ -25,7 +27,7 @@ class QuicktabAddForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $renderer_options = array('accordian', 'quicktabs', 'ui_tabs');
     $qt_title = \Drupal::service('config.factory')->get('quicktabs.settings')->get('title');
     $config = $this->config('quicktabs.settings');
@@ -146,19 +148,13 @@ class QuicktabAddForm extends FormBase {
         '#limit_validation_errors' => array(),
     );
 
-      //$form['actions'] = array('#type' => 'actions');
-
-      $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Save'),
-      );
       return $form;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function submitForm(array &$form, FormStateInterface $form_state) {
+    public function save(array $form, FormStateInterface $form_state) {
       $title = $form_state->getValue('title');
       $machine_name = $form_state->getValue('machine_name');
       $renderer = $form_state->getValue('renderer');
