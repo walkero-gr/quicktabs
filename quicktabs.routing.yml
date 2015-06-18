@@ -22,7 +22,7 @@ quicktabs.add:
   requirements:
     _permission: 'Access Content'
 quicktabs.delete:
- path: '/admin/structure/quicktabs/manage/{quicktabs}/delete'
+ path: '/admin/structure/quicktabs/manage/{settings}/delete'
  defaults:
    _title: 'Delete quicktab'
    _form: '\Drupal\quicktabs\Form\QuicktabDeleteForm'
@@ -36,7 +36,7 @@ quicktabs.edit:
   requirements:
     _entity_access: 'settings.update' #need to recheck!!
 quicktabs.clone:
-  path: '/admin/structure/quicktabs/manage/{quicktabs}/clone'
+  path: '/admin/structure/quicktabs/manage/{settings}/clone'
   defaults:
     _title: 'Clone quicktab'
     _form: '\Drupal\quicktabs\Form\QuicktabCloneForm'

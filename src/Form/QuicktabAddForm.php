@@ -168,7 +168,7 @@ class QuicktabAddForm extends EntityForm {
         ->set('ajax', $ajax)
         ->set('hide_empty_tabs', $hide_empty_tabs)
         ->save();
-      //parent::submitForm($form,$form_state);
+      // parent::submitForm($form,$form_state);
       // $form_state->setRedirect('quicktabs.list');
       $new_array = array(
         $title,
