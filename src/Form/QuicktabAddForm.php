@@ -5,12 +5,11 @@
  */
 namespace Drupal\quicktabs\Form;
 
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityForm;
-use Drupal\quicktabs\Entity\QuickSet;
+
 /**
  * Class QuicktabAddForm
  *
@@ -190,6 +189,7 @@ class QuicktabAddForm extends EntityForm {
       $entity->set('hide_empty_tabs',$hide_empty_tabs);
       $status = $entity->save();
       if($status==SAVED_NEW)
-      drupal_set_message('Hi saved it!!!');
+        $form_state->setRedirect('quicktabs.add');
+
     }
 }

@@ -5,33 +5,42 @@
  */
 namespace Drupal\quicktabs\Form;
 
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Class QuicktabAddForm
  *
  */
-class QuicktabDeleteForm extends FormBase {
+class QuicktabDeleteForm extends EntityConfirmFormBase {
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
-    return 'quicktab delete';
+  public function getQuestion() {
+    return $this-t('Are you sure you want to delete this quicktabs instance with name %name?',array('%name' => $this->entity->id()));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state ){
-    return $form;
+  public function getCancelUrl() {
+    return new Url('quicktabs.add');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function getConfirmText() {
+    return $this->t('Delete');
+  }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state){
+    $this->entity->delete();
+    $form_state->setRedirectUrl($this->getCancelUrl());
   }
 }

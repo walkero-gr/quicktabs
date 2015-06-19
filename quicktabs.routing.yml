@@ -21,29 +21,29 @@ quicktabs.add:
     _entity_form: 'settings.add'
   requirements:
     _permission: 'Access Content'
-quicktabs.delete:
+entity.quicktabs.delete:
  path: '/admin/structure/quicktabs/manage/{settings}/delete'
  defaults:
    _title: 'Delete quicktab'
    _entity_form: 'settings.delete'
  requirements:
-   _permission: 'Access Content'
-quicktabs.edit:
+   _permission: 'administer quicktabs'
+entity.quicktabs.edit:
   path: '/admin/structure/quicktabs/manage/{settings}/edit'
   defaults:
     _title: 'Edit quicktab'
     _entity_form: 'settings.edit'
   requirements:
     _permission: 'administer quicktabs' #need to recheck!!
-quicktabs.clone:
+entity.quicktabs.clone:
   path: '/admin/structure/quicktabs/manage/{settings}/clone'
   defaults:
     _title: 'Clone quicktab'
     _entity_form: 'settings.clone'
   requirements:
     _permission: 'administer quicktabs'
-quicktabs.export:
-  path: '/admin/structure/quicktabs/manage/{quicktabs}/export'
+entity.quicktabs.export:
+  path: '/admin/structure/quicktabs/manage/{settings}/export'
   defaults:
     _title: 'Export quicktab'
     _form: '\Drupal\quicktabs\Form\QuicktabExportForm'
