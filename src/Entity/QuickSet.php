@@ -37,16 +37,12 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "clone-form" = "/admin/structure/quicktabs/manage/{settings}/clone"
  *   },
  *   entity_keys = {
- *     "title" = "title",
- *     "machine_name" = "machine_name",
- *     "renderer" = "renderer",
- *     "style" = "style",
- *     "ajax" = "ajax",
- *     "hideemptytabs" = "hideemptytabs"
+ *     "id" = "id",
+ *     "title" = "title"
  *   },
  *   config_export = {
+ *     "id" = "id",
  *     "title" = "title",
- *     "machine_name" = "machine_name",
  *     "renderer" = "renderer",
  *     "style" = "style",
  *     "ajax" = "ajax",
@@ -56,9 +52,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  */
 class QuickSet extends ConfigEntityBase {
 
-  protected $title;
+  protected $id;
 
-  protected $machine_name;
+  protected $title;
 
   protected $renderer;
 

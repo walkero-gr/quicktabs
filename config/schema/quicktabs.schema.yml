@@ -2,12 +2,12 @@ quicktabs.settings.*:
   type: config_entity
   label: 'Quicktabs'
   mapping:
+    id:
+      type: string
+      label: 'ID'
     title:
       type: string
       label: 'Title'
-    machine_name:
-      type: string
-      label: 'Machine name'
     renderer:
       type: string
       label: 'Renderer'

@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityForm;
-
+use Drupal\quicktabs\Entity\QuickSet;
 /**
  * Class QuicktabAddForm
  *
@@ -41,7 +41,7 @@ class QuicktabAddForm extends EntityForm {
       '#placeholder' => $this->t('Enter title'),
     );
 
-    $form['machine_name'] = array(
+    $form['id'] = array(
       '#type' => 'machine_name',
       '#maxlength' => 32,
       '#machine_name' => array(
@@ -155,12 +155,14 @@ class QuicktabAddForm extends EntityForm {
      * {@inheritdoc}
      */
     public function save(array $form, FormStateInterface $form_state) {
+      
+      
       $title = $form_state->getValue('title');
-      $machine_name = $form_state->getValue('machine_name');
+      $id = $form_state->getValue('id');
       $renderer = $form_state->getValue('renderer');
       $ajax = $form_state->getValue('ajax');
       $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
-      $config = \Drupal::service('config.factory')
+      /*$config = \Drupal::service('config.factory')
         ->getEditable('quicktabs.settings')
         ->set('title', $title)
         ->set('machine_name', $machine_name)
@@ -178,6 +180,16 @@ class QuicktabAddForm extends EntityForm {
         $hide_empty_tabs
       );
       //drupal_set_message($this->t($new_array));
-      drupal_set_message(\Drupal::service('config.factory')->get('quicktabs.settings')->get('title'));
+      drupal_set_message(\Drupal::service('config.factory')->get('quicktabs.settings')->get('title'));*/
+
+      $entity = $this->entity;
+      $entity->set('title',$title);
+      $entity->set('id',$id);
+      $entity->set('renderer',$renderer);
+      $entity->set('ajax',$ajax);
+      $entity->set('hide_empty_tabs',$hide_empty_tabs);
+      $status = $entity->save();
+      if($status==SAVED_NEW)
+      drupal_set_message('Hi saved it!!!');
     }
 }

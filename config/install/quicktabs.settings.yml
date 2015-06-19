@@ -1,5 +1,5 @@
+id: 'quicktab_instance'
 title: ''
-machine_name: ''
 renderer: 'quicktabs'
 style: 'nostyle'
 ajax: FALSE

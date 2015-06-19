@@ -25,30 +25,30 @@ quicktabs.delete:
  path: '/admin/structure/quicktabs/manage/{settings}/delete'
  defaults:
    _title: 'Delete quicktab'
-   _form: '\Drupal\quicktabs\Form\QuicktabDeleteForm'
+   _entity_form: 'settings.delete'
  requirements:
    _permission: 'Access Content'
 quicktabs.edit:
   path: '/admin/structure/quicktabs/manage/{settings}/edit'
   defaults:
     _title: 'Edit quicktab'
-    _entity_form: 'settings.default'
+    _entity_form: 'settings.edit'
   requirements:
-    _entity_access: 'settings.update' #need to recheck!!
+    _permission: 'administer quicktabs' #need to recheck!!
 quicktabs.clone:
   path: '/admin/structure/quicktabs/manage/{settings}/clone'
   defaults:
     _title: 'Clone quicktab'
-    _form: '\Drupal\quicktabs\Form\QuicktabCloneForm'
+    _entity_form: 'settings.clone'
   requirements:
-    _permission: 'administer quicktab'
+    _permission: 'administer quicktabs'
 quicktabs.export:
   path: '/admin/structure/quicktabs/manage/{quicktabs}/export'
   defaults:
     _title: 'Export quicktab'
     _form: '\Drupal\quicktabs\Form\QuicktabExportForm'
   requirements:
-    _permission: 'administer quicktab'
+    _permission: 'administer quicktabs'
 quicktabs.ajax:
   path: '/quicktabs/ajax'
 #  _controller: '\Drupal\quicktabs\Ajax\quicktabAjax::' Ask!!!
