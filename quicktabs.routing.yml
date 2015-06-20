@@ -14,7 +14,7 @@ quicktabs.list_tabs:
     _entity_list: 'settings'
   requirements:
     _permission: 'administer quicktabs'
-quicktabs.add:
+entity.quicktabs.add:
   path: '/admin/structure/quicktabs/add'
   defaults:
     _title: 'Add Quicktabs Instance'

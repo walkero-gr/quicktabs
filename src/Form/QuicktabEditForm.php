@@ -165,7 +165,7 @@ class QuicktabEditForm extends EntityForm {
     $entity->set('hide_empty_tabs',$hide_empty_tabs);
     $status = $entity->save();
     if($status==SAVED_UPDATED)
-      $form_state->setRedirect('quicktabs.add');
+      $form_state->setRedirect('entity.quicktabs.add');
   }
 
 }

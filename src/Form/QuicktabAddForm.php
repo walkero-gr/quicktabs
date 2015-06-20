@@ -161,26 +161,6 @@ class QuicktabAddForm extends EntityForm {
       $renderer = $form_state->getValue('renderer');
       $ajax = $form_state->getValue('ajax');
       $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
-      /*$config = \Drupal::service('config.factory')
-        ->getEditable('quicktabs.settings')
-        ->set('title', $title)
-        ->set('machine_name', $machine_name)
-        ->set('renderer', $renderer)
-        ->set('ajax', $ajax)
-        ->set('hide_empty_tabs', $hide_empty_tabs)
-        ->save();
-      // parent::submitForm($form,$form_state);
-      // $form_state->setRedirect('quicktabs.list');
-      $new_array = array(
-        $title,
-        $machine_name,
-        $renderer,
-        $ajax,
-        $hide_empty_tabs
-      );
-      //drupal_set_message($this->t($new_array));
-      drupal_set_message(\Drupal::service('config.factory')->get('quicktabs.settings')->get('title'));*/
-
       $entity = $this->entity;
       $entity->set('title',$title);
       $entity->set('id',$id);
@@ -189,7 +169,6 @@ class QuicktabAddForm extends EntityForm {
       $entity->set('hide_empty_tabs',$hide_empty_tabs);
       $status = $entity->save();
       if($status==SAVED_NEW)
-        $form_state->setRedirect('quicktabs.add');
-
+        $form_state->setRedirect('entity.quicktabs.add');
     }
 }
