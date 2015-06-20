@@ -124,7 +124,7 @@ class QuicktabEditForm extends EntityForm {
     );
     $form['qt_wrapper']['tabs']['operations']['#links']['edit'] = array(
       'title' => $this->t('Edit'),
-      'url' => Url::fromRoute('quicktabs.add'),
+      'url' => Url::fromRoute('entity.quicktabs.edit'),
     );
     $form['qt_wrapper']['tabs_more'] = array(
       '#type' => 'submit',

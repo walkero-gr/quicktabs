@@ -25,16 +25,18 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "list_builder" = "Drupal\quicktabs\QuicktabListBuilder",
  *     "form" = {
  *       "add" = "Drupal\quicktabs\Form\QuicktabAddForm",
- *       "edit" = "Drupal\quicktabs\Form\QuicktabEditForm",
+ *       "default" = "Drupal\quicktabs\Form\QuicktabEditForm",
  *       "delete" = "Drupal\quicktabs\Form\QuicktabDeleteForm",
- *       "clone" = "Drupal\quicktabs\Form\QuicktabCloneForm"
+ *       "clone" = "Drupal\quicktabs\Form\QuicktabCloneForm",
+ *       "export" = "Drupal\quicktabs\Form\QuicktabExportForm"
  *     },
  *   },
  *   links = {
  *     "add" = "/admin/structure/quicktabs/add",
  *     "edit" = "/admin/structure/quicktabs/manage/{settings}/edit",
  *     "delete" = "/admin/structure/quicktabs/manage/{settings}/delete",
- *     "clone" = "/admin/structure/quicktabs/manage/{settings}/clone"
+ *     "clone" = "/admin/structure/quicktabs/manage/{settings}/clone",
+ *     "export" = "/admin/structure/quicktabs/manage/{settings}/export"
  *   },
  *   entity_keys = {
  *     "id" = "id",

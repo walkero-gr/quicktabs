@@ -6,11 +6,9 @@
 
 namespace Drupal\quicktabs;
 
-use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Class QuicktabListBuilder
@@ -30,7 +28,8 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['title'] = $this->t('Name');
+    $header['title'] = $this->t('QuickSet');
+    $header['storage'] = $this->t('Storage');
     return $header + parent::buildHeader();
   }
 
@@ -38,8 +37,24 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['title']['#markup'] = SafeMarkup::checkPlain($entity->id());
+    $row['title'] = $entity->id();
+    $row['storage'] = $this->t('Normal');
     return $row + parent::buildRow($entity);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+
+    if ($entity->hasLinkTemplate('edit')) {
+      $operations['edit'] = array(
+        'title' => t('Edit quicktab'),
+        'weight' => 20,
+        'url' => $entity->urlInfo('edit'),
+      );
+    }
+    return $operations;
+  }
 }

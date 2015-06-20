@@ -32,7 +32,7 @@ entity.quicktabs.edit:
   path: '/admin/structure/quicktabs/manage/{settings}/edit'
   defaults:
     _title: 'Edit quicktab'
-    _entity_form: 'settings.edit'
+    _entity_form: 'settings.default'
   requirements:
     _permission: 'administer quicktabs' #need to recheck!!
 entity.quicktabs.clone:
@@ -46,7 +46,7 @@ entity.quicktabs.export:
   path: '/admin/structure/quicktabs/manage/{settings}/export'
   defaults:
     _title: 'Export quicktab'
-    _form: '\Drupal\quicktabs\Form\QuicktabExportForm'
+    _entity_form: 'settings.export'
   requirements:
     _permission: 'administer quicktabs'
 quicktabs.ajax:
