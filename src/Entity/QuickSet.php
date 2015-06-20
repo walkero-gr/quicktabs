@@ -31,10 +31,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     },
  *   },
  *   links = {
- *     "add-form" = "/admin/structure/quicktabs/add",
- *     "edit-form" = "/admin/structure/quicktabs/manage/{settings}/edit",
- *     "delete-form" = "/admin/structure/quicktabs/manage/{settings}/delete",
- *     "clone-form" = "/admin/structure/quicktabs/manage/{settings}/clone"
+ *     "add" = "/admin/structure/quicktabs/add",
+ *     "edit" = "/admin/structure/quicktabs/manage/{settings}/edit",
+ *     "delete" = "/admin/structure/quicktabs/manage/{settings}/delete",
+ *     "clone" = "/admin/structure/quicktabs/manage/{settings}/clone"
  *   },
  *   entity_keys = {
  *     "id" = "id",

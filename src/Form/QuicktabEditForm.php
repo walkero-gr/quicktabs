@@ -145,12 +145,6 @@ class QuicktabEditForm extends EntityForm {
       '#limit_validation_errors' => array(),
     );
 
-    //$form['actions'] = array('#type' => 'actions');
-
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    );
     return $form;
   }
 
@@ -163,24 +157,15 @@ class QuicktabEditForm extends EntityForm {
     $renderer = $form_state->getValue('renderer');
     $ajax = $form_state->getValue('ajax');
     $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
-    $config = \Drupal::service('config.factory')
-      ->getEditable('quicktabs.settings')
-      ->set('title', $title)
-      ->set('machine_name', $id)
-      ->set('renderer', $renderer)
-      ->set('ajax', $ajax)
-      ->set('hide_empty_tabs', $hide_empty_tabs)
-      ->save();
-    //parent::submitForm($form,$form_state);
-    // $form_state->setRedirect('quicktabs.list');
-    $new_array = array(
-      $title,
-      $id,
-      $renderer,
-      $ajax,
-      $hide_empty_tabs
-    );
-    drupal_set_message($this->t($new_array));
+    $entity = $this->entity;
+    $entity->set('title',$title);
+    $entity->set('id',$id);
+    $entity->set('renderer',$renderer);
+    $entity->set('ajax',$ajax);
+    $entity->set('hide_empty_tabs',$hide_empty_tabs);
+    $status = $entity->save();
+    if($status==SAVED_UPDATED)
+      $form_state->setRedirect('quicktabs.add');
   }
 
 }

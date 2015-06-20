@@ -10,9 +10,12 @@ use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Class QuicktabListBuilder
+ *
+ * @see \Drupal\quicktabs\Entity\QuickSet
  */
 class QuicktabListBuilder extends ConfigEntityListBuilder {
 
@@ -27,7 +30,7 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = $this->t('Name');
+    $header['title'] = $this->t('Name');
     return $header + parent::buildHeader();
   }
 
@@ -35,7 +38,7 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $this->getLabel($entity);
+    $row['title']['#markup'] = SafeMarkup::checkPlain($entity->id());
     return $row + parent::buildRow($entity);
   }
 
