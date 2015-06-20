@@ -5,7 +5,6 @@
  */
 namespace Drupal\quicktabs\Form;
 
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityForm;
@@ -28,7 +27,7 @@ class QuicktabEditForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $renderer_options = array('accordian', 'quicktabs', 'ui_tabs');
-    $config = $this->config('quicktabs.add');
+    $config = $this->config('quicktabs.settings');
     $form['title'] = array(
       '#title' => $this->t('Title'),
       '#description' => $this->t('This will appear as the block title.'),
@@ -39,7 +38,7 @@ class QuicktabEditForm extends EntityForm {
       '#placeholder' => $this->t('Enter title'),
     );
 
-    $form['machine_name'] = array(
+    $form['id'] = array(
       '#type' => 'machine_name',
       '#maxlength' => 32,
       '#machine_name' => array(
@@ -58,7 +57,7 @@ class QuicktabEditForm extends EntityForm {
         'quicktabs',
         'ui_tabs'
       ),
-      '#default_value' => $this->config('quicktabs.add')->get('renderer'),
+      '#default_value' => $this->config('quicktabs.settings')->get('renderer'),
       '#description' => $this->t('Choose how to render the content.'),
       '#weight' => -7,
     );
@@ -160,14 +159,14 @@ class QuicktabEditForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $title = $form_state->getValue('title');
-    $machine_name = $form_state->getValue('machine_name');
+    $id = $form_state->getValue('id');
     $renderer = $form_state->getValue('renderer');
     $ajax = $form_state->getValue('ajax');
     $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
     $config = \Drupal::service('config.factory')
-      ->getEditable('quicktabs.add')
+      ->getEditable('quicktabs.settings')
       ->set('title', $title)
-      ->set('machine_name', $machine_name)
+      ->set('machine_name', $id)
       ->set('renderer', $renderer)
       ->set('ajax', $ajax)
       ->set('hide_empty_tabs', $hide_empty_tabs)
@@ -176,7 +175,7 @@ class QuicktabEditForm extends EntityForm {
     // $form_state->setRedirect('quicktabs.list');
     $new_array = array(
       $title,
-      $machine_name,
+      $id,
       $renderer,
       $ajax,
       $hide_empty_tabs

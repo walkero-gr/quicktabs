@@ -19,7 +19,11 @@ class QuicktabDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete this quicktabs instance with name %name?',array('%name' => $this->entity->id()));
+    /**
+     * @var \Drupal\quicktabs\Entity\QuickSet $entity
+     */
+    $entity = $this->entity;
+    return $this->t('Are you sure you want to delete this quicktabs instance with name %name?',array('%name' => $entity->getTitle()));
   }
 
   /**
