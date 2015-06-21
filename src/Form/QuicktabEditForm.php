@@ -47,9 +47,8 @@ class QuicktabEditForm extends EntityForm {
       '#required' => TRUE,
       '#machine_name' => array(
         'exists' => 'quicktabs_machine_name_exists',
-        'source' => array('title'),
       ),
-      '#default' => $entity->id(),
+      '#default_value' => $entity->id(),
       '#description' => $this->t('A unique machine-readable name for this Quicktabs instance. It must only contain lowercase letters, numbers, and underscores. The machine name will be used internally by Quicktabs and will be used in the CSS ID of your Quicktabs block.'),
       '#weight' => -8,
     );
@@ -70,7 +69,7 @@ class QuicktabEditForm extends EntityForm {
         TRUE => $this->t('Yes') . ': ' . t('Load only the first tab on page view'),
         FALSE => $this->t('No') . ': ' . t('Load all tabs on page view.'),
       ),
-      '#default_value' => 1,
+      '#default_value' => $entity->isAjax(),
       '#description' => $this->t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p><p>Warning: if you enable Ajax, any block you add to this quicktabs block will be accessible to anonymous users, even if you place role restrictions on the quicktabs block. Do not enable Ajax if the quicktabs block includes any blocks with potentially sensitive information.</p>'),
       //'#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
       '#weight' => -6,
@@ -85,7 +84,7 @@ class QuicktabEditForm extends EntityForm {
     $form['hide_empty_tabs'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Hide empty tabs'),
-      //    '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
+      '#default_value' => $entity->getHideEmptyTabs(),
       '#description' => $this->t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
       '#weight' => -4,
     );

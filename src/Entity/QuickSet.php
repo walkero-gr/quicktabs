@@ -48,7 +48,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "renderer" = "renderer",
  *     "style" = "style",
  *     "ajax" = "ajax",
- *     "hideemptytabs" = "hideemptytabs"
+ *     "hide_empty_tabs" = "hide_empty_tabs"
  * },
  * )
  */
@@ -64,7 +64,7 @@ class QuickSet extends ConfigEntityBase {
 
   protected $ajax;
 
-  protected $hideemptytabs;
+  protected $hide_empty_tabs;
 
   public function getTitle() {
     return $this->title;
@@ -83,6 +83,6 @@ class QuickSet extends ConfigEntityBase {
   }
 
   public function getHideEmptyTabs() {
-    return $this->hideemptytabs;
+    return $this->hide_empty_tabs;
   }
 }

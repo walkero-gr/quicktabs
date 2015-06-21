@@ -15,8 +15,8 @@ quicktabs.settings.*:
       type: string
       label: 'Style'
     ajax:
-      type: boolean
+      type: integer
       label: 'Ajax'
     hide_empty_tabs:
-      type: boolean
+      type: integer
       label: 'Hide empty tabs'

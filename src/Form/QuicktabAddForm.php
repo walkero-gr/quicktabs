@@ -50,7 +50,6 @@ class QuicktabAddForm extends EntityForm {
       '#default_value' => $config->get('id'),
       '#machine_name' => array(
         'exists' => 'quicktabs_machine_name_exists',
-        'source' => array('title'),
       ),
       '#description' => $this->t('A unique machine-readable name for this Quicktabs instance. It must only contain lowercase letters, numbers, and underscores. The machine name will be used internally by Quicktabs and will be used in the CSS ID of your Quicktabs block.'),
       '#weight' => -8,
@@ -91,7 +90,7 @@ class QuicktabAddForm extends EntityForm {
     $form['hide_empty_tabs'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Hide empty tabs'),
-      //    '#default_value' => isset($qt->hide_empty_tabs) ? $qt->hide_empty_tabs : 0,
+      '#default_value' => $config->get('hide_empty_tabs'),
       '#description' => $this->t('Empty and restricted tabs will not be displayed. Could be useful when the tab content is not accessible.<br />This option does not work in ajax mode.'),
       '#weight' => -4,
     );
