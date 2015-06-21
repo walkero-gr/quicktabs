@@ -5,9 +5,7 @@
  */
 
 namespace Drupal\quicktabs;
-
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 
 /**

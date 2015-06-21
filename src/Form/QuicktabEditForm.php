@@ -5,8 +5,8 @@
  */
 namespace Drupal\quicktabs\Form;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityForm;
 
 /**
@@ -27,12 +27,15 @@ class QuicktabEditForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $renderer_options = array('accordian', 'quicktabs', 'ui_tabs');
-    $config = $this->config('quicktabs.settings');
+    /**
+     * @var \Drupal\quicktabs\Entity\QuickSet $entity
+     */
+    $entity = $this->entity;
     $form['title'] = array(
       '#title' => $this->t('Title'),
       '#description' => $this->t('This will appear as the block title.'),
       '#type' => 'textfield',
-      // '#default_value' => isset($qt->title) ? $qt->title : '',
+      '#default_value' => $entity->getTitle(),
       '#weight' => -9,
       '#required' => TRUE,
       '#placeholder' => $this->t('Enter title'),
@@ -41,10 +44,12 @@ class QuicktabEditForm extends EntityForm {
     $form['id'] = array(
       '#type' => 'machine_name',
       '#maxlength' => 32,
+      '#required' => TRUE,
       '#machine_name' => array(
-        //  'exists' => 'quicktabs_machine_name_exists',
+        'exists' => 'quicktabs_machine_name_exists',
         'source' => array('title'),
       ),
+      '#default' => $entity->id(),
       '#description' => $this->t('A unique machine-readable name for this Quicktabs instance. It must only contain lowercase letters, numbers, and underscores. The machine name will be used internally by Quicktabs and will be used in the CSS ID of your Quicktabs block.'),
       '#weight' => -8,
     );
@@ -52,12 +57,8 @@ class QuicktabEditForm extends EntityForm {
     $form['renderer'] = array(
       '#type' => 'select',
       '#title' => $this->t('Renderer'),
-      '#options' => array(
-        'accordian',
-        'quicktabs',
-        'ui_tabs'
-      ),
-      '#default_value' => $this->config('quicktabs.settings')->get('renderer'),
+      '#options' => $renderer_options,
+      '#default_value' => $entity->getRenderer(),
       '#description' => $this->t('Choose how to render the content.'),
       '#weight' => -7,
     );
@@ -69,7 +70,7 @@ class QuicktabEditForm extends EntityForm {
         TRUE => $this->t('Yes') . ': ' . t('Load only the first tab on page view'),
         FALSE => $this->t('No') . ': ' . t('Load all tabs on page view.'),
       ),
-      '#default_value' => $config->get('ajax'),
+      '#default_value' => 1,
       '#description' => $this->t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p><p>Warning: if you enable Ajax, any block you add to this quicktabs block will be accessible to anonymous users, even if you place role restrictions on the quicktabs block. Do not enable Ajax if the quicktabs block includes any blocks with potentially sensitive information.</p>'),
       //'#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
       '#weight' => -6,
@@ -165,7 +166,7 @@ class QuicktabEditForm extends EntityForm {
     $entity->set('hide_empty_tabs',$hide_empty_tabs);
     $status = $entity->save();
     if($status==SAVED_UPDATED)
-      $form_state->setRedirect('entity.quicktabs.add');
+      $form_state->setRedirect('quicktabs.list_tabs');
   }
 
 }

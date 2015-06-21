@@ -9,7 +9,7 @@ quicktabs.settings.*:
       type: string
       label: 'Title'
     renderer:
-      type: string
+      type: integer
       label: 'Renderer'
     style:
       type: string
