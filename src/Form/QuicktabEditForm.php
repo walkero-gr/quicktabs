@@ -151,6 +151,31 @@ class QuicktabEditForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function validate(array $form, FormStateInterface $form_state) {
+    $id = $form_state->getValue('id');
+    if (empty($id)) {
+      $form_state->setErrorByName('machine_name', t('The quicktabs machine name is required.'));
+    }
+    elseif (!preg_match('!^[a-z0-9_]+$!', $id)) {
+      $form_state->setErrorByName('machine_name', t('The quicktabs machine name must contain only lowercase letters, numbers, and underscores.'));
+    }
+
+    $tabs = $form_state->getValue('tabs');
+    if (!isset($tabs)) {
+      $form_state->setErrorByName('', t('At least one tab should be created.'));
+    }
+    else {
+      foreach ($tabs as $j => $tab) {
+        if (empty($tab['title'])) {
+          $form_state->setErrorByName('tabs][' . $j . '][title', t('Title is required for each tab.'));
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save(array $form, FormStateInterface $form_state) {
     $title = $form_state->getValue('title');
     $id = $form_state->getValue('id');

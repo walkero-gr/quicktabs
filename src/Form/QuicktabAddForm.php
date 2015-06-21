@@ -154,25 +154,46 @@ class QuicktabAddForm extends EntityForm {
       return $form;
     }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function validate(array $form, FormStateInterface $form_state) {
+    $id = $form_state->getValue('id');
+    if (empty($id)) {
+      $form_state->setErrorByName('machine_name', t('The quicktabs machine name is required.'));
+    }
+    elseif (!preg_match('!^[a-z0-9_]+$!', $id)) {
+      $form_state->setErrorByName('machine_name', t('The quicktabs machine name must contain only lowercase letters, numbers, and underscores.'));
+    }
+
+    $tabs = $form_state->getValue('tabs');
+    if (!isset($tabs)) {
+      $form_state->setErrorByName('', t('At least one tab should be created.'));
+    }
+    else {
+      foreach ($tabs as $j => $tab) {
+        if (empty($tab['title'])) {
+          $form_state->setErrorByName('tabs][' . $j . '][title', t('Title is required for each tab.'));
+        }
+      }
+    }
+  }
     /**
      * {@inheritdoc}
      */
-    public function save(array $form, FormStateInterface $form_state) {
-      
-      
-      $title = $form_state->getValue('title');
-      $id = $form_state->getValue('id');
-      $renderer = $form_state->getValue('renderer');
-      $ajax = $form_state->getValue('ajax');
-      $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
-      $entity = $this->entity;
-      $entity->set('title',$title);
-      $entity->set('id',$id);
-      $entity->set('renderer',$renderer);
-      $entity->set('ajax',$ajax);
-      $entity->set('hide_empty_tabs',$hide_empty_tabs);
-      $status = $entity->save();
-      if($status==SAVED_NEW)
-        $form_state->setRedirect('quicktabs.list_tabs');
-    }
+  public function save(array $form, FormStateInterface $form_state) {
+    $title = $form_state->getValue('title');
+    $id = $form_state->getValue('id');
+    $renderer = $form_state->getValue('renderer');
+    $ajax = $form_state->getValue('ajax');
+    $hide_empty_tabs = $form_state->getValue('hide_empty_tabs');
+    $entity = $this->entity;
+    $entity->set('title',$title);
+    $entity->set('id',$id);
+    $entity->set('renderer',$renderer);
+    $entity->set('ajax',$ajax);
+    $entity->set('hide_empty_tabs',$hide_empty_tabs);
+    $status = $entity->save();
+    if($status==SAVED_NEW)$form_state->setRedirect('quicktabs.list_tabs');
+  }
 }
