@@ -76,8 +76,11 @@ class QuicktabEditForm extends EntityForm {
     );
 
     $form['style'] = array(
-      '#type' => 'value',
-      '#value' => 'nostyle',
+      '#type' => 'select',
+      '#title' => $this->t('Style'),
+      '#options' => array('none', 'option1', 'option2',),
+      '#weight' => -5,
+      '#description' => $this->t('<p>Yet to be implemented</p>'),
     );
 
 
@@ -189,8 +192,10 @@ class QuicktabEditForm extends EntityForm {
     $entity->set('ajax',$ajax);
     $entity->set('hide_empty_tabs',$hide_empty_tabs);
     $status = $entity->save();
-    if($status==SAVED_UPDATED)
+    if($status==SAVED_UPDATED) {
       $form_state->setRedirect('quicktabs.list_tabs');
+      drupal_set_message($this->t('Settings have been updated!'));
+    }
   }
 
 }

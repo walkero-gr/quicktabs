@@ -82,8 +82,11 @@ class QuicktabAddForm extends EntityForm {
     );
 
     $form['style'] = array(
-      '#type' => 'value',
-      '#value' => 'nostyle',
+      '#type' => 'select',
+      '#title' => $this->t('Style'),
+      '#options' => array('none', 'option1', 'option2',),
+      '#weight' => -5,
+      '#description' => $this->t('<p>Yet to be implemented</p>'),
     );
 
 
