@@ -115,10 +115,11 @@ class QuickQuicktabs extends QuickRenderer {
     );
     $settings = $this->quickset->getSettings();
     // Add the custom style css if a custom style has been set.
-    $style_css = quicktabs_get_css($settings['style']);
+    // No use of now.
+    /*$style_css = quicktabs_get_css($settings['style']);
     if (!empty($style_css)) {
       $attached['css'][] = $style_css;
-    }
+    }*/
     // Prepare a tab_settings array for passing the tab info to our JavaScript.
     $tab_settings = array();
     foreach ($this->quickset->getContents() as $i => $content) {
