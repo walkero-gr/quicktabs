@@ -6,7 +6,17 @@
 
 namespace Drupal\quicktabs;
 
+use \Drupal\Core\Plugin\DefaultPluginManager;
 
-class QuicktabsManager {
+/**
+ * Quicktabs Plugin Manager.
+ */
+class QuicktabsManager extends DefaultPluginManager {
 
+  /**
+   * Contructs an Quicktab object
+   */
+  public function __construct() {
+
+  }
 }
