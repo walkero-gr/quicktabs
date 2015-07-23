@@ -124,11 +124,14 @@ class QuickQuicktabs extends QuickRenderer {
     $tab_settings = array();
     foreach ($this->quickset->getContents() as $i => $content) {
       if (!empty($content)) {
-        $tab_settings[$i] = $content->getSettings();
+         $tab_settings[$i] = $content->getSettings();
       }
     }
     // Add our JS settings
     $javascript = drupal_add_js();
+    $javascript = array(
+      '#attached' => array(),
+    );
     if (isset($javascript['settings']['data'])) {
       foreach ($javascript['settings']['data'] as $key => $settings) {
         if (key($settings) == 'quicktabs') {
