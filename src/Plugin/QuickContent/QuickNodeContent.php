@@ -13,7 +13,8 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class QuickNodeContent
+ * Class for tab content of type "node" - this is for rendering a node as tab
+ * content.
  * @QuicktabFormat{
  *  id = "quicknodecontent"
  * }
