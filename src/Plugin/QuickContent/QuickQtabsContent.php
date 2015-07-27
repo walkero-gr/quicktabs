@@ -8,6 +8,7 @@ namespace Drupal\quicktabs\Plugin\QuickContent;
 
 use Drupal\quicktabs\QuickContent;
 use Drupal\quicktabs\QuicktabContentInterface;
+use Drupal\quicktabs\QuickSet;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -68,12 +69,14 @@ class QuickQtabsContent extends QuickContent implements QuicktabContentInterface
 
     $output = array();
     if (isset($item['machine_name'])) {
-      if ($quicktabs = quicktabs_load($item['machine_name'])) {
+      $quicktabs = quicktabs_load($item['machine_name']);
+      if ($quicktabs) {
         $contents = $quicktabs->tabs;
         $name = $quicktabs->machine_name;
         unset($quicktabs->tabs, $quicktabs->machine_name);
         $options = (array) $quicktabs;
-        if ($qt = QuickSet::QuickSetRendererFactory($name, $contents, $quicktabs->renderer, $options)) {
+        $qt = QuickSet::QuickSetRendererFactory($name, $contents, $quicktabs->renderer, $options);
+        if ($qt) {
           $output = $qt->render();
         }
       }
