@@ -9,16 +9,27 @@ namespace Drupal\quicktabs\Plugin\QuickContent;
 
 use Drupal\quicktabs\QuickContent;
 use Drupal\quicktabs\QuicktabContentInterface;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class QuickNodeContent
- * @package Drupal\quicktabs\Plugin\QuickContent
+ * @QuicktabFormat{
+ *  id = "quicknodecontent"
+ * }
  */
 class QuickNodeContent extends QuickContent implements  QuicktabContentInterface {
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getType() {
     return 'node';
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function optionsForm($delta, $qt) {
     $tab = $this->settings;
     $form = array();
@@ -49,6 +60,9 @@ class QuickNodeContent extends QuickContent implements  QuicktabContentInterface
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function render($hide_empty = FALSE, $args = array()) {
     if ($this->rendered_content) {
       return $this->rendered_content;

@@ -17,14 +17,18 @@ interface QuicktabContentInterface {
   public static function getType();
 
   /**
+   * @param int $delta
+   * @param \Drupal\quicktabs\An $qt
    * @return array
    */
-  public function optionsForm();
+  public function optionsForm($delta, $qt);
 
   /**
+   * @param bool $hide_empty
+   * @param array $args
    * @return array
    */
-  public function render();
+  public function render($hide_empty = FALSE, $args = array());
 
   /**
    * @return array
