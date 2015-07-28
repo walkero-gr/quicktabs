@@ -42,7 +42,7 @@ class QuickNodeContent extends QuickContent implements  QuicktabContentInterface
       '#size' => 20,
       '#default_value' => isset($tab['nid']) ? $tab['nid'] : '',
     );
-    $entity_info = entity_get_info('node');
+    $entity_info = \Drupal::entityManager()->getDefinition('node');
     $view_modes = array();
     foreach ($entity_info['view modes'] as $view_mode_name => $view_mode) {
       $view_modes[$view_mode_name] = $view_mode['label'];
@@ -78,7 +78,7 @@ class QuickNodeContent extends QuickContent implements  QuicktabContentInterface
     }
     $output = array();
     if (isset($item['nid'])) {
-      $node = node_load($item['nid']);
+      $node = \Drupal::entityManager()->getStorage('node')->load($item['nid']);
       if (!empty($node)) {
         if (node_access('view', $node)) {
           $buildmode = $item['view_mode'];
@@ -96,10 +96,16 @@ class QuickNodeContent extends QuickContent implements  QuicktabContentInterface
     return $output;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getAjaxKeys() {
     return array('nid', 'view_mode', 'hide_title');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getUniqueKeys() {
     return array('nid');
   }
