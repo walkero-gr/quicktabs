@@ -12,6 +12,9 @@ use Drupal\quicktabs\QuicktabContentInterface;
 /**
  * Class for tab content of type "view" - this is for rendering a view as tab
  * content.
+ * @QuicktabFormat{
+ *   id = "quickviewcontent"
+ * }
  */
 class QuickViewContent extends QuickContent implements QuicktabContentInterface {
 
@@ -77,7 +80,7 @@ class QuickViewContent extends QuickContent implements QuicktabContentInterface 
    */
   public function __construct($item) {
     parent::__construct($item);
-    if (Drupal::moduleHandler()->moduleExists('views')) views_add_js('ajax_view');
+    if (\Drupal::moduleHandler()->moduleExists('views')) views_add_js('ajax_view');
     $this->settings['view_path'] = rawurlencode($_GET['q']);
     $this->settings['view_dom_id'] = self::$view_dom_id++;
     $args_array = array();
@@ -139,7 +142,7 @@ class QuickViewContent extends QuickContent implements QuicktabContentInterface 
     $output = array();
     if (isset($item['vid'])) {
       if (\Drupal::moduleHandler()->moduleExists('views')) {
-        $view = views_get_view($item['vid'])
+        $view = views_get_view($item['vid']);
         if ($view) {
           if ($view->access($item['display'])) {
             $view->set_display($item['display']);
