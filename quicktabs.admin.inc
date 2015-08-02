@@ -467,28 +467,6 @@ function quicktabs_callback_element_validate($element, &$form_state, $form) {
 
 
 /**
- * Submit handler for quicktabs admin page.
- */
-function quicktabs_form_submit($form, &$form_state) {
-  if ($form_state['clicked_button']['#id'] == 'edit-submit-form') {
-    $qt = _quicktabs_convert_form_to_quicktabs($form_state);
-
-    $exists = quicktabs_load($qt->machine_name);
-    if ($exists && empty($exists->in_code_only)) {
-      if (quicktabs_update($qt)) {
-        drupal_set_message(t('The Quicktabs instance has been updated.'));
-      }
-    }
-    else {
-      if (quicktabs_save($qt)) {
-        drupal_set_message(t('The Quicktabs instance has been created.'));
-      }
-    }
-    $form_state['redirect'] = 'admin/structure/quicktabs';
-  }
-}
-
-/**
  * Deletion of quicktab block.
  */
 function quicktabs_block_delete($form, $form_state, $qt) {
