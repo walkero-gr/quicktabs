@@ -449,29 +449,6 @@ function quicktabs_remove_tab_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-/**
- * Validation handler for quicktabs admin page.
- */
-function quicktabs_form_validate($form, &$form_state) {
-  if (empty($form_state['values']['machine_name'])) {
-    form_set_error('machine_name', t('The quicktabs machine name is required.'));
-  }
-  elseif (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['machine_name'])) {
-    form_set_error('machine_name', t('The quicktabs machine name must contain only lowercase letters, numbers, and underscores.'));
-  }
-
-  if (!isset($form_state['values']['tabs'])) {
-    form_set_error('', t('At least one tab should be created.'));
-  }
-  else {
-    foreach ($form_state['values']['tabs'] as $j => $tab) {
-      if (empty($tab['title'])) {
-        form_set_error('tabs][' . $j . '][title', t('Title is required for each tab.'));
-      }
-    }
-  }
-}
-
 function quicktabs_callback_element_validate($element, &$form_state, $form) {
   // We can tell which tab delta the element is for from the element's #parents
   // property, which is an array based on the tree structure.
