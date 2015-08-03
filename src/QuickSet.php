@@ -2,6 +2,7 @@
 
 namespace Drupal\quicktabs;
 
+use Drupal\quicktabs\InvalidQuickSetException;
 
 /**
  * A QuickSet object is an unrendered Quicktabs instance, essentially just a
@@ -73,7 +74,8 @@ class QuickSet {
    */
   public static function QuickSetRendererFactory($name, $contents, $renderer, $settings) {
     ctools_include('plugins');
-    if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler')) {
+    $class = ctools_plugin_load_class('quicktabs', 'renderers', $renderer, 'handler');
+    if ($class) {
       try {
         $qs = new self($name, $contents, $settings);
       }

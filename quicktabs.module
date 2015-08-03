@@ -181,7 +181,8 @@ function quicktabs_build_quicktabs($name, $settings = array(), $custom_tabs = ar
   else {
     unset($settings['sorted']);
   }
-  if ($qt = quickset_renderer_factory($name, $contents, $renderer, $settings)) {
+  $qt = quickset_renderer_factory($name, $contents, $renderer, $settings);
+  if ($qt) {
     $renderable_qt = array('#title' => $qt->getTitle(), 'content' => $qt->render());
     return $renderable_qt;
   }
@@ -236,7 +237,7 @@ function quicktabs_load_multiple($names = array()) {
  * Creates a new quicktab instance.
  */
 function quicktabs_save($quicktab) {
-  module_invoke_all('quicktabs_presave', $quicktab);
+  \Drupal::moduleHandler()->invokeAll('quicktabs_presave', $quicktab);
 
   $exists = quicktabs_load($quicktab->machine_name);
   if ($exists && empty($exists->in_code_only)) {
@@ -252,13 +253,13 @@ function quicktabs_save($quicktab) {
     $ret = drupal_write_record('quicktabs', $quicktab);
     if ($ret == SAVED_NEW) {
       quicktabs_i18n_update_strings(array($quicktab->machine_name));
-      module_invoke_all('quicktabs_insert', $quicktab);
+      \Drupal::moduleHandler()->invokeAll('quicktabs_insert', $quicktab);
     }
     else {
       return FALSE;
     }
   }
-  module_invoke_all('quicktabs_save', $quicktab);
+  \Drupal::moduleHandler()->invokeAll('quicktabs_save', $quicktab);
   return $quicktab;
 }
 
@@ -267,7 +268,7 @@ function quicktabs_save($quicktab) {
  */
 function quicktabs_update($quicktab) {
   quicktabs_save($quicktab);
-  module_invoke_all('quicktabs_update', $quicktab);
+  \Drupal::moduleHandler()->invokeAll('quicktabs_update', $quicktab);
   return $quicktab;
 }
 
@@ -276,7 +277,7 @@ function quicktabs_update($quicktab) {
  */
 function quicktabs_delete($machine_name) {
   db_query('DELETE FROM {quicktabs} WHERE machine_name = :machine_name', array(':machine_name' => $machine_name));
-  module_invoke_all('quicktabs_delete', $machine_name);
+  \Drupal::moduleHandler()->invokeAll('quicktabs_delete', $machine_name);
 }
 
 /**
@@ -318,6 +319,13 @@ function quicktabs_i18n_string_info() {
   return $groups;
 }
 
+/**
+ * @param $name
+ * @param $string
+ * @param null $langcode
+ * @param string $textgroup
+ * @return mixed
+ */
 function quicktabs_translate($name, $string, $langcode = NULL, $textgroup = 'quicktabs') {
   return function_exists('i18n_string') ? i18n_string($textgroup . ':' . $name, $string, array('langcode' => $langcode)) : $string; 
 }
@@ -510,14 +518,15 @@ function _quicktabs_get_style_css($style) {
     $cid = 'quicktabs_tabstyles';
     $cache = cache_get($cid);
     if (!$cache) {
-      $tabstyles = module_invoke_all('quicktabs_tabstyles');
+      $tabstyles = \Drupal::moduleHandler()->invokeAll('quicktabs_tabstyles');
       cache_set($cid, $tabstyles);
     }
     else {
       $tabstyles = $cache->data;
     }
   }
-  if ($css_file = array_search($style, $tabstyles)) {
+  $css_file = array_search($style, $tabstyles);
+  if ($css_file) {
     return array('data' => $css_file);
   }
   return array();
