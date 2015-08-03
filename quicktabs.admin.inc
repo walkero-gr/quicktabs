@@ -6,57 +6,6 @@
 
 use Drupal\Core\Render\Element;
 
-/**
- * Page callback to list quicktabs in the system.
- */
-function quicktabs_list() {
-  $header = array(
-    array('data' => t('QuickSet')),
-    array('data' => t('Storage')),
-    array('data' => t('Operations'), 'colspan' => 4),
-  );
-  $rows = array();
-
-  foreach (quicktabs_load_multiple() as $qt) {
-    // Determine storage
-    switch ($qt->export_type) {
-      case EXPORT_IN_DATABASE | EXPORT_IN_CODE:
-        $storage = t('Overridden');
-        $delete = l(t('Revert'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/delete');
-        break;
-      case EXPORT_IN_DATABASE:
-        $storage = t('Normal');
-        $delete = l(t('Delete'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/delete');
-        break;
-      case EXPORT_IN_CODE:
-        $storage = t('Default');
-        $delete = '';
-        break;
-    }
-
-    $tablerow = array(
-      array('data' => check_plain($qt->title)),
-      array('data' => $storage),
-      array('data' => l(t('Edit'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/edit')),
-      array('data' => l(t('Export'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/export')),
-      array('data' => l(t('Clone'), 'admin/structure/quicktabs/manage/'. $qt->machine_name .'/clone')),
-      array('data' => $delete),
-    );
-    $rows[] = $tablerow;
-  }
-
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No quicktabs instances available.'), 'colspan' => 6));
-  }
-
-  $build = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#attributes' => array('id' => 'quicktabs'),
-  );
-  return $build;
-}
 
 /**
  * Clone QuickTabs.
@@ -195,7 +144,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     $form['options'][$renderer] = $options;
   }
   
-  $styles = module_invoke_all('quicktabs_tabstyles');
+  $styles = \Drupal::moduleHandler()->invokeAll('quicktabs_tabstyles');
   if (count($styles)) {
     $style_options = array();
     // The keys used for options must be valid html IDs.
