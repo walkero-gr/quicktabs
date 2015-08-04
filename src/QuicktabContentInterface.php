@@ -5,6 +5,7 @@
  */
 
 namespace Drupal\quicktabs;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Helper interface to other Content Plugins.
@@ -17,11 +18,13 @@ interface QuicktabContentInterface {
   public static function getType();
 
   /**
-   * @param int $delta
-   * @param \Drupal\quicktabs\An $qt
+   * @param $delta
+   * @param $qt
+   * @param array $form
+   * test description.
    * @return array
    */
-  public function optionsForm($delta, $qt);
+  public function optionsForm($delta, $qt, $form);
 
   /**
    * @param bool $hide_empty

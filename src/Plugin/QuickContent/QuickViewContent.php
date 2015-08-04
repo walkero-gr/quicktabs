@@ -8,6 +8,8 @@ namespace Drupal\quicktabs\Plugin\QuickContent;
 
 use Drupal\quicktabs\QuickContent;
 use Drupal\quicktabs\QuicktabContentInterface;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class for tab content of type "view" - this is for rendering a view as tab
@@ -33,7 +35,7 @@ class QuickViewContent extends QuickContent implements QuicktabContentInterface 
   /**
    * {@inheritdoc}
    */
-  public function optionsForm($delta, $qt) {
+  public function optionsForm($delta, $qt, $form) {
     $tab = $this->settings;
     $form = array();
     $views = quicktabs_get_views();

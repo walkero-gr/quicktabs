@@ -3,6 +3,7 @@
  * @file
  * Contains \Drupal\quicktabs\Annotation\QuicktabFormat
  */
+
 namespace Drupal\quicktabs\Annotation;
 
 use Drupal\Component\Annotation\Plugin;

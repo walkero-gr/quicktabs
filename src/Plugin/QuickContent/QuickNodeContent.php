@@ -31,7 +31,7 @@ class QuickNodeContent extends QuickContent implements  QuicktabContentInterface
   /**
    * {@inheritdoc}
    */
-  public function optionsForm($delta, $qt) {
+  public function optionsForm($delta, $qt, $form) {
     $tab = $this->settings;
     $form = array();
     $form['node']['nid'] = array(
