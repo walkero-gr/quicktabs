@@ -115,7 +115,8 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
   $renderers = ctools_get_plugins('quicktabs', 'renderers');
   $renderer_options = array();
   foreach ($renderers as $name => $info) {
-    if ($class = ctools_plugin_load_class('quicktabs', 'renderers', $name, 'handler')) {
+    $class = ctools_plugin_load_class('quicktabs', 'renderers', $name, 'handler');
+    if ($class) {
       // Add the renderer to the dropdown list of renderers
       $renderer_options[$name] = $name;
       // Get the renderer's options form elements

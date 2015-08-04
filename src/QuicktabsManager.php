@@ -8,6 +8,7 @@ namespace Drupal\quicktabs;
 
 use \Drupal\Core\Plugin\DefaultPluginManager;
 use \Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
 
 /**
  * Quicktabs Plugin Manager.
@@ -15,9 +16,11 @@ use \Drupal\Core\Extension\ModuleHandlerInterface;
 class QuicktabsManager extends DefaultPluginManager {
 
   /**
-   * Contructs an Quicktab object.
+   * @param \Traversable $namespaces
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    */
-  public function __construct(\Traversable $namespaces, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin', $module_handler, 'Drupal\quicktabs\QuicktabsInterface', 'Drupal\quicktabs\Annotation');
+  public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
+    parent::__construct('Plugin/QuickContent', $namespaces,  $module_handler, 'Drupal\quicktabs\QuicktabContentInterface', 'Drupal\quicktabs\Annotation\QuicktabFormat');
   }
 }
