@@ -26,7 +26,7 @@ function quicktabs_schema() {
     'fields' => array(
       'machine_name' => array(
         'description' => 'The primary identifier for a qt block.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
       ),
@@ -54,7 +54,7 @@ function quicktabs_schema() {
       ),
       'title' => array(
         'description' => 'The title of this quicktabs block.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
       ),
@@ -67,13 +67,13 @@ function quicktabs_schema() {
       ),
       'renderer' => array(
         'description' => 'The rendering mechanism.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
       ),
       'style' => array(
         'description' => 'The tab style.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
         'not null' => TRUE,
       ),
