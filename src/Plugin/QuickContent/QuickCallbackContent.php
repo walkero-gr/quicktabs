@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class for tab content of type "callback" - this is for rendering the contents
  * of some menu callback function as tab content.
+ * @QuicktabFormat{
+ *   id = "quickcallbackcontent"
  */
 class QuickCallbackContent extends QuickContent implements QuicktabContentInterface {
 

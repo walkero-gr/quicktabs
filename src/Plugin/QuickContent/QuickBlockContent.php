@@ -9,9 +9,12 @@ namespace Drupal\quicktabs\Plugin\QuickContent;
 use Drupal\quicktabs\QuickContent;
 use Drupal\quicktabs\QuicktabContentInterface;
 
+
 /**
  * Class for tab content of type "block" - this is for rendering a block as tab
  * content.
+ * @QuicktabFormat{
+ *   id = "quickblockcontent
  */
 class QuickBlockContent extends QuickContent implements QuicktabContentInterface {
 
