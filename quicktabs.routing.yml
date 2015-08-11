@@ -18,35 +18,35 @@ entity.quicktabs.add:
   path: '/admin/structure/quicktabs/add'
   defaults:
     _title: 'Add Quicktabs Instance'
-    _entity_form: 'settings.add'
+    _entity_form: settings.add
   requirements:
     _permission: 'Access Content'
 entity.quicktabs.delete:
  path: '/admin/structure/quicktabs/manage/{settings}/delete'
  defaults:
    _title: 'Delete quicktab'
-   _entity_form: 'settings.delete'
+   _entity_form: settings.delete
  requirements:
    _permission: 'administer quicktabs'
 entity.quicktabs.edit:
   path: '/admin/structure/quicktabs/manage/{settings}/edit'
   defaults:
     _title: 'Edit quicktab'
-    _entity_form: 'settings.default'
+    _entity_form: settings.default
   requirements:
     _permission: 'administer quicktabs' #need to recheck!!
 entity.quicktabs.clone:
   path: '/admin/structure/quicktabs/manage/{settings}/clone'
   defaults:
     _title: 'Clone quicktab'
-    _entity_form: 'settings.clone'
+    _entity_form: settings.clone
   requirements:
     _permission: 'administer quicktabs'
 entity.quicktabs.export:
   path: '/admin/structure/quicktabs/manage/{settings}/export'
   defaults:
     _title: 'Export quicktab'
-    _entity_form: 'settings.export'
+    _entity_form: settings.export
   requirements:
     _permission: 'administer quicktabs'
 quicktabs.ajax:
