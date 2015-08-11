@@ -96,7 +96,7 @@ class QuickCallbackContent extends QuickContent implements QuicktabContentInterf
       $request = \Drupal::request();
       $route_match = \Drupal::routeMatch();
       $page_title = \Drupal::service('title_resolver')->getTitle($request, $route_match);
-      $request = \Drupal::service('request');
+      $request = \Drupal::service('request_stack');
       $subrequest = Request::create($item['actual_path'], 'GET', $request->query->all(), $request->cookies->all(), array(), $request->server->all());
       $response = \Drupal::service('http_kernel')->handle($subrequest, HttpKernelInterface::SUB_REQUEST);
       //$response = menu_execute_active_handler($item['actual_path'], FALSE);
