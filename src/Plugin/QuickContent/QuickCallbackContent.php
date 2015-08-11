@@ -9,6 +9,9 @@ namespace Drupal\quicktabs\Plugin\QuickContent;
 
 use Drupal\quicktabs\QuickContent;
 use Drupal\quicktabs\QuicktabContentInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class for tab content of type "callback" - this is for rendering the contents
@@ -83,18 +86,25 @@ class QuickCallbackContent extends QuickContent implements QuicktabContentInterf
       // for this content type.
       array_shift($args);
       $item['actual_path'] = rawurldecode($args[0]);
-      $_GET['q'] = $item['actual_path'];
+      //$_GET['q'] = $item['actual_path'];
     }
 
     $output = array();
     if (isset($item['actual_path'])) {
       // Retain the current page title as we'll need to set it back after
       // calling menu_execute_active_handler().
-      $page_title = drupal_get_title();
-      $response = menu_execute_active_handler($item['actual_path'], FALSE);
+      $request = \Drupal::request();
+      $route_match = \Drupal::routeMatch();
+      $page_title = \Drupal::service('title_resolver')->getTitle($request, $route_match);
+      $request = \Drupal::service('request');
+      $subrequest = Request::create($item['actual_path'], 'GET', $request->query->all(), $request->cookies->all(), array(), $request->server->all());
+      $response = \Drupal::service('http_kernel')->handle($subrequest, HttpKernelInterface::SUB_REQUEST);
+      //$response = menu_execute_active_handler($item['actual_path'], FALSE);
       // Revert the page title.
       if($this->settings['use_title']) {
-        $this->title = drupal_get_title();
+        $temp_request = \Drupal::request();
+        $temp_route_match = \Drupal::routeMatch();
+        $this->title = \Drupal::service('title_resolver')->getTitle($temp_request, $temp_route_match);
       }
       drupal_set_title($page_title);
 
