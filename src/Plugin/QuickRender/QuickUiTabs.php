@@ -7,6 +7,9 @@ namespace Drupal\quicktabs\Plugin\QuickRender;
 
 use Drupal\quicktabs\QuickRenderer;
 
+/**
+ * Renders the content using the jQuery UI Tabs widget.
+ */
 class QuickUiTabs extends QuickRenderer {
 
   /**
