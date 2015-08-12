@@ -6,6 +6,7 @@
 namespace Drupal\quicktabs\Plugin\QuickRender;
 
 use Drupal\quicktabs\QuickRenderer;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Renders the content using the jQuery UI Tabs widget.
@@ -77,7 +78,7 @@ class QuickUiTabs extends QuickRenderer {
         // be escaped. Sad panda is sad.
         $href = '#qt-'. $qt_name .'-ui-tabs' . ($i+1);
         $tablink = array(
-          '#markup' => '<a href="'. $href .'">'. check_plain($this->quickset->translateString($tab->getTitle(), 'tab', $i)) .'</a>',
+          '#markup' => '<a href="'. $href .'">'. SafeMarkup::checkPlain($this->quickset->translateString($tab->getTitle(), 'tab', $i)) .'</a>',
         );
         $tabs[$i] = $tablink;
       }
