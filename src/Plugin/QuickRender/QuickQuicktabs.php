@@ -7,6 +7,8 @@
 namespace Drupal\quicktabs\Plugin\QuickRender;
 
 use Drupal\quicktabs\QuickRenderer;
+use Drupal\Component\Utility\Html;
+use \Drupal\Component\Utility\UrlHelper;
 
 /**
  * Renders the content using the original Quicktabs mechanism of previous versions.
@@ -23,7 +25,8 @@ class QuickQuicktabs extends QuickRenderer {
     $render_array = array();
 
     $active_tab = $quickset->getActiveTab();
-    if ($tabs = $this->build_tablinks($active_tab)) {
+    $tabs = $this->build_tablinks($active_tab);
+    if ($tabs) {
       $render_array['#attached'] = $this->add_attached();
 
       $qt_name = $quickset->getName();
@@ -34,12 +37,12 @@ class QuickQuicktabs extends QuickRenderer {
         '#theme' => 'qt_quicktabs',
         '#options' => array('attributes' => array(
           'id' => 'quicktabs-' . $qt_name,
-          'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_html_class($settings['style']),
+          'class' => 'quicktabs-wrapper quicktabs-style-' . Html::getClass($settings['style']),
         )),
-        'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_html_class($settings['style'])), 'tablinks' => $tabs),
+        'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => Html::getClass($settings['style'])), 'tablinks' => $tabs),
         // The main content area, each quicktab container needs a unique id.
         'container' => array(
-          '#prefix' => '<div id="quicktabs-container-' . $qt_name .'" class="quicktabs_main quicktabs-style-' . drupal_html_class($settings['style']) .'">',
+          '#prefix' => '<div id="quicktabs-container-' . $qt_name .'" class="quicktabs_main quicktabs-style-' . Html::getClass($settings['style']) .'">',
           '#suffix' => '</div>',
           'divs' => array(),
         ),
@@ -194,7 +197,7 @@ class QuickQuicktabs extends QuickRenderer {
     }
 
     // Need to construct the correct querystring for the tab links.
-    $query = drupal_get_query_parameters(NULL, array("qt-$qt_name", 'q', 'page'));
+    $query = UrlHelper::filterQueryParameters(NULL, array("qt-$qt_name", 'q', 'page'));
     $query["qt-{$qt_name}"] = $tabkey;
 
     $link_options = array(
