@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\quicktabs\Plugin\QuickContent\QuickBlockContent.
+ * Contains Drupal\quicktabs\Plugin\QuickContent\QuickBlockContent.php.
  */
 
 namespace Drupal\quicktabs\Plugin\QuickContent;

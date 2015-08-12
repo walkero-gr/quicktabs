@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\quicktabs\Plugin\QuickContent\QuickQtabsContent.
+ * Contains Drupal\quicktabs\Plugin\QuickContent\QuickQtabsContent.php
  */
 
 namespace Drupal\quicktabs\Plugin\QuickContent;

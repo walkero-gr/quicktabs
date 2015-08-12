@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\quicktabs\Plugin\QuickContent\QuickCallbackContent.
+ * Contains \Drupal\quicktabs\Plugin\QuickContent\QuickCallbackContent.php
  */
 
 namespace Drupal\quicktabs\Plugin\QuickContent;
