@@ -24,16 +24,16 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "storage" = "Drupal\quicktabs\QuicktabStorage",
  *     "list_builder" = "Drupal\quicktabs\QuicktabListBuilder",
  *     "form" = {
- *       "add" = "Drupal\quicktabs\Form\QuicktabAddForm",
  *       "default" = "Drupal\quicktabs\Form\QuicktabEditForm",
+ *       "add" = "Drupal\quicktabs\Form\QuicktabAddForm",
  *       "delete" = "Drupal\quicktabs\Form\QuicktabDeleteForm",
  *       "clone" = "Drupal\quicktabs\Form\QuicktabCloneForm",
  *       "export" = "Drupal\quicktabs\Form\QuicktabExportForm"
  *     },
  *   },
  *   links = {
- *     "add" = "/admin/structure/quicktabs/add",
  *     "edit" = "/admin/structure/quicktabs/manage/{settings}/edit",
+ *     "add" = "/admin/structure/quicktabs/add",
  *     "delete" = "/admin/structure/quicktabs/manage/{settings}/delete",
  *     "clone" = "/admin/structure/quicktabs/manage/{settings}/clone",
  *     "export" = "/admin/structure/quicktabs/manage/{settings}/export"

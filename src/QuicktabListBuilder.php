@@ -44,13 +44,29 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function getDefaultOperations(EntityInterface $entity) {
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
     $operations = parent::getDefaultOperations($entity);
 
     if ($entity->hasLinkTemplate('edit')) {
       $operations['edit'] = array(
         'title' => t('Edit quicktab'),
-        'weight' => 20,
+        'weight' => 10,
         'url' => $entity->urlInfo('edit'),
+      );
+      $operations['delete'] = array(
+        'title' => t('Delete quicktab'),
+        'weight' => 20,
+        'url' => $entity->urlInfo('delete'),
+      );
+      $operations['clone'] = array(
+        'title' => t('Clone quicktab'),
+        'weight' => 30,
+        'url' => $entity->urlInfo('clone'),
+      );
+      $operations['export'] = array(
+        'title' => t('Export quicktab'),
+        'weight' => 40,
+        'url' => $entity->urlInfo('export'),
       );
     }
     return $operations;
