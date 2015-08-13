@@ -1,22 +1,22 @@
-entity.quicktabs.edit:
-  route_name: entity.quicktabs.edit
+entity.settings.edit:
+  route_name: entity.settings.edit
   title: 'Edit'
-  base_route: entity.quicktabs.edit
+  base_route: entity.settings.edit
 
-entity.quicktabs.delete:
-  route_name: entity.quicktabs.delete
+entity.settings.delete:
+  route_name: entity.settings.delete
   title: 'Delete'
-  base_route: entity.quicktabs.edit
+  base_route: entity.settings.edit
   weight: 100
 
-entity.quicktabs.clone:
-  route_name: entity.quicktabs.clone
+entity.settings.clone:
+  route_name: entity.settings.clone
   title: 'Clone'
-  base_route: entity.quicktabs.edit
+  base_route: entity.settings.edit
   weight: 101
 
-entity.quicktabs.export:
-  route_name: entity.quicktabs.export
+entity.settings.export:
+  route_name: entity.settings.export
   title: 'Export'
-  base_route: entity.quicktabs.edit
+  base_route: entity.settings.edit
   weight: 102

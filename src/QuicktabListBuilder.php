@@ -16,7 +16,7 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 class QuicktabListBuilder extends ConfigEntityListBuilder {
 
   /**
-   * {@inheritdoc]
+   * {@inheritdoc}
    */
   public function getFormId() {
     return 'quicktabs_list';

@@ -1,5 +1,5 @@
-entity.quicktabs.add:
-  route_name: entity.quicktabs.add
+entity.settings.add:
+  route_name: entity.settings.add
   title: 'Add quicktab Instance'
   appears_on:
     - quicktabs.admin
