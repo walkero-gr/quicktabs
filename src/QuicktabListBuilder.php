@@ -46,14 +46,13 @@ class QuicktabListBuilder extends ConfigEntityListBuilder {
   public function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
-    /*if ($entity->hasLinkTemplate('edit')) {
+    if ($entity->hasLinkTemplate('edit')) {
       $operations['edit'] = array(
         'title' => t('Edit quicktab'),
         'weight' => 20,
         'url' => $entity->urlInfo('edit'),
       );
-      drupal_set_message($this->t('Hi'));
-    }*/
+    }
     return $operations;
   }
 }
