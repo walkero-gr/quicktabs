@@ -30,7 +30,7 @@ class QuicktabDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('entity.settings.add');
+    return new Url('quicktabs.list_tabs');
   }
 
   /**
