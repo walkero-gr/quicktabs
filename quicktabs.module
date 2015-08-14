@@ -26,17 +26,6 @@ function quicktabs_help($route_name, RouteMatchInterface $route_match) {
 
 
 /**
- * Implements hook_permission().
- */
-function quicktabs_permission() {
-  return array(
-    'administer quicktabs' => array(
-      'title' => t('Administer Quicktabs'),
-    ),
-  );
-}
-
-/**
  * Implements hook_theme().
  */
 function quicktabs_theme() {
