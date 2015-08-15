@@ -15,4 +15,10 @@ use Drupal\simpletest\WebTestBase;
  */
 class QuicktabsAdminTestCase extends WebTestBase {
 
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('quicktabs');
 }
