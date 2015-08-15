@@ -35,7 +35,7 @@ class QuicktabsAdminTestCase extends NodeTestBase {
       $node->title = 'This is node number '. ($i+1);
       $node->body[Language::LANGCODE_NOT_SPECIFIED][0]['value'] = $this->randomString(255);
       node_object_prepare($node);
-      node_save($node);
+      $this->$node->save();
     }
   }
 
