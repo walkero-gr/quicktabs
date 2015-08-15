@@ -6,14 +6,14 @@
 
 namespace Drupal\quicktabs\Tests;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\node\Tests\NodeTestBase;
 
 /**
  * Add, edit and delete quicktabs.
  * @ingroup Quicktabs
  * @group Quicktabs
  */
-class QuicktabsAdminTestCase extends WebTestBase {
+class QuicktabsAdminTestCase extends NodeTestBase {
 
   /**
    * Modules to enable.
@@ -21,4 +21,13 @@ class QuicktabsAdminTestCase extends WebTestBase {
    * @var array
    */
   public static $modules = array('quicktabs');
+
+  function setUp() {
+    parent::setUp();
+
+    $admin_user = $this->drupalCreateUser(array('access administration pages', 'administer quicktabs', 'administer nodes'));
+    $this->drupalLogin($admin_user);
+  }
+
+
 }
