@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\quicktabs\Tests\QuicktabsAdminTestCase.php.
+ * Contains \Drupal\quicktabs\Tests\QuicktabsAdminTest.php.
  */
 
 namespace Drupal\quicktabs\Tests;
@@ -15,14 +15,14 @@ use Drupal\Node\Entity\Node;
  * @ingroup Quicktabs
  * @group Quicktabs
  */
-class QuicktabsAdminTestCase extends NodeTestBase {
+class QuicktabsAdminTest extends NodeTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('quicktabs');
+  public static $modules = array('quicktabs', 'node');
 
   function setUp() {
     parent::setUp();
@@ -40,6 +40,4 @@ class QuicktabsAdminTestCase extends NodeTestBase {
       $loader->save();
     }
   }
-
-
 }

@@ -1,4 +1,4 @@
-quicktabs.settings.*:
+quicktabs.settings:
   type: config_entity
   label: 'Quicktabs'
   mapping:
