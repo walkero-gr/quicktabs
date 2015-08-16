@@ -8,6 +8,7 @@ namespace Drupal\quicktabs\Tests;
 
 use Drupal\node\Tests\NodeTestBase;
 use Drupal\Core\Language\Language;
+use Drupal\Node\Entity\Node;
 
 /**
  * Add, edit and delete quicktabs.
@@ -30,12 +31,13 @@ class QuicktabsAdminTestCase extends NodeTestBase {
     $this->drupalLogin($admin_user);
 
     for ($i = 0; $i < 5; $i++) {
-      $node = new \stdClass();
-      $node->type = 'page';
-      $node->title = 'This is node number '. ($i+1);
-      $node->body[Language::LANGCODE_NOT_SPECIFIED][0]['value'] = $this->randomString(255);
-      node_object_prepare($node);
-      $this->$node->save();
+      $node = array();
+      $node['type'] = 'page';
+      $node['uid'] = $i;
+      $node['title'] = 'This is node number '. ($i+1);
+      $node['body'][Language::LANGCODE_NOT_SPECIFIED][0]['value'] = $this->randomString(255);
+      $loader = Node::create('node',$node);
+      $loader->save();
     }
   }
 
