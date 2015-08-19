@@ -34,7 +34,7 @@ class QuicktabsAdminTest extends WebTestBase {
   function setUp() {
     parent::setUp();
 
-    $admin_user = $this->drupalCreateUser(array('access administration pages', 'administer quicktabs', 'administer nodes'));
+    $this->$admin_user = $this->drupalCreateUser(array('access administration pages', 'administer quicktabs', 'administer nodes'));
     $this->drupalLogin($admin_user);
 
     for ($i = 0; $i < 5; $i++) {
