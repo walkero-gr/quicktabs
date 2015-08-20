@@ -57,22 +57,25 @@ class QuicktabsAdminTest extends WebTestBase {
    * Create a Quicktabs instance through the UI and ensure that it is saved properly.
    */
   function testQuicktabsAdmin() {
-    // Add a new Quicktabs instance using the UI.
 
     $edit = EntityInterface::create(array(
-      'machine_name' => strtolower($this->randomName()),
-      'title' => $this->randomName(),
+      'machine_name' => strtolower($this->randomMachineName()),
+      'title' => $this->randomMachineName(),
       'ajax' => 0,
       'hide_empty_tabs' => FALSE,
       'renderer' => 'quicktabs',
     ));
 
+    $edit->save();
+
+
+    // Add a new Quicktabs instance using the UI.
     $saved = $edit;
     // We'll be using the $saved array to compare against the Quicktabs instance
     // that gets created. However, hierarchical form elements are dealt with
     // differenly so we can't include them in the $saved array like this.
-    $tab_title_first = $this->randomName();
-    $tab_title_second = $this->randomName();
+    $tab_title_first = $this->randomMachineName();
+    $tab_title_second = $this->randomMachineName();
     $edit += array(
       'tabs[0][type]' => 'node',
       'tabs[0][node][nid]' => 1,
@@ -123,7 +126,7 @@ class QuicktabsAdminTest extends WebTestBase {
 
     // Edit the Quicktabs instance through the UI.
     $edit = array(
-      'title' => $this->randomName(),
+      'title' => $this->randomMachineName(),
       'ajax' => 1,
       'hide_empty_tabs' => TRUE,
       'renderer' => 'ui_tabs',
@@ -131,8 +134,8 @@ class QuicktabsAdminTest extends WebTestBase {
     );
 
     $saved = $edit;
-    $tab_title_first = $this->randomName();
-    $tab_title_second = $this->randomName();
+    $tab_title_first = $this->randomMachineName();
+    $tab_title_second = $this->randomMachineName();
     $edit += array(
       'tabs[0][title]' => $tab_title_first,
       'tabs[0][weight]' => 1,
@@ -183,8 +186,5 @@ class QuicktabsAdminTest extends WebTestBase {
     // Check that the quicktabs object is no longer in the database.
     $this->assertNull(quicktabs_load($quicktabs->machine_name), t('Quicktabs instance not found in database'));
   }
-
-
-
 }
 
