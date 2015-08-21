@@ -60,12 +60,42 @@ class QuicktabsAdminTest extends WebTestBase {
   function testQuicktabsAdmin() {
     $this->drupalLogin($this->admin_user);
 
-    $config = $this->config('quicktabs.settings');
-    $id = $this->randomMachineName();
-    $config->set('id',$id);
 
-    $id_result = $config->get('id');
+    $id = $this->randomMachineName();
+    $title = $this->randomMachineName();
+    $renderer = 'quicktabs';
+    $style = 'nostyle';
+    $ajax = FALSE;
+    $hide_empty_tabs = 1;
+
+
+    $config = \Drupal::service('config.factory')
+          ->getEditable('quicktabs.settings')
+          ->set('id',$id)
+          ->set('title',$title)
+          ->set('renderer',$renderer)
+          ->set('style',$style)
+          ->set('ajax',$ajax)
+          ->set('hide_empty_tabs',$hide_empty_tabs)->save();
+    $id_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('id');
+    $title_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('title');
+    $renderer_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('renderer');
+    $style_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('style');
+    $ajax_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('ajax');
+    $hide_empty_tabs_result = \Drupal::service('config.factory')->get('quicktabs.settings')->get('hide_empty_tabs');
+
+
     $this->assertEqual($id, $id_result);
+
+    $this->assertEqual($title, $title_result);
+
+    $this->assertEqual($renderer, $renderer_result);
+
+    $this->assertEqual($style, $style_result);
+
+    $this->assertEqual($ajax, $ajax_result);
+
+    $this->assertEqual($hide_empty_tabs, $hide_empty_tabs_result);
   }
 }
 
