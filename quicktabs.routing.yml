@@ -20,7 +20,7 @@ entity.settings.add:
     _title: 'Add Quicktabs Instance'
     _entity_form: settings.add
   requirements:
-    _permission: 'Access Content'
+    _permission: 'administer quicktabs'
 entity.settings.delete:
  path: '/admin/structure/quicktabs/manage/{settings}/delete'
  defaults:

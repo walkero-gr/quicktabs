@@ -11,7 +11,7 @@ use Drupal\Node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Core\Entity\Entity;
 
-  /**
+/**
  * Add, edit and delete quicktabs.
  *
  * @group Quicktabs
@@ -27,7 +27,7 @@ class QuicktabsAdminTest extends WebTestBase {
 
 
   /**
-   *
+   * Test user.
    */
   private $admin_user;
 
