@@ -59,17 +59,13 @@ class QuicktabsAdminTest extends WebTestBase {
    */
   function testQuicktabsAdmin() {
     $this->drupalLogin($this->admin_user);
-    $edit = \Drupal::entityManager()->getStorage('settings')->create(array(
-      'id' => strtolower($this->randomMachineName()),
-      'title' => $this->randomMachineName(),
-      'renderer' => 1,
-      'ajax' => FALSE,
-      'style' => 'nostyle',
-      'hide_empty_tabs' => 1,
-    ));
 
-    $edit->save();
+    $config = $this->config('quicktabs.settings');
+    $id = $this->randomMachineName();
+    $config->set('id',$id);
 
+    $id_result = $config->get('id');
+    $this->assertEqual($id, $id_result);
   }
 }
 
