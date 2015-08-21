@@ -1,6 +1,6 @@
 id: ''
 title: ''
-renderer: '1'
+renderer: 1
 style: 'nostyle'
 ajax: FALSE
-hide_empty_tabs: '0'
+hide_empty_tabs: 0
