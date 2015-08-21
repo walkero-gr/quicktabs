@@ -47,7 +47,7 @@ class QuicktabsPathTest extends WebTestBase {
 
     foreach ($paths as $path) {
       $this->drupalGet($path);
-      $this->assertResponse(200);
+      $this->assertResponse(200, '200 response for path: ' . $path);
     }
   }
 }
