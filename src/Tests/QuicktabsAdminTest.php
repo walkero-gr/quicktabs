@@ -11,6 +11,8 @@ use Drupal\Core\Language\Language;
 use Drupal\Node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Entity;
+use Drupal\Core\Database\Database;
 
   /**
  * Add, edit and delete quicktabs.
@@ -27,14 +29,19 @@ class QuicktabsAdminTest extends WebTestBase {
   public static $modules = array('quicktabs', 'node');
 
 
+  /**
+   *
+   */
+  private $admin_user;
+
   function setUp() {
     parent::setUp();
 
-    $admin_user = $this->drupalCreateUser(array(
+    $this->admin_user = $this->drupalCreateUser(array(
       'administer quicktabs',
       'administer nodes'
     ));
-    $this->drupalLogin($admin_user);
+    $this->drupalLogin($this->admin_user);
 
     for ($i = 0; $i < 5; $i++) {
       $node = array();
@@ -51,16 +58,17 @@ class QuicktabsAdminTest extends WebTestBase {
    * Create a Quicktabs instance through the UI and ensure that it is saved properly.
    */
   function testQuicktabsAdmin() {
-/*
-    $edit = EntityInterface::create(array(
+    $this->drupalLogin($this->admin_user);
+    $edit = \Drupal::entityManager()->getStorage('settings')->create(array(
       'id' => strtolower($this->randomMachineName()),
       'title' => $this->randomMachineName(),
-      'ajax' => 0,
-      'hide_empty_tabs' => FALSE,
-      'renderer' => 'quicktabs',
+      'renderer' => 1,
+      'ajax' => FALSE,
+      'style' => 'nostyle',
+      'hide_empty_tabs' => 1,
     ));
 
-    $edit->save();*/
+    $edit->save();
 
   }
 }
