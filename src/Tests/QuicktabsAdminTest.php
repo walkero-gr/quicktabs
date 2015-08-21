@@ -58,7 +58,7 @@ class QuicktabsAdminTest extends WebTestBase {
     $this->drupalLogin($this->admin_user);
 
 
-    $id = $this->randomMachineName();
+    $id = strtolower($this->randomMachineName());
     $title = $this->randomMachineName();
     $renderer = 'quicktabs';
     $style = 'nostyle';
