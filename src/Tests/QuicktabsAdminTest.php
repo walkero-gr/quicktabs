@@ -6,13 +6,10 @@
 
 namespace Drupal\quicktabs\Tests;
 
-use Drupal\node\Tests\NodeTestBase;
 use Drupal\Core\Language\Language;
 use Drupal\Node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Entity;
-use Drupal\Core\Database\Database;
 
   /**
  * Add, edit and delete quicktabs.
