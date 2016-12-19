@@ -45,6 +45,14 @@ function quicktabs_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'use_hover' => array(
+        'description' => 'Whether this tabset has tabs enabled on mouse over.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'default_tab' => array(
         'description' => 'Default tab.',
         'type' => 'int',
@@ -209,4 +217,31 @@ function quicktabs_update_7303() {
     }
   }
   return 'Added support for view modes.';
+}
+
+/**
+ * Add the table field where the checkbox to enable tabs on mouse over and not on click is stored
+ */
+function quicktabs_update_7304() {
+  if (!db_field_exists('quicktabs', 'use_hover')) {
+    db_drop_primary_key('quicktabs');
+    $output[] = "Drop the primary key";
+	
+    // Add the use_hover field
+    $use_hover_field = array(
+        'description' => 'Whether this tabset has tabs enabled on mouse over.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+    );
+    db_add_field('quicktabs', 'use_hover', $use_hover_field);
+    $output[] = "Added the use_hover field";
+    
+	db_add_primary_key('quicktabs', array('machine_name'));
+    $output[] = "Add the primary key back!";
+  }
+  
+  return implode('<br />', $output);
 }

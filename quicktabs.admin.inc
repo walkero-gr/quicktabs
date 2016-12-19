@@ -218,6 +218,15 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     );
   }
 
+  $form['use_hover'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable on hover'),
+    '#default_value' => isset($qt->use_hover) ? $qt->use_hover : 0,
+    '#description' => t('Enable tab on mouse over and not on click.'),
+    '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
+    '#weight' => -5,
+  );
+
   $form['ajax'] = array(
     '#type' => 'radios',
     '#title' => t('Ajax'),
@@ -644,6 +653,7 @@ function _quicktabs_convert_form_to_quicktabs($form_state) {
   $qt->ajax = $form_state['values']['ajax'];
   $qt->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
   $qt->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
+  $qt->use_hover = $form_state['values']['use_hover'];
   $qt->renderer = $renderer;
   $qt->style = $form_state['values']['style'];
   $qt->tabs = $formvalues_tabs;
