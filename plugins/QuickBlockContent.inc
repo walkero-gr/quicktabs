@@ -24,6 +24,15 @@ class QuickBlockContent extends QuickContent {
       '#title' => t('Hide the title of this block'),
       '#default_value' => isset($tab['hide_title']) ? $tab['hide_title'] : 1,
     );
+    $form['block']['click_to_url'] = array(
+      '#type' => 'textfield',
+      '#title' => 'go to page',
+      '#size' => '40',
+      '#required' => FALSE,
+      '#default_value' => isset($tab['click_to_url']) ? $tab['click_to_url'] : '',
+      '#description' => t('Set the URL where the user will go on click.'),
+      '#states' => array('visible' => array(':input[name="click_to_page"]' => array("checked" => TRUE))),
+    );
     return $form;
   }
 
@@ -125,4 +134,3 @@ class QuickBlockContent extends QuickContent {
       || (count(array_intersect($authorized_rids, $rids)) != 0);
   }
 }
-

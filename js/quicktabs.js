@@ -34,12 +34,16 @@ Drupal.quicktabs.prepare = function(el) {
       $(element).addClass('quicktabs-loaded');
       $(element).append('<span id="active-quicktabs-tab" class="element-invisible">' + Drupal.t('(active tab)') + '</span>');
     }
-    
-	if($('#quicktabs-' + qt_name).hasClass('quicktabs_hover')) {
-		$(element).once(function() {$(this).bind('mouseenter', {tab: tab}, Drupal.quicktabs.hoverHandler);});
-	} else {
-		$(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
-	}
+
+  	if($('#quicktabs-' + qt_name).hasClass('quicktabs_hover')) {
+  		$(element).once(function() {$(this).bind('mouseenter', {tab: tab}, Drupal.quicktabs.hoverHandler);});
+      // With the following the first tab automatically is triggered
+      if(i == 0) {
+        $(this).trigger('mouseenter');
+      }
+  	} else {
+  		$(element).once(function() {$(this).bind('click', {tab: tab}, Drupal.quicktabs.clickHandler);});
+  	}
   });
 }
 
@@ -55,7 +59,7 @@ Drupal.quicktabs.clickHandler = function(event) {
 
   // Hide all tabpages.
   tab.container.children().addClass('quicktabs-hide');
-  
+
   if (!tab.tabpage.hasClass("quicktabs-tabpage")) {
     tab = new Drupal.quicktabs.tab(element);
   }
@@ -77,7 +81,7 @@ Drupal.quicktabs.hoverHandler = function(event) {
 
   // Hide all tabpages.
   tab.container.children().addClass('quicktabs-hide');
-  
+
   if (!tab.tabpage.hasClass("quicktabs-tabpage")) {
     tab = new Drupal.quicktabs.tab(element);
   }
@@ -123,13 +127,13 @@ if (Drupal.ajax) {
     if (ajax.ajaxing) {
       return false;
     }
-  
+
     try {
       if (ajax.form) {
         if (ajax.setClick) {
           element.form.clk = element;
         }
-  
+
         ajax.form.ajaxSubmit(ajax.options);
       }
       else {

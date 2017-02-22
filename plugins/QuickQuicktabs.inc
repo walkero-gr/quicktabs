@@ -10,6 +10,7 @@ class QuickQuicktabs extends QuickRenderer {
     $quickset = $this->quickset;
 
     $render_array = array();
+    $moreclasses = '';
 
     $active_tab = $quickset->getActiveTab();
     if ($tabs = $this->build_tablinks($active_tab)) {
@@ -19,11 +20,15 @@ class QuickQuicktabs extends QuickRenderer {
       $settings = $quickset->getSettings();
       $contents = $quickset->getContents();
 
+      if($settings['use_hover']) {
+        $moreclasses .= ' quicktabs_hover';
+      }
+
       $render_array['content'] = array(
         '#theme' => 'qt_quicktabs',
         '#options' => array('attributes' => array(
           'id' => 'quicktabs-' . $qt_name,
-          'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_html_class($settings['style']) . (($settings['use_hover']) ? ' quicktabs_hover' : ''),
+          'class' => 'quicktabs-wrapper quicktabs-style-' . drupal_html_class($settings['style']) . $moreclasses,
         )),
         'tabs' => array('#theme' => 'qt_quicktabs_tabset', '#options' => array('active' => $active_tab, 'style' => drupal_html_class($settings['style'])), 'tablinks' => $tabs),
         // The main content area, each quicktab container needs a unique id.
@@ -33,9 +38,9 @@ class QuickQuicktabs extends QuickRenderer {
           'divs' => array(),
         ),
       );
-      
 
-    
+
+
       // If in ajax mode, we'll only be rendering one tab, otherwise all of them.
       if ($settings['ajax']){
         // check in case of $active_tab=QUICKTABS_DELTA_NONE
@@ -43,7 +48,7 @@ class QuickQuicktabs extends QuickRenderer {
       }else{
         $tabs_to_render = $contents;
       }
-    
+
       foreach ($tabs_to_render as $key => $tab) {
         if (!empty($tab)) {
           $attribs = array(
@@ -69,8 +74,13 @@ class QuickQuicktabs extends QuickRenderer {
   protected function build_tablinks($active_tab) {
     $quickset = $this->quickset;
     $settings = $quickset->getSettings();
+    $contents = $this->quickset->getContents();
+
     $tabs = array();
     foreach ($quickset->getContents() as $i => $tab) {
+      // Get the tab settings
+      $tab_settings = $contents[$i]->getSettings();
+
       if (!empty($tab)) {
         $tablink = array(
           '#type' => 'link',
@@ -78,6 +88,16 @@ class QuickQuicktabs extends QuickRenderer {
           '#href' =>  $_GET['q'],
           '#options' => $this->construct_link_options($i),
         );
+
+        /* If the quicktabs has onHover event enabled
+        // and click_to_page enabled, and set a link to page
+        // then we change here the href of the tab
+        // for the click event
+        */
+        if($settings['click_to_page'] && $settings['use_hover'] && !empty($tab_settings['click_to_url'])) {
+          $tablink['#href'] = $tab_settings['click_to_url'];
+        }
+
         if ($settings['ajax']) {
           $tab_settings = $tab->getSettings();
           $ajax_keys = $tab->getAjaxKeys();
@@ -191,6 +211,7 @@ class QuickQuicktabs extends QuickRenderer {
       'fragment' => 'qt-' . $qt_name,
       'html' => isset($settings['html']) ? $settings['html'] : FALSE,
     );
+
     return $link_options;
   }
 }

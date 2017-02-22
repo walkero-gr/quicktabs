@@ -88,7 +88,7 @@ function quicktabs_form($form, &$form_state, $formtype, $qt = NULL) {
     $qt->tabs[] = array();
   }
   $form_state['num_tabs'] = count($qt->tabs);
-  
+
   // If the "Remove" button was clicked for a tab, we need to remove that tab
   // from the form.
   if (isset($form_state['to_remove'])) {
@@ -133,7 +133,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
   if (isset($form_state['values']['title'])) {
     $qt = _quicktabs_convert_form_to_quicktabs($form_state);
   }
-  
+
   $form['title'] = array(
     '#title' => t('Title'),
     '#description' => t('This will appear as the block title.'),
@@ -142,7 +142,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     '#weight' => -9,
     '#required' => TRUE,
   );
-  
+
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 32,
@@ -168,7 +168,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
       // Add the renderer to the dropdown list of renderers
       $renderer_options[$name] = $name;
       // Get the renderer's options form elements
-      
+
       // PHP 5.2 doesn't support $class::staticMethod() syntax, so we have to
       // use call_user_func_array() until PHP 5.3 is required.
       $renderer_form_options[$name] = call_user_func_array(array($class, 'optionsForm'), array($qt));
@@ -192,7 +192,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     }
     $form['options'][$renderer] = $options;
   }
-  
+
   $styles = module_invoke_all('quicktabs_tabstyles');
   if (count($styles)) {
     $style_options = array();
@@ -218,6 +218,15 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     );
   }
 
+  $form['click_to_page'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Click to other page'),
+    '#default_value' => isset($qt->click_to_page) ? $qt->click_to_page : 0,
+    '#description' => t('When tabs are enabled on hover, set the clcik event to go to an other page.'),
+    '#states' => array('visible' => array(':input[name="use_hover"]' => array("checked" => TRUE))),
+    '#weight' => -5,
+  );
+
   $form['use_hover'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable on hover'),
@@ -237,7 +246,7 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
     '#default_value' => isset($qt->ajax) ? $qt->ajax : 0,
     '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p><p>Warning: if you enable Ajax, any block you add to this quicktabs block will be accessible to anonymous users, even if you place role restrictions on the quicktabs block. Do not enable Ajax if the quicktabs block includes any blocks with potentially sensitive information.</p>'),
     '#states' => array('visible' => array(':input[name="renderer"]' => array('value' => 'quicktabs'))),
-    '#weight' => -5,
+    '#weight' => -4,
   );
 
   $form['hide_empty_tabs'] = array(
@@ -290,13 +299,13 @@ function _quicktabs_admin_main_form($form_state, &$qt) {
 
 /*
  * Build one row (one tabpage) on the QT admin form.
- * 
+ *
  * @param array $tab
  *  An array containing the details of this particular tabpage.
- * 
+ *
  * @param object $qt
  *  An object representing the Quicktabs instance that the tabs are
- *  being built for. 
+ *  being built for.
  */
 function _quicktabs_form(array $tab, $qt) {
   $form['#tree'] = TRUE;
@@ -654,6 +663,7 @@ function _quicktabs_convert_form_to_quicktabs($form_state) {
   $qt->default_tab = isset($form_state['values']['default_tab']) ? $form_state['values']['default_tab'] : 0;
   $qt->hide_empty_tabs = $form_state['values']['hide_empty_tabs'];
   $qt->use_hover = $form_state['values']['use_hover'];
+  $qt->click_to_page = $form_state['values']['click_to_page'];
   $qt->renderer = $renderer;
   $qt->style = $form_state['values']['style'];
   $qt->tabs = $formvalues_tabs;

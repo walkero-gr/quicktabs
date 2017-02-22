@@ -53,6 +53,14 @@ function quicktabs_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'click_to_page' => array(
+        'description' => 'Whether the tabs enabled on mouse over will have a url to follow on click.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'default_tab' => array(
         'description' => 'Default tab.',
         'type' => 'int',
@@ -125,7 +133,7 @@ function quicktabs_update_7300() {
     if (!db_query("DELETE FROM {quicktabs}")) {
       throw new DrupalUpdateException(t('Could not complete the update.'));
     }
-  
+
     db_drop_field('quicktabs', 'qtid');
     $name_field = array(
       'description' => 'The primary identifier for a qt block.',
@@ -135,7 +143,7 @@ function quicktabs_update_7300() {
     );
     db_add_field('quicktabs', 'machine_name', $name_field);
     db_add_primary_key('quicktabs', array('machine_name'));
-  
+
     $used = array();
     foreach ($result as $qt) {
       $row = (array)$qt;
@@ -157,7 +165,7 @@ function quicktabs_update_7300() {
       }
       $tokens = implode(', ', array_keys($values));
       db_query("INSERT INTO {quicktabs} ($placeholders) VALUES($tokens)", $values);
-  
+
       $output[] = "Converted quicktab {$row['machine_name']}.";
     }
   }
@@ -226,7 +234,7 @@ function quicktabs_update_7304() {
   if (!db_field_exists('quicktabs', 'use_hover')) {
     db_drop_primary_key('quicktabs');
     $output[] = "Drop the primary key";
-	
+
     // Add the use_hover field
     $use_hover_field = array(
         'description' => 'Whether this tabset has tabs enabled on mouse over.',
@@ -238,10 +246,32 @@ function quicktabs_update_7304() {
     );
     db_add_field('quicktabs', 'use_hover', $use_hover_field);
     $output[] = "Added the use_hover field";
-    
+
 	db_add_primary_key('quicktabs', array('machine_name'));
     $output[] = "Add the primary key back!";
   }
-  
+
+  return implode('<br />', $output);
+}
+
+/**
+ * Add the table field where the checkbox to enable the hover enabled tabs tabs
+ * to follow a different page on click
+ */
+function quicktabs_update_7305() {
+  if (!db_field_exists('quicktabs', 'click_to_page')) {
+    // Add the click_to_page field
+    $click_to_page_field = array(
+        'description' => 'Whether the tabs enabled on mouse over will have a url to follow on click.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+    );
+    db_add_field('quicktabs', 'click_to_page', $click_to_page_field);
+    $output[] = "Added the click_to_page field";
+  }
+
   return implode('<br />', $output);
 }
